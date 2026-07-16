@@ -22,6 +22,9 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.18",
     "ty>=0.0.51",
+    "pandas>=2.3.3",
+    "ipykernel>=7.3.0",
+    "scikit-learn>=1.7.2",
 ]
 
 
