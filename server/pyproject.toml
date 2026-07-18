@@ -3,7 +3,7 @@ name = "server"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.4",
     "fastapi>=0.138.0",
@@ -26,6 +26,8 @@ dev = [
     "ipykernel>=7.3.0",
     "scikit-learn>=1.7.2",
     "xgboost>=3.2.0",
+    "awpy>=2.0.2",
+    "polars>=1.42.1",
 ]
 
 
