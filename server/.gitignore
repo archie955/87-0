@@ -16,3 +16,6 @@ wheels/
 # Note files
 notes.md
 old_ml
+
+# CSVs
+**/*.csv
