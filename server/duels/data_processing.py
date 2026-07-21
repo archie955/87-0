@@ -5,6 +5,8 @@ from pathlib import Path
 
 import polars as pl
 
+FILENAME = "./collected_data.csv"
+
 
 def read_parsed_demo(filename):
     with lzma.LZMAFile(filename, "rb") as f:
@@ -23,20 +25,25 @@ def vel_angle(x, y):
 
 
 def vert_ang_dist(distance, z1, z2):
+    if distance == 0.0:
+        print(
+            f"Distance is 0 in vertical angle distance!!!. Z1 and Z2 are {z1} and {z2} respectively."
+        )
+        return math.degrees(math.asin((z2 - z1) / 0.00001))
     angle = math.degrees(math.asin((z2 - z1) / distance))
     return angle
 
 
 def distance(x1, x2, y1, y2, z1, z2):
-    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+    return math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2) + ((z2 - z1) ** 2))
 
 
 def make_dict(data):
     kills = {
-        "tick": [],
-        "prev_tick": [],
-        "assisted": [],
-        "trade": [],
+        "kill_tick": [],
+        "kill_seconds": [],
+        "duel_tick": [],
+        "duel_seconds": [],
         "distance": [],
         "attacker_vel": [],
         "attacker_vel_dir": [],
@@ -68,6 +75,7 @@ def make_dict(data):
                 continue
 
             tick = kill["tick"]
+            seconds = kill["seconds"]
 
             attacker_name = kill["attackerName"]
             attacker_side = str(kill["attackerSide"]).lower()
@@ -75,31 +83,33 @@ def make_dict(data):
             victim_name = kill["victimName"]
             victim_side = kill["victimSide"].lower()
 
-            kills["tick"].append(tick)
+            kills["kill_tick"].append(tick)
+            kills["kill_seconds"].append(seconds)
 
             kills["attacker_side"].append(attacker_side)
 
-            if kill["assisterName"]:
-                kills["assisted"].append(True)
-            else:
-                kills["assisted"].append(False)
-
-            kills["attacker_blinded"].append(kill["attackerBlinded"])
-            kills["victim_blinded"].append(kill["victimBlinded"])
-
-            kills["trade"].append(kill["isTrade"])
-
             kills["attacker_weapon"].append(str(kill["weapon"]))
 
-            j = -1
+            players = {kill["attackerName"], kill["victimName"]}
+            time = kill["seconds"]
+            damage_time = time
+            for damage in round["damages"]:
+                if (
+                    time - 3 < damage["seconds"] <= time
+                    and damage["attackerName"] in players
+                    and damage["victimName"] in players
+                ):
+                    damage_time = damage["seconds"]
+                    break
+            i = -1
             while (
-                j + 1 < len(round["frames"]) and round["frames"][j + 1]["tick"] < tick
+                i + 1 < len(round["frames"])
+                and round["frames"][i + 1]["seconds"] < damage_time
             ):
-                j += 1
-
-            frame = round["frames"][j]
-
-            kills["prev_tick"].append(frame["tick"])
+                i += 1
+            frame = round["frames"][i]
+            kills["duel_tick"].append(frame["tick"])
+            kills["duel_seconds"].append(frame["seconds"])
 
             for player in frame[attacker_side]["players"]:
                 if player["name"] == attacker_name:
@@ -128,6 +138,9 @@ def make_dict(data):
 
             kills["attacker_helmet"].append(attacker["hasHelmet"])
             kills["victim_helmet"].append(victim["hasHelmet"])
+
+            kills["attacker_blinded"].append(attacker["isBlinded"])
+            kills["victim_blinded"].append(victim["isBlinded"])
 
             attacker_bearing, victim_bearing = bearings(
                 attacker["x"], victim["x"], attacker["y"], victim["y"]
@@ -180,17 +193,17 @@ def make_dict(data):
 
 def create_csv(data):
     dir = Path(__file__).parent
-    rel_path = "./training_data.csv"
+    rel_path = FILENAME
 
     path = dir.joinpath(rel_path)
 
     df = pl.DataFrame(
         data=data,
         schema=[
-            ("tick", pl.Int32),
-            ("prev_tick", pl.Int32),
-            ("assisted", pl.Boolean),
-            ("trade", pl.Boolean),
+            ("kill_tick", pl.Int32),
+            ("kill_seconds", pl.Float64),
+            ("duel_tick", pl.Int32),
+            ("duel_seconds", pl.Float64),
             ("distance", pl.Float64),
             ("attacker_vel", pl.Float64),
             ("attacker_vel_dir", pl.Float64),
@@ -224,17 +237,17 @@ def create_csv(data):
 
 def update_csv(data):
     dir = Path(__file__).parent
-    rel_path = "./training_data.csv"
+    rel_path = FILENAME
 
     path = dir.joinpath(rel_path)
 
     df = pl.DataFrame(
         data=data,
         schema=[
-            ("tick", pl.Int32),
-            ("prev_tick", pl.Int32),
-            ("assisted", pl.Boolean),
-            ("trade", pl.Boolean),
+            ("kill_tick", pl.Int32),
+            ("kill_seconds", pl.Float64),
+            ("duel_tick", pl.Int32),
+            ("duel_seconds", pl.Float64),
             ("distance", pl.Float64),
             ("attacker_vel", pl.Float64),
             ("attacker_vel_dir", pl.Float64),
@@ -278,6 +291,11 @@ def main():
             lines[i] = lines[i].replace("\n", "")
 
     print(lines[0])
+    first_xz = "./esta/data/lan/0013db25-4444-452b-980b-7702dc6fb810.json.xz"
+    create_path = dir.joinpath(first_xz)
+    data = read_parsed_demo(create_path)
+    kills = make_dict(data)
+    create_csv(kills)
     count = 1
     for line in lines:
         relative = f"./esta/data/lan/{line}"
@@ -289,6 +307,36 @@ def main():
         print(f"updated! count = {count}")
         count += 1
     print("Completed")
+
+
+def test_main():
+    dir = Path(__file__).parent
+    rel = "./esta/data/lan/0a5fb56f-de83-4e4c-8f9d-bf6f24d7f54a.json.xz"
+    path = dir.joinpath(rel)
+    df = read_parsed_demo(path)
+    players = {
+        df["gameRounds"][0]["kills"][0]["attackerName"],
+        df["gameRounds"][0]["kills"][0]["victimName"],
+    }
+    time = df["gameRounds"][0]["kills"][0]["seconds"]
+    for damage in df["gameRounds"][0]["damages"]:
+        if (
+            time - 3 < damage["seconds"] <= time
+            and damage["attackerName"] in players
+            and damage["victimName"] in players
+        ):
+            print(
+                f"Duel between attacker {damage['attackerName']} and victim {damage['victimName']} starts at {damage['seconds']} seconds"
+            )
+            damage_time = damage["seconds"]
+            break
+    i = -1
+    while (
+        i + 1 < len(df["gameRounds"][0]["frames"])
+        and df["gameRounds"][0]["frames"][i + 1]["seconds"] < damage_time
+    ):
+        i += 1
+    print(df["gameRounds"][0]["frames"][i])
 
 
 if __name__ == "__main__":
