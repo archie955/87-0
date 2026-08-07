@@ -28,6 +28,9 @@ dev = [
     "xgboost>=3.2.0",
     "awpy>=2.0.2",
     "polars>=1.42.1",
+    "matplotlib>=3.11.1",
+    "seaborn>=0.13.2",
+    "altair>=6.2.2",
 ]
 
 

@@ -1,4 +1,11 @@
-from enum import Enum
+from enum import Enum, StrEnum
+
+
+class Roles(StrEnum):
+    AWPER = "AWPer"
+    CLOSER = "Closer"
+    OPENER = "Opener"
+    SUPPORT = "Support"
 
 
 class Nationality(str, Enum):
@@ -278,9 +285,3 @@ class Majors(str, Enum):
     AU25 = "BLAST.tv Austin Major 2025"
     B25 = "StarLadder Budapest Major 2025"
     C26 = "IEM Cologne Major 2026"
-
-
-class Roles(str, Enum):
-    IGL = "In-Game Leader"
-    AWP = "AWPer"
-    RIF = "Rifler"
