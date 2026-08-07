@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from database.database import get_db, Base
+from database.database import Base, get_db
 from main import app
 
 SQLALCHEMY_DATABASE_URL = (

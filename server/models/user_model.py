@@ -13,8 +13,6 @@ class User(Base, Name, TimeStamps):
 
     steam_id: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
 
-    steam_auth_code: Mapped[str] = mapped_column(String(100), nullable=True)
-
     avatar: Mapped[str] = mapped_column(String(100), nullable=True)
 
     best_game: Mapped["Game"] = relationship(back_populates="owner")
