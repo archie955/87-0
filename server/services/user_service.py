@@ -1,111 +1,76 @@
 import logging
 
-from sqlalchemy import or_, select
+from fastapi.datastructures import QueryParams
+from fastapi.responses import RedirectResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token
 from exceptions.app_exceptions import (
-    BadRequestError,
-    DataAlreadyExistsError,
     InvalidCredentialsError,
 )
-from models import models
-from schemas import token_schemas, user_schemas
-from services.helpers import safe_commit
-from utils import utils
+from models.user_model import User
+from routers.steam_login import SteamLogin, SteamValidator
+from schemas import token_schemas
+from services.helpers import safe_commit, safe_commit_add
 
 logger = logging.getLogger(__name__)
 
 
-async def create_user(
-    db: AsyncSession, user: user_schemas.UserCreate
-) -> user_schemas.UserOut:
-    existing_user = (
-        await db.execute(
-            select(models.User).where(
-                or_(
-                    models.User.email == user.email,
-                    models.User.username == user.username,
-                )
-            )
-        )
-    ).scalar_one_or_none()
-
-    if existing_user:
-        raise DataAlreadyExistsError(datatype="User")
-
-    new_user = models.User(
-        email=user.email,
-        username=user.username,
-        hashed_password=utils.hash(user.password),
-    )
-
-    db.add(new_user)
-
-    await safe_commit(db=db, datatype="User")
-    await db.refresh(new_user)
-
-    logger.info("User created", extra={"user_id": new_user.id})
-
-    return user_schemas.UserOut.model_validate(new_user)
+def redirect(url: str) -> RedirectResponse:
+    steam = SteamLogin(url)
+    logger.info("User redirected")
+    return steam.Redirect()
 
 
-async def login(
-    db: AsyncSession, username: str, password: str
-) -> token_schemas.UserToken:
-    user = (
-        await db.execute(
-            select(models.User).where(
-                or_(
-                    models.User.email == username,
-                    models.User.username == username,
-                )
-            )
-        )
-    ).scalar_one_or_none()
+async def validate(db: AsyncSession, query_params: QueryParams):
+    validator = SteamValidator()
+    steamID = validator.ValidateLogin(query_params)
 
-    if not (user and utils.verify(password, user.hashed_password)):
+    if not steamID or not isinstance(steamID, str):
         raise InvalidCredentialsError()
 
-    user_data = {"sub": str(user.id)}
+    profile = validator.FetchDetails()
 
-    logger.info("User logged in", extra={"user_id": user.id})
+    existing_user = (
+        await db.execute(
+            select(User)
+            .where(User.steam_id == profile.steam_id)
+            .options(selectinload(User.best_game))
+        )
+    ).scalar_one_or_none()
+
+    if existing_user is None:
+        new_user = User(
+            username=profile.username,
+            url=profile.url,
+            avatar=profile.avatar,
+            steam_id=profile.steam_id,
+        )
+        db.add(new_user)
+        await safe_commit_add(db=db, datatype="User")
+        await db.refresh(new_user)
+        id = new_user.id
+    else:
+        existing_user.username = profile.username
+        existing_user.url = profile.url
+        existing_user.avatar = profile.avatar
+        await safe_commit(db=db, datatype="User")
+        await db.refresh(existing_user)
+        id = existing_user.id
+
+    user_data = {"sub": str(id)}
+
+    logger.info("User logged in", extra={"user_id": str(id)})
 
     return token_schemas.UserToken(
-        user=user_schemas.UserOut.model_validate(user),
         access_token=create_access_token(data=user_data),
         token_type="bearer",
     )
 
 
-async def update(
-    db: AsyncSession, user: models.User, updated: user_schemas.UserUpdate
-) -> user_schemas.UserOut:
-    if not utils.verify(updated.password, user.hashed_password):
-        raise InvalidCredentialsError()
-
-    updated_user = updated.updated_user
-
-    if (
-        user.email == updated_user.email
-        and utils.verify(updated_user.password, user.hashed_password)
-        and user.username == updated_user.username
-    ):
-        raise BadRequestError(message="No new information provided, nothing updated")
-
-    user.email = updated_user.email
-    user.username = updated_user.username
-    user.hashed_password = utils.hash(updated_user.password)
-
-    await db.commit()
-    await db.refresh(user)
-
-    logger.info("User updated", extra={"user_id": user.id})
-
-    return user_schemas.UserOut.model_validate(user)
-
-
-async def delete(db: AsyncSession, user: models.User):
+async def delete(db: AsyncSession, user: User):
     await db.delete(user)
     await db.commit()
 

@@ -29,7 +29,6 @@ def evaluate_lineup(lineup: lineup_schemas.Lineup):
     closer = test_pos_evaluation(Position.CLOSE, lineup.closer)
     igl = test_pos_evaluation(Position.IGL, lineup.igl)
 
-    # type: ignore
     igl_points = chem_evaluation(team=[awper, support, opener, closer], igl=igl)
 
     total_points = igl_points + awper.hltv + opener.hltv + closer.hltv + support.hltv
