@@ -121,7 +121,7 @@ class SteamValidator:
 
     def FetchDetails(self) -> Profile:
         params = {"key": KEY, "steamids": self.__identity}
-        response = requests.get(FETCHURL, params=params)
+        response = requests.get(FETCHURL, params=params).json()
 
         if not response.players or not response.players[0]:
             raise DataNotFoundError(datatype="user")

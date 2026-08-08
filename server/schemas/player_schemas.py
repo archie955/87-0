@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from models.enums import Majors, Nationality, Roles
+from models.enums import Roles
 
 config = ConfigDict(from_attributes=True)
 
@@ -9,11 +9,9 @@ class Player(BaseModel):
     id: int
     team_id: int
     name: str
-    nationality: Nationality
-    major: Majors
-    role: list[Roles]
+    role: Roles
     hltv: float
-    igl: int | None
+    igl_score: float | None = None
     model_config = config
 
 
