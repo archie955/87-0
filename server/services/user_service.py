@@ -11,7 +11,7 @@ from exceptions.app_exceptions import (
     InvalidCredentialsError,
 )
 from models.user_model import User
-from routers.steam_login import SteamLogin, SteamValidator
+from services.steam_login import SteamLogin, SteamValidator
 from schemas import token_schemas
 from services.helpers import safe_commit, safe_commit_add
 
