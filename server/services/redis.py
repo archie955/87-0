@@ -1,7 +1,9 @@
+import json
 from contextlib import asynccontextmanager
+from random import randint
 
 from fastapi import Depends, FastAPI
-from redis import Redis
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -27,7 +29,9 @@ async def redis_lifespan(app: FastAPI, db: AsyncSession = Depends(get_db)):
         .all()
     )
 
+    team_ids = []
     for team in teams:
+        team_ids.append(team.id)
         players = []
         for player in team.players:
             if player.id == team.igl.player_id:
@@ -38,6 +42,17 @@ async def redis_lifespan(app: FastAPI, db: AsyncSession = Depends(get_db)):
             p.igl_score = igl
             players.append(p)
         t = team_schemas.Team(id=team.id, name=team.name, players=players)
-        app.state.redis.set(str(team.id), t.model_dump_json())
+        await app.state.redis.set(str(team.id), t.model_dump_json())
+    await app.state.redis.set("team_ids", json.dumps(team_ids))
     yield
     app.state.redis.close()
+
+
+async def get_teams(redis: Redis):
+    team_ids_string: str = await redis.get("team_ids")
+    team_ids: list[int] = json.loads(team_ids_string)
+    n = len(team_ids)
+    data = {}
+    for i in range(6):
+        data[i] = await redis.get(str(team_ids[randint(0, n - 1)]))
+    return data
