@@ -33,7 +33,7 @@ async def validate(db: AsyncSession, query_params: QueryParams):
 
     profile = validator.FetchDetails()
 
-    existing_user = (
+    user = (
         await db.execute(
             select(User)
             .where(User.steam_id == profile.steam_id)
@@ -41,30 +41,31 @@ async def validate(db: AsyncSession, query_params: QueryParams):
         )
     ).scalar_one_or_none()
 
-    if existing_user is None:
-        new_user = User(
+    if user is None:
+        user = User(
             username=profile.username,
             url=profile.url,
             avatar=profile.avatar,
             steam_id=profile.steam_id,
         )
-        db.add(new_user)
+        db.add(user)
         await safe_commit_add(db=db, datatype="User")
-        await db.refresh(new_user)
-        id = new_user.id
+        await db.refresh(user)
+        id = user.id
     else:
-        existing_user.username = profile.username
-        existing_user.url = profile.url
-        existing_user.avatar = profile.avatar
+        user.username = profile.username
+        user.url = profile.url
+        user.avatar = profile.avatar
         await safe_commit(db=db, datatype="User")
-        await db.refresh(existing_user)
-        id = existing_user.id
+        await db.refresh(user)
+        id = user.id
 
     user_data = {"sub": str(id)}
 
     logger.info("User logged in", extra={"user_id": str(id)})
 
     return token_schemas.UserToken(
+        user=user,
         access_token=create_access_token(data=user_data),
         token_type="bearer",
     )
