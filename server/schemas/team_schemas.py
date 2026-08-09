@@ -12,4 +12,9 @@ class Team(BaseModel):
 
 
 class Teams(BaseModel):
-    teams: list[Team]
+    team_1: Team
+    team_2: Team
+    team_3: Team
+    team_4: Team
+    team_5: Team
+    team_6: Team

@@ -4,7 +4,11 @@ import requests
 from fastapi import status
 from fastapi.responses import RedirectResponse
 
-from exceptions.app_exceptions import DataNotFoundError, InvalidCredentialsError
+from exceptions.app_exceptions import (
+    DataNotFoundError,
+    InvalidCredentialsError,
+    PermissionDeniedError,
+)
 from schemas.user_schemas import Profile
 from utils.config import settings
 
@@ -139,6 +143,9 @@ class SteamValidator:
 
         if not player.avatar:
             raise DataNotFoundError(datatype="avatar")
+
+        if not isinstance(self.__identity, str):
+            raise PermissionDeniedError()
 
         profile = Profile(
             username=player.personaname,

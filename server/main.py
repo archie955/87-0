@@ -10,7 +10,8 @@ from database.database import get_db
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from routers import players, teams, users
+from redis_config.redis import redis_lifespan
+from routers import teams, users
 from utils.config import settings
 
 origins = settings.allowed_origins.split(",")
@@ -19,7 +20,7 @@ configure_logging()
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(lifespan=redis_lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,7 +34,6 @@ app.add_middleware(LoggingMiddleware)
 
 app.include_router(users.router)
 app.include_router(teams.router)
-app.include_router(players.router)
 
 
 @app.get("/health")

@@ -11,7 +11,7 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 
 from alembic import op
-from models.models import majors, nat, roles
+from models.player_model import roles
 
 # revision identifiers, used by Alembic.
 revision: str = "efa5b5610486"

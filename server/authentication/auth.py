@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.database import get_db
 from exceptions.app_exceptions import InvalidCredentialsError
-from models import models
+from models.user_model import User
 from schemas import token_schemas
 from utils.config import settings
 
@@ -56,13 +56,11 @@ def verify_access_token(token: str) -> token_schemas.TokenData:
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
-) -> models.User:
+) -> User:
     user_id_token = verify_access_token(token=token)
 
     user = (
-        await db.execute(
-            select(models.User).where(models.User.id == int(user_id_token.id))
-        )
+        await db.execute(select(User).where(User.id == int(user_id_token.id)))
     ).scalar_one_or_none()
 
     if not user:

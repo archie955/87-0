@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.database import get_db
@@ -9,7 +9,6 @@ router = APIRouter(prefix="/teams", tags=["Teams"])
 
 
 @router.get(path="", status_code=status.HTTP_200_OK, response_model=team_schemas.Teams)
-async def get_teams(db: AsyncSession = Depends(get_db)):
-    teams = await team_service.get(db)
-
+async def get_teams(request: Request, db: AsyncSession = Depends(get_db)):
+    teams = await team_service.get(request.state.redis)
     return teams

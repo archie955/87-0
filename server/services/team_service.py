@@ -1,26 +1,30 @@
+import json
 import logging
+from random import randint
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from redis.asyncio import Redis
 
-from models import models
+from exceptions.app_exceptions import DataNotFoundError
 from schemas import team_schemas
 
 logger = logging.getLogger(__name__)
 
 
-async def get(db: AsyncSession) -> team_schemas.Teams:
-    teams = (
-        (
-            await db.execute(
-                select(models.Team).options(selectinload(models.Team.players))
-            )
-        )
-        .scalars()
-        .all()
-    )
+async def get(redis: Redis) -> team_schemas.Teams:
+    team_ids_string = await redis.get("team_ids")
+    if not team_ids_string:
+        raise DataNotFoundError(datatype="Team ids")
+    team_ids: list[int] = json.loads(team_ids_string)
+    n = len(team_ids)
+    data = {}
+    for i in range(1, 7):
+        temp = await redis.get(str(team_ids[randint(0, n - 1)]))
+        if not temp:
+            raise DataNotFoundError(datatype="Team")
+        data[f"team_{i}"] = json.loads(temp)
 
-    team_list = [team_schemas.Team.model_validate(t) for t in teams]
+    teams = team_schemas.Teams.model_validate(data)
 
-    return team_schemas.Teams(teams=team_list)
+    logger.info("Successfully generated teams", extra={"teams": teams})
+
+    return teams
