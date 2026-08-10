@@ -9,7 +9,7 @@ from exceptions.app_exceptions import (
     InvalidCredentialsError,
     PermissionDeniedError,
 )
-from schemas.user_schemas import Profile
+from schemas.steam_schemas import Profile
 from utils.config import settings
 
 """example output of fetch here:

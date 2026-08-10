@@ -1,29 +1,32 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
-
-from schemas.game_schemas import Game
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 config = ConfigDict(from_attributes=True)
 
 
-class User(BaseModel):
+class UserBase(BaseModel):
+    email: EmailStr
     username: str
-    url: str
-    avatar: str
-    model_config = config
 
 
-class Profile(User):
-    username: str
-    url: str
-    avatar: str
-    steam_id: str
+class UserCreate(UserBase):
+    password: str
 
 
-class UserOut(User):
+class UserOut(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    best_game: Game
     model_config = config
+
+
+class UserUpdate(BaseModel):
+    updated_user: UserCreate
+    password: str
+
+
+class UserToken(BaseModel):
+    user: UserOut
+    access_token: str
+    token_type: str

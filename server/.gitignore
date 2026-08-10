@@ -21,3 +21,4 @@ old_ml
 **/*.csv
 
 data
+redis_temp

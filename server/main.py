@@ -10,8 +10,7 @@ from database.database import get_db
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from redis_config.redis import redis_lifespan
-from routers import teams, users
+from routers import teams, user
 from utils.config import settings
 
 origins = settings.allowed_origins.split(",")
@@ -20,7 +19,7 @@ configure_logging()
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(lifespan=redis_lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,17 +31,8 @@ app.add_middleware(
 
 app.add_middleware(LoggingMiddleware)
 
-app.include_router(users.router)
 app.include_router(teams.router)
-
-
-@app.get("/health")
-async def health(db: AsyncSession = Depends(get_db)) -> dict[str, str]:
-    try:
-        await db.execute(text("SELECT 1"))
-        return {"status": "healthy"}
-    except Exception:
-        return {"status": "unhealthy"}
+app.include_router(user.router)
 
 
 @app.exception_handler(AppException)
@@ -72,6 +62,10 @@ def global_expression_handler(request: Request, exc: Exception):
     )
 
 
-@app.get("/")
-def root():
-    return {"message": "home page"}
+@app.get("/health")
+async def health(db: AsyncSession = Depends(get_db)) -> dict[str, str]:
+    try:
+        await db.execute(text("SELECT 1"))
+        return {"status": "healthy"}
+    except Exception:
+        return {"status": "unhealthy"}
