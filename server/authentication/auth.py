@@ -6,6 +6,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from database.database import get_db
 from exceptions.app_exceptions import InvalidCredentialsError
@@ -61,6 +62,25 @@ async def get_current_user(
 
     user = (
         await db.execute(select(User).where(User.id == int(user_id_token.id)))
+    ).scalar_one_or_none()
+
+    if not user:
+        raise CREDENTIALS_EXCEPTION
+
+    return user
+
+
+async def get_current_lineup(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+) -> User:
+    user_id_token = verify_access_token(token=token)
+
+    user = (
+        await db.execute(
+            select(User)
+            .where(User.id == int(user_id_token.id))
+            .options(selectinload(User.best_game))
+        )
     ).scalar_one_or_none()
 
     if not user:
