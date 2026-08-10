@@ -38,6 +38,6 @@ class IGL(Base, Name, TimeStamps):
 
     win_teammates: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    player: Mapped["Player"] = relationship(back_populates="igl")
+    player: Mapped["Player"] = relationship()
 
     team: Mapped["Team"] = relationship(back_populates="igl")

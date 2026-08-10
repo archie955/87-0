@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
 from models.enums import Roles
-from models.igl_model import IGL
 from models.mixins import Name, TimeStamps
 from models.team_model import Team
 
@@ -21,8 +20,6 @@ class Player(Base, Name, TimeStamps):
 
     hltv: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
 
-    igl_id: Mapped[bool] = mapped_column(Integer, ForeignKey("igl.id"), nullable=True)
+    igl_bonus: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
 
     team: Mapped["Team"] = relationship(back_populates="players")
-
-    igl: Mapped["IGL"] = relationship(back_populates="player")

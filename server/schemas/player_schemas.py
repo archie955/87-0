@@ -11,7 +11,7 @@ class Player(BaseModel):
     name: str
     role: Roles
     hltv: float
-    igl_score: float | None = None
+    igl_bonus: float
     model_config = config
 
 
