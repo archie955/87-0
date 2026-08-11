@@ -9,7 +9,7 @@ from exceptions.app_exceptions import (
     DataAlreadyExistsError,
     InvalidCredentialsError,
 )
-from models.user_model import User
+from models.models import User
 from schemas import user_schemas
 from services.helpers import safe_commit
 from utils import utils

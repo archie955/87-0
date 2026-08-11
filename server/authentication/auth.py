@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from database.database import get_db
 from exceptions.app_exceptions import InvalidCredentialsError
-from models.user_model import User
+from models.models import User
 from schemas import token_schemas
 from utils.config import settings
 
@@ -25,7 +25,7 @@ CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Be
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
 
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire, "type": "access"})
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

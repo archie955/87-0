@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from exceptions.app_exceptions import BadRequestError
-from models.user_model import User
+from models.models import User
 from schemas import lineup_schemas
 from services import lineup_helpers
 

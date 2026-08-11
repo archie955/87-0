@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from authentication import auth
 from database.database import get_db
-from models.user_model import User
+from models.models import User
 from schemas import token_schemas
 from services import steam_service
 

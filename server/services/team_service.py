@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from exceptions.app_exceptions import DataNotFoundError
-from models.team_model import Team
+from models.models import Team
 from schemas import player_schemas, team_schemas
 
 logger = logging.getLogger(__name__)

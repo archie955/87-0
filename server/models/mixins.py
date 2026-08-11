@@ -20,7 +20,7 @@ class TimeStamps:
     """Automatically adds created_at and updated_at columns to any inheriting tables"""
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, serve_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     updated_at: Mapped[datetime] = mapped_column(

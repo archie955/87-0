@@ -2,9 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.enums import Roles
-from models.game_model import Game
-from models.player_model import Player
-from models.user_model import User
+from models.models import Game, Player, User
 from schemas import lineup_schemas
 from services.helpers import safe_commit
 
