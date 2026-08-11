@@ -2,7 +2,6 @@ from sqlalchemy import DECIMAL, ForeignKey, Index, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
-from models.igl_model import IGL
 from models.mixins import Name, TimeStamps
 from models.player_model import Player
 from models.user_model import User
@@ -43,7 +42,9 @@ class Game(Base, Name, TimeStamps):
         Integer, ForeignKey("player.id"), nullable=False
     )
 
-    igl_id: Mapped[int] = mapped_column(Integer, ForeignKey("igl.id"), nullable=False)
+    igl_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("player.id"), nullable=False
+    )
 
     score: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
 
@@ -58,5 +59,3 @@ class Game(Base, Name, TimeStamps):
     support: Mapped["Player"] = relationship()
 
     flex: Mapped["Player"] = relationship()
-
-    igl: Mapped["IGL"] = relationship()

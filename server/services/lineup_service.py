@@ -16,7 +16,7 @@ def eval_lineup(lineup: lineup_schemas.Lineup) -> float:
         return -1.0
     for p in lineup.players:
         score += p.hltv
-        if p.igl: # This doesn't exist yet, so fix. Create new lineup player schema.
+        if p.igl:
             score += p.igl_bonus
     return score
 

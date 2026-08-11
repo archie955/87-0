@@ -5,8 +5,12 @@ from schemas.player_schemas import Player
 config = ConfigDict(from_attributes=True)
 
 
+class LineupPlayer(Player):
+    igl: bool
+
+
 class Lineup(BaseModel):
-    players: list[Player]
+    players: list[LineupPlayer]
 
 
 class LineupEvaluation(BaseModel):
