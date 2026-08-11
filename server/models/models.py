@@ -26,7 +26,9 @@ class User(Base, Name, TimeStamps):
 
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
 
-    hashed_pwd: Mapped[str] = mapped_column(String(200), nullable=False, unique=False)
+    hashed_password: Mapped[str] = mapped_column(
+        String(200), nullable=False, unique=False
+    )
 
     best_game: Mapped["Game"] = relationship(back_populates="owner")
 
@@ -38,9 +40,7 @@ class Player(Base, Name, TimeStamps):
         Index("ix_player_role", "role"),
         UniqueConstraint("name", "team_id", name="uq_player_name_team"),
     )
-    name: Mapped[str] = mapped_column(
-        String(100), nullable=False, unique=True, index=True
-    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
 
     role: Mapped[Roles] = mapped_column(roles, nullable=False)
 
@@ -75,9 +75,7 @@ class Historic_Player(Base, Name, TimeStamps):
         Index("ix_historic_player_team_id", "team_id"),
         Index("ix_historic_player_role", "role"),
     )
-    name: Mapped[str] = mapped_column(
-        String(100), nullable=False, unique=True, index=True
-    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
 
     role: Mapped[Roles] = mapped_column(roles, nullable=False)
 

@@ -10,7 +10,7 @@ from database.database import get_db
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from routers import teams, user
+from routers import lineup, teams, user
 from utils.config import settings
 
 origins = settings.allowed_origins.split(",")
@@ -31,8 +31,9 @@ app.add_middleware(
 
 app.add_middleware(LoggingMiddleware)
 
-app.include_router(teams.router)
 app.include_router(user.router)
+app.include_router(teams.router)
+app.include_router(lineup.router)
 
 
 @app.exception_handler(AppException)
@@ -54,7 +55,10 @@ async def app_exception_handler(
 
 @app.exception_handler(Exception)
 def global_expression_handler(request: Request, exc: Exception):
-    logger.exception("Unhandled exception")
+    logger.exception(
+        f"Unhandled exception: {exc} | {request.method} {request.url} from"
+        f"{request.client.host if request.client else 'HOST NOT FOUND'}"
+    )
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
