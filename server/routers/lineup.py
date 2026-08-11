@@ -11,22 +11,27 @@ router = APIRouter(prefix="/lineup", tags=["Lineups"])
 
 
 @router.post(
-    path="",
+    path="/user",
     status_code=status.HTTP_200_OK,
     response_model=lineup_schemas.LineupEvaluation,
 )
-async def submit_lineup(
+async def submit_user_lineup(
     lineup: lineup_schemas.Lineup,
     user: User = Depends(get_current_lineup),
     db: AsyncSession = Depends(get_db),
 ):
-    score = lineup_service.eval_lineup(lineup)
-    best = False
-    if score > user.best_game.score:
-        best = True
-        lineup_service.persist_lineup(lineup, db)
-
-    return lineup_service.evaluation(score, best)
+    evaluation = await lineup_service.eval_user(lineup=lineup, user=user, db=db)
+    return evaluation
 
 
-"""Need to add a lineup evaluation for not logged in users too"""
+@router.post(
+    path="",
+    status_code=status.HTTP_200_OK,
+    response_model=lineup_schemas.LineupEvaluationNoUser,
+)
+async def submit_lineup(
+    lineup: lineup_schemas.Lineup,
+    db: AsyncSession = Depends(get_db),
+):
+    evaluation = await lineup_service.eval_no_user(lineup=lineup, db=db)
+    return evaluation

@@ -13,7 +13,12 @@ class Lineup(BaseModel):
     players: list[LineupPlayer]
 
 
-class LineupEvaluation(BaseModel):
+class LineupEvaluationNoUser(BaseModel):
+    score: float
+    bracket: int
+
+
+class LineupEvaluation(LineupEvaluationNoUser):
     score: float
     bracket: int
     best: bool

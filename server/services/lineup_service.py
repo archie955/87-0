@@ -1,42 +1,39 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from exceptions.app_exceptions import BadRequestError
+from models.user_model import User
 from schemas import lineup_schemas
+from services import lineup_helpers
 
 
-def valid_lineup(lineup: lineup_schemas.Lineup) -> bool:
-    """Will validate the lineup fits the rules
-    and that the players exist on db and have the correct scores"""
-    print(lineup)
-    return True
+async def eval_user(lineup: lineup_schemas.Lineup, user: User, db: AsyncSession):
+
+    valid = await lineup_helpers.valid_lineup(lineup=lineup, db=db)
+    if valid:
+        raise BadRequestError(message="Invalid Lineup")
+
+    score = lineup_helpers.eval_lineup(lineup)
+    best = False
+
+    if user.best_game is None:
+        best = True
+        await lineup_helpers.create_lineup(lineup, score, user, db)
+
+    elif user.best_game.score <= score:
+        best = True
+        await lineup_helpers.update_lineup(lineup, score, user, db)
+
+    res = lineup_helpers.evaluation_user(score=score, best=best)
+    return res
 
 
-def eval_lineup(lineup: lineup_schemas.Lineup) -> float:
-    score = 0.0
-    if not valid_lineup(lineup):
-        return -1.0
-    for p in lineup.players:
-        score += p.hltv
-        if p.igl:
-            score += p.igl_bonus
-    return score
+async def eval_no_user(lineup: lineup_schemas.Lineup, db: AsyncSession):
 
+    valid = await lineup_helpers.valid_lineup(lineup=lineup, db=db)
+    if not valid:
+        raise BadRequestError(message="Invalid Lineup")
 
-def persist_lineup(lineup: lineup_schemas.Lineup, db: AsyncSession) -> None:
-    """Commit Game to DB connected to user, requires updating both user and game
-    investigate relationships under data change."""
-    print(lineup)
-    print(db)
-    pass
+    score = lineup_helpers.eval_lineup(lineup)
 
-
-def evaluation(score, best) -> lineup_schemas.LineupEvaluation:
-    """bracket will just determine which group it is,
-    higher bracket means higher score"""
-    if score < 5.0:
-        bracket = 0
-    elif score < 6.0:
-        bracket = 1
-    else:
-        bracket = 2
-    response = lineup_schemas.LineupEvaluation(score=score, bracket=bracket, best=best)
-    return response
+    res = lineup_helpers.evaluation_no_user(score)
+    return res
