@@ -83,7 +83,6 @@ async def create_lineup(
     lineup: lineup_schemas.Lineup, score: float, user: User, db: AsyncSession
 ) -> None:
     game_dict = {}
-    game_dict["user_id"] = user.id
 
     for p in lineup.players:
         key = f"{str(p.role).lower()}_id"
@@ -99,7 +98,7 @@ async def create_lineup(
 
     game_dict["score"] = score
 
-    game = Game(**game_dict)
+    game = Game(**game_dict, owner=user)
     db.add(game)
 
     await safe_commit(db=db, datatype="Game")

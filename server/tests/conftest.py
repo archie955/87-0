@@ -14,6 +14,7 @@ from main import app
 from models.models import Base
 from tests.authclient import AuthClient
 from tests.helpers import Helpers
+from tests.mockdata import data as mock_data
 
 SQLALCHEMY_DATABASE_URL = (
     "postgresql+psycopg://postgres:postgres@localhost:5433/test_db"
@@ -73,3 +74,13 @@ async def auth_client(
     user: dict[str, str] = await helpers.full_login(client)
 
     return AuthClient(client, user, db=db)
+
+
+@pytest_asyncio.fixture
+async def auth_client_seed(
+    client: AsyncClient, db: AsyncSession, helpers: Helpers
+) -> AuthClient:
+    user: dict[str, str] = await helpers.full_login(client)
+    ac = AuthClient(client, user, db=db)
+    await ac.seed_data(data=mock_data)
+    return ac
