@@ -50,3 +50,15 @@ class PermissionDeniedError(AppException):
             message="You do not have permission to perform this action",
             headers=headers,
         )
+
+
+class ExpiredDataError(AppException):
+    def __init__(self, datatype: str, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=422, message=f"{datatype} has expired", headers=headers
+        )
+
+
+class InvalidGameLineup(AppException):
+    def __init__(self, headers: dict[str, str] | None = None):
+        super().__init__(status_code=422, message="Lineup is invalid", headers=headers)

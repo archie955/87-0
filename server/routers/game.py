@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from authentication.auth import get_current_lineup
 from database.database import get_db
-from models.models import User
-from schemas import lineup_schemas
-from services import lineup_service
+from models.models import Active_Game, User
+from schemas import active_game_schemas
+from services import game_service
 
 router = APIRouter(prefix="/lineup", tags=["Lineups"])
 
@@ -13,25 +13,31 @@ router = APIRouter(prefix="/lineup", tags=["Lineups"])
 @router.post(
     path="/user",
     status_code=status.HTTP_200_OK,
-    response_model=lineup_schemas.LineupEvaluation,
+    response_model=active_game_schemas.GameEvaluationUser,
 )
 async def submit_user_lineup(
-    lineup: lineup_schemas.Lineup,
+    game: active_game_schemas.GameResult,
+    active_game: Active_Game,
     user: User = Depends(get_current_lineup),
     db: AsyncSession = Depends(get_db),
 ):
-    evaluation = await lineup_service.eval_user(lineup=lineup, user=user, db=db)
+    evaluation = await game_service.evaluate_user_game(
+        game=game, active_game=active_game, user=user, db=db
+    )
     return evaluation
 
 
 @router.post(
     path="",
     status_code=status.HTTP_200_OK,
-    response_model=lineup_schemas.LineupEvaluationNoUser,
+    response_model=active_game_schemas.GameEvaluation,
 )
 async def submit_lineup(
-    lineup: lineup_schemas.Lineup,
+    game: active_game_schemas.GameResult,
+    active_game: Active_Game,
     db: AsyncSession = Depends(get_db),
 ):
-    evaluation = await lineup_service.eval_no_user(lineup=lineup, db=db)
+    evaluation = await game_service.evaluate_game(
+        game=game, active_game=active_game, db=db
+    )
     return evaluation

@@ -1,11 +1,15 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy import (
     DECIMAL,
+    DateTime,
     Enum,
     ForeignKey,
     Index,
     Integer,
     String,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -160,3 +164,35 @@ class Game(Base, Name, TimeStamps):
     score: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
 
     owner: Mapped["User"] = relationship(back_populates="best_game")
+
+
+class Active_Game(Base, Name):
+    team_1_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    team_2_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    team_3_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    team_4_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    team_5_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    team_6_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("team.id"), nullable=False
+    )
+
+    expiry: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now() + timedelta(minutes=30),
+    )

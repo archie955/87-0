@@ -10,7 +10,7 @@ from database.database import get_db
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from routers import lineup, teams, user
+from routers import game, teams, user
 from utils.config import settings
 
 origins = settings.allowed_origins.split(",")
@@ -33,7 +33,7 @@ app.add_middleware(LoggingMiddleware)
 
 app.include_router(user.router)
 app.include_router(teams.router)
-app.include_router(lineup.router)
+app.include_router(game.router)
 
 
 @app.exception_handler(AppException)

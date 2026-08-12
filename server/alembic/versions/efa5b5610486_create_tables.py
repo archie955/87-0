@@ -7,6 +7,7 @@ Create Date: 2026-06-23 17:33:10.488419
 """
 
 from collections.abc import Sequence
+from datetime import timedelta
 
 import sqlalchemy as sa
 
@@ -335,8 +336,27 @@ def upgrade() -> None:
     op.create_index("ix_game_flex_id", "game", ["flex_id"])
     op.create_index("ix_game_igl_id", "game", ["igl_id"])
 
+    op.create_table(
+        "active_game",
+        sa.Column("id", primary_key=True, autoincrement=True, nullable=False),
+        sa.Column("team_1_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column("team_2_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column("team_3_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column("team_4_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column("team_5_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column("team_6_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
+        sa.Column(
+            "expiry",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now() + timedelta(minutes=30),
+        ),
+    )
+
 
 def downgrade() -> None:
+    op.drop_table("active_game")
+
     op.drop_index("ix_game_user_id", "game")
     op.drop_index("ix_game_awper_id", "game")
     op.drop_index("ix_game_closer_id", "game")
