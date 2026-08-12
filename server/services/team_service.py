@@ -27,8 +27,7 @@ async def get(db: AsyncSession) -> team_schemas.Teams:
         team_players = []
         for p in t.players:
             team_players.append(player_schemas.Player.model_validate(p))
-        players = player_schemas.Team_Players(players=team_players)
-        team = team_schemas.Team(id=t.id, name=t.name, players=players)
+        team = team_schemas.Team(id=t.id, name=t.name, players=team_players)
         team_list.append(team)
 
     team_return = team_schemas.Teams(teams=team_list)
