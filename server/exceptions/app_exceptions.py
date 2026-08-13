@@ -60,5 +60,9 @@ class ExpiredDataError(AppException):
 
 
 class InvalidGameLineup(AppException):
-    def __init__(self, headers: dict[str, str] | None = None):
-        super().__init__(status_code=422, message="Lineup is invalid", headers=headers)
+    def __init__(self, id: int, reason: str, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=422,
+            message=f"Lineup is invalid because {reason}, id={id}",
+            headers=headers,
+        )

@@ -20,11 +20,12 @@ async def create_game(db: AsyncSession = Depends(get_db)):
 
 
 @router.post(
-    path="/{id}/user",
+    path="/{game_id}/user",
     status_code=status.HTTP_200_OK,
     response_model=active_game_schemas.GameEvaluationUser,
 )
 async def submit_user_lineup(
+    game_id: int,
     game: active_game_schemas.GameResult,
     active_game: Active_Game = Depends(get_current_game),
     user: User = Depends(get_current_lineup),
@@ -37,11 +38,12 @@ async def submit_user_lineup(
 
 
 @router.post(
-    path="/{id}",
+    path="/{game_id}",
     status_code=status.HTTP_200_OK,
     response_model=active_game_schemas.GameEvaluation,
 )
 async def submit_lineup(
+    game_id: int,
     game: active_game_schemas.GameResult,
     active_game: Active_Game = Depends(get_current_game),
     db: AsyncSession = Depends(get_db),

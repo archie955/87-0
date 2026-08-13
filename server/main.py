@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import Depends, FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -41,11 +42,7 @@ async def app_exception_handler(
     request: Request,
     exc: AppException,
 ) -> JSONResponse:
-    logger.warning(
-        "%s: %s",
-        exc.__class__.__name__,
-        exc.message,
-    )
+    logger.warning(f"AppException raised: {exc.__class__.__name__}: {exc.message}")
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.message},
@@ -53,10 +50,23 @@ async def app_exception_handler(
     )
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError,
+):
+    logger.error("REQUEST VALIDATION ERROR: %s", exc.errors())
+
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
+
+
 @app.exception_handler(Exception)
 def global_expression_handler(request: Request, exc: Exception):
     logger.exception(
-        f"Unhandled exception: {exc} | {request.method} {request.url} from"
+        f"Unhandled exception: {exc} | {request.method} {request.url} from "
         f"{request.client.host if request.client else 'HOST NOT FOUND'}"
     )
 
