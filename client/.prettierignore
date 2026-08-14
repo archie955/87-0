@@ -1,0 +1,12 @@
+**/*.git
+.env**
+**/*.md
+**/*.ini
+**/*.json
+build
+dist
+coverage
+**/*.gitignore
+**/node_modules
+.dockerignore
+Dockerfile

@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/typings.d.ts","./src/services/api.ts","./src/services/persistentUser.ts","./src/services/user.ts","./src/stores/userStore.ts","./src/types/userTypes.ts","./vite-env.d.ts"],"version":"6.0.3"}
