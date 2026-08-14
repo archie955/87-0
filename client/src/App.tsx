@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useUserActions } from "./stores/userStore";
+import ErrorBoundary from "./ErrorBoundary";
 
 const App = () => {
   const { init } = useUserActions();
@@ -10,7 +11,9 @@ const App = () => {
 
   return (
     <div>
-      <h1>Test</h1>
+      <ErrorBoundary>
+        <h1>Test</h1>
+      </ErrorBoundary>
     </div>
   );
 };

@@ -8,9 +8,8 @@ async def test_fetch_teams(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
 
-    assert "teams" in data
-
-    teams = data["teams"]
+    keys = data.keys()
+    teams = [data[key] for key in keys]
 
     assert len(teams) == 2
     names = {teams[0]["name"], teams[1]["name"]}
@@ -40,9 +39,8 @@ async def test_fetch_teams_no_auth(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
 
-    assert "teams" in data
-
-    teams = data["teams"]
+    keys = data.keys()
+    teams = [data[key] for key in keys]
 
     assert len(teams) == 2
     names = {teams[0]["name"], teams[1]["name"]}
@@ -69,9 +67,8 @@ async def test_fetch_teams_no_user(client, auth_client_seed):
     assert response.status_code == 200
     data = response.json()
 
-    assert "teams" in data
-
-    teams = data["teams"]
+    keys = data.keys()
+    teams = [data[key] for key in keys]
 
     assert len(teams) == 2
     names = {teams[0]["name"], teams[1]["name"]}
