@@ -4,7 +4,7 @@ from httpx import AsyncClient, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.models import Historic_Player, Historic_Team, Player, Team
+from models.models import Player, Team
 from tests.mockdata import mock_igl_bonus
 
 SQLALCHEMY_DATABASE_URL = (
@@ -67,20 +67,13 @@ class AuthClient:
     async def seed_data(self, data: dict[str, Any]) -> None:
         for t in data["teams"]:
             team = Team(name=t["name"])
-            hteam = Historic_Team(name=t["name"])
             self.db.add(instance=team)
-            self.db.add(instance=hteam)
             await self.db.flush()
 
         teams = (await self.db.execute(select(Team))).scalars().all()
         team_dict = {}
         for team in teams:
             team_dict[team.name] = team
-
-        hteams = (await self.db.execute(select(Historic_Team))).scalars().all()
-        hteam_dict = {}
-        for team in hteams:
-            hteam_dict[team.name] = team
 
         for p in data["players"]:
             p["igl_bonus"] = mock_igl_bonus(p)
@@ -99,21 +92,6 @@ class AuthClient:
                 win_teammates=p["win_teammates"],
                 team=team_dict[p["team_name"]],
             )
-            hplayer = Historic_Player(
-                name=p["name"],
-                role=p["role"],
-                hltv=p["hltv"],
-                igl_bonus=p["igl_bonus"],
-                majors=p["majors"],
-                wins=p["wins"],
-                second=p["second"],
-                semi=p["semi"],
-                quarter=p["quarter"],
-                total_tournaments=p["total_tournaments"],
-                major_teammates=p["major_teammates"],
-                win_teammates=p["win_teammates"],
-                team=hteam_dict[p["team_name"]],
-            )
+
             self.db.add(player)
-            self.db.add(hplayer)
             await self.db.flush()

@@ -44,8 +44,4 @@ class GameList(BaseModel):
 
 class GameEvaluation(BaseModel):
     score: float
-    bracket: int
-
-
-class GameEvaluationUser(GameEvaluation):
     best: bool

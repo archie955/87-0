@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from authentication.auth import get_current_lineup
+from authentication.auth import get_current_user
 from database.database import get_db
 from models.models import Active_Game, User
 from routers.game_dep import get_current_game
@@ -22,13 +22,13 @@ async def create_game(db: AsyncSession = Depends(get_db)):
 @router.post(
     path="/{game_id}/user",
     status_code=status.HTTP_200_OK,
-    response_model=active_game_schemas.GameEvaluationUser,
+    response_model=active_game_schemas.GameEvaluation,
 )
 async def submit_user_lineup(
     game_id: int,
     game: active_game_schemas.GameResult,
     active_game: Active_Game = Depends(get_current_game),
-    user: User = Depends(get_current_lineup),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     evaluation = await game_service.evaluate_user_game(

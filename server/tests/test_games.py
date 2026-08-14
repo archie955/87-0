@@ -35,11 +35,10 @@ async def test_play_game_user(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
     assert "score" in data
-    assert "bracket" in data
     assert "best" in data
 
     assert isinstance(data["score"], float)
-    assert isinstance(data["bracket"], int)
+    print(data)
     assert data["best"]
 
 
@@ -52,10 +51,8 @@ async def test_play_game(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
     assert "score" in data
-    assert "bracket" in data
 
     assert isinstance(data["score"], float)
-    assert isinstance(data["bracket"], int)
 
 
 @pytest.mark.asyncio

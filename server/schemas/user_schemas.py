@@ -16,6 +16,7 @@ class UserCreate(UserBase):
 
 class UserOut(UserBase):
     id: int
+    best_score: float | None = None
     created_at: datetime
     updated_at: datetime
     model_config = config

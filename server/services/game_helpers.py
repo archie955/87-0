@@ -6,9 +6,16 @@ from exceptions.app_exceptions import (
     InvalidGameLineup,
 )
 from models.enums import Roles
-from models.models import Active_Game, Game, Player, User
+from models.models import Active_Game, Player
 from schemas import active_game_schemas
-from services.helpers import safe_commit
+
+
+def eval_lineup(game: active_game_schemas.GameList) -> float:
+    score = 0.0
+
+    for p in game.players:
+        score += p.score
+    return score
 
 
 async def validate_game(
@@ -150,14 +157,7 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
     return double_key
 
 
-def eval_lineup(game: active_game_schemas.GameList) -> float:
-    score = 0.0
-
-    for p in game.players:
-        score += p.score
-    return score
-
-
+"""
 async def update_lineup(
     game: active_game_schemas.GameList, score: float, user: User, db: AsyncSession
 ) -> None:
@@ -206,29 +206,4 @@ async def create_lineup(
 
     await safe_commit(db=db, datatype="Game")
     return
-
-
-def evaluation_user(score: float, best: bool) -> active_game_schemas.GameEvaluationUser:
-    """bracket will just determine which group it is,
-    higher bracket means higher score"""
-    if score < 5.0:
-        bracket = 0
-    elif score < 6.0:
-        bracket = 1
-    else:
-        bracket = 2
-    response = active_game_schemas.GameEvaluationUser(
-        score=score, bracket=bracket, best=best
-    )
-    return response
-
-
-def evaluation_no_user(score: float) -> active_game_schemas.GameEvaluation:
-    if score < 5.0:
-        bracket = 0
-    elif score < 6.0:
-        bracket = 1
-    else:
-        bracket = 2
-    response = active_game_schemas.GameEvaluation(score=score, bracket=bracket)
-    return response
+"""

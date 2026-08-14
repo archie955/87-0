@@ -37,7 +37,7 @@ async def evaluate_user_game(
     active_game: Active_Game,
     user: User,
     db: AsyncSession,
-) -> active_game_schemas.GameEvaluationUser:
+) -> active_game_schemas.GameEvaluation:
     game_list = await game_helpers.validate_game(
         game=game, active_game=active_game, db=db
     )
@@ -45,22 +45,17 @@ async def evaluate_user_game(
     if not game_helpers.valid_lineup(game=game_list):
         raise BadRequestError(message="Invalid Game")
 
-    await db.delete(active_game)
-    await db.commit()
-
     score = game_helpers.eval_lineup(game_list)
     best = False
 
-    if user.best_game is None:
+    if user.best_score is None or user.best_score < score:
+        user.best_score = score
         best = True
-        await game_helpers.create_lineup(game_list, score, user, db)
 
-    elif user.best_game.score <= score:
-        best = True
-        await game_helpers.update_lineup(game_list, score, user, db)
+    await db.delete(active_game)
+    await db.commit()
 
-    res = game_helpers.evaluation_user(score=score, best=best)
-    return res
+    return active_game_schemas.GameEvaluation(score=score, best=best)
 
 
 async def evaluate_game(
@@ -78,5 +73,4 @@ async def evaluate_game(
 
     score = game_helpers.eval_lineup(game_list)
 
-    res = game_helpers.evaluation_no_user(score)
-    return res
+    return active_game_schemas.GameEvaluation(score=score, best=False)
