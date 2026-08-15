@@ -13,7 +13,6 @@ const App = () => {
   return (
     <div>
       <ErrorBoundary>
-        <h1>Test</h1>
         <Login />
       </ErrorBoundary>
     </div>
