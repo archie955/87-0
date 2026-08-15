@@ -23,5 +23,6 @@
     "outDir": "./build",
     "types": ["jest", "@testing-library/jest-dom", "vitest/globals"]
   },
-  "include": ["src", "vite-env.d.ts"]
+  "include": ["src", "vite-env.d.ts"],
+  "exclude": ["src/template"]
 }
