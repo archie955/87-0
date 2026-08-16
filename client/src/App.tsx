@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useUserActions } from "./stores/userStore";
 import ErrorBoundary from "./ErrorBoundary";
 import Login from "./pages/Login";
+import "./index.css";
 
 const App = () => {
   const { init } = useUserActions();
