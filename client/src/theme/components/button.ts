@@ -1,4 +1,4 @@
-import { Components, Theme } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 
 export const button: Components<Theme> = {
   MuiButton: {
@@ -12,10 +12,33 @@ export const button: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         boxShadow: "none",
+        boxSizing: "border-box",
+        transition: "all 100ms ease-in",
+        "&:focus-visible": {
+          outline: `3px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+          outlineOffset: "2px",
+        },
         borderRadius: (theme.vars || theme).shape.borderRadius,
         textTransform: "none",
-        paddingLeft: 24,
-        paddingRight: 24,
+        variants: [
+          {
+            props: {
+              size: "small",
+            },
+            style: {
+              height: "2.25rem",
+              padding: "8px 12px",
+            },
+          },
+          {
+            props: {
+              size: "medium",
+            },
+            style: {
+              height: "2.5rem",
+            },
+          },
+        ],
       }),
     },
   },

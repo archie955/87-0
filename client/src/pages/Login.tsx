@@ -4,7 +4,6 @@ import LoginForm from "../components/LoginForm";
 import AuthPage from "../components/AuthPage";
 import FormFooter from "../components/FormFooter";
 import AppLayout from "../layout/AppLayout";
-import AuthCard from "../styledComponents/AuthCard";
 
 const Login = () => {
   const login = useLogin();
@@ -13,7 +12,7 @@ const Login = () => {
   return (
     <AppLayout>
       <AuthPage>
-        {login ? <AuthCard /> : <RegistrationForm />}
+        {login ? <LoginForm /> : <RegistrationForm />}
         <FormFooter login={login} changeLogin={changeLogin} />
       </AuthPage>
     </AppLayout>

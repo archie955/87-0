@@ -2,10 +2,11 @@ import { useUserActions } from "../stores/userStore";
 import { useState, SubmitEvent } from "react";
 import useField from "../hooks/useField";
 import { useNavigate } from "react-router-dom";
-import { Button, Box, TextField } from "@mui/material";
+import { Button, Box, TextField, Divider } from "@mui/material";
 import { useNotificationActions } from "../stores/notificationStore";
 import { Credentials } from "../types/userTypes";
 import AuthCard from "./AuthCard";
+import { GoogleIcon } from "./CustomIcons";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,21 @@ const LoginForm = () => {
 
         <Button type="submit" loading={loading}>
           Login
+        </Button>
+      </Box>
+      <Divider>or</Divider>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Button
+          onClick={() => alert("Sign in with Google")}
+          startIcon={<GoogleIcon />}
+        >
+          Sign in with Google
         </Button>
       </Box>
     </AuthCard>
