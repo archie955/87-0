@@ -31,7 +31,6 @@ export interface PersistentUser {
 }
 
 export interface RegisterUser {
-  username: string;
   email: string;
   password: string;
 }

@@ -2,6 +2,7 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { useThemeMode } from "./stores/themeStore";
 import { getTheme } from "./theme/index";
 import { useMemo } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import App from "./App";
 
 const ThemeWrapper = () => {
@@ -11,7 +12,9 @@ const ThemeWrapper = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
     </ThemeProvider>
   );
 };

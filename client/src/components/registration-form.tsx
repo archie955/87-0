@@ -11,38 +11,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { ComponentProps, SubmitEvent } from "react";
 import { useUserActions } from "@/stores/userStore";
-import { useNavigate } from "react-router-dom";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
-import { Credentials } from "@/types/userTypes";
 import { useChangeActions } from "@/stores/loginStore";
+import { RegisterUser } from "@/types/userTypes";
 import { Link } from "@mui/material";
 
-const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { login } = useUserActions();
-  const navigate = useNavigate();
-  const username = useField("text");
+const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
+  const { create } = useUserActions();
+  const email = useField("text");
   const password = useField("password");
-  const { setNotification } = useNotificationActions();
   const { changeLogin } = useChangeActions();
+  const { setNotification } = useNotificationActions();
 
-  const handleLogin = async (
+  const validateInputs = (email: string, password: string) => {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setNotification("Please enter a valid email address.", "error");
+      return false;
+    }
+    if (!password || password.length < 6) {
+      setNotification("Password must be at least 6 characters long.", "error");
+      return false;
+    }
+    return true;
+  };
+
+  const handleRegister = async (
     e: SubmitEvent<HTMLFormElement>,
   ): Promise<void> => {
     e.preventDefault();
 
-    const credentials: Credentials = {
-      username: username.value,
+    const credentials: RegisterUser = {
+      email: email.value,
       password: password.value,
     };
+    if (!validateInputs(credentials.email, credentials.password)) {
+      return;
+    }
 
     try {
-      await login(credentials);
+      await create(credentials);
 
-      setNotification("Successfully logged in", "success");
-      navigate("/leagues");
+      setNotification("Successfully registered user", "success");
+      changeLogin();
     } catch {
-      setNotification("Login Failed", "error");
+      setNotification("Register Failed", "error");
     }
   };
 
@@ -54,19 +67,19 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">
-          <form className="p-6 md:p-8" onSubmit={handleLogin}>
+          <form className="p-6 md:p-8" onSubmit={handleRegister}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Welcome!</h1>
                 <p className="text-balance text-muted-foreground">
-                  Login to your account
+                  Register an account
                 </p>
               </div>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
-                  {...username}
+                  {...email}
                   placeholder="user@example.com"
                   required
                 />
@@ -74,17 +87,11 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </div>
                 <Input id="password" {...password} required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit">Register</Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
@@ -97,7 +104,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Apple</span>
+                  <span className="sr-only">Register with Apple</span>
                 </Button>
                 <Button variant="outline" type="button" onClick={handleClick}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -106,7 +113,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Register with Google</span>
                 </Button>
                 <Button variant="outline" type="button" onClick={handleClick}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -115,11 +122,11 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Meta</span>
+                  <span className="sr-only">Register with Meta</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account?{" "}
+                Already have an account?{" "}
                 <Link
                   component="button"
                   onClick={changeLogin}
@@ -141,4 +148,4 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
   );
 };
 
-export default LoginForm;
+export default RegistrationForm;
