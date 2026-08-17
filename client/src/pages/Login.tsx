@@ -1,9 +1,9 @@
-import { useLogin, useChangeActions } from "../stores/loginStore";
-import RegistrationForm from "../components/RegistrationForm";
+import { useLogin, useChangeActions } from "@/stores/loginStore";
+import RegistrationForm from "@/components/RegistrationForm";
 // import LoginForm from "../components/LoginForm";
-import AuthPage from "../components/AuthPage";
-import FormFooter from "../components/FormFooter";
-import AppLayout from "../layout/AppLayout";
+import AuthPage from "@/components/AuthPage";
+import FormFooter from "@/components/FormFooter";
+import AppLayout from "@/layout/AppLayout";
 import { LoginForm } from "@/components/login-form";
 
 const Login = () => {

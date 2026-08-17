@@ -48,7 +48,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
     padding: theme.spacing(4),
   },
   "&::before": {
-    content: "\"\"",
+    content: '""',
     display: "block",
     position: "absolute",
     zIndex: -1,
