@@ -1,8 +1,10 @@
+import AppLayout from "@/layout/AppLayout";
+
 const Home = () => {
   return (
-    <div>
+    <AppLayout>
       <h1>Home Page</h1>
-    </div>
+    </AppLayout>
   );
 };
 

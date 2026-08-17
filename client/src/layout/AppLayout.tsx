@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import ColourModeDropdown from "../theme/ColourModeDropdown";
 import { ReactNode } from "react";
+import { ApplicationShell1 } from "@/components/application-shell1";
 
 interface Props {
   children: ReactNode;
@@ -9,7 +10,7 @@ interface Props {
 const AppLayout = ({ children }: Props) => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <ColourModeDropdown />
+      <ApplicationShell1 />
 
       <Box
         component="main"

@@ -135,7 +135,7 @@ const sidebarData: SidebarData = {
         {
           label: "Dashboard",
           icon: LayoutDashboard,
-          href: "",
+          href: "/",
           isActive: true,
         },
       ],

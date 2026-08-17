@@ -5,7 +5,7 @@ import { ApplicationShell1 } from "@/components/application-shell1";
 const Login = () => {
   return (
     <AppLayout>
-      <ApplicationShell1 />
+      <AuthCard />
     </AppLayout>
   );
 };
