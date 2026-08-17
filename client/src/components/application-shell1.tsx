@@ -1,25 +1,14 @@
 "use client";
 
 import {
-  BadgeCheck,
-  BarChart3,
-  Briefcase,
   Gamepad,
   ChevronRight,
   ChevronsUpDown,
-  ClipboardList,
-  Clock3,
-  FileText,
-  Folder,
-  Globe2,
   HelpCircle,
   LayoutDashboard,
   LogOut,
   Settings,
-  Sparkles,
-  Star,
   User,
-  Users,
   BookText,
 } from "lucide-react";
 import * as React from "react";
@@ -68,9 +57,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import AuthCard from "@/components/auth-card";
 import { useChangeActions, useShow } from "@/stores/loginStore";
+import { useLocation } from "react-router-dom";
 
 // Base nav item - used by simple sidebars
 type NavItem = {
@@ -305,7 +293,6 @@ const NavUser = ({ user }: { user: UserData }) => {
 };
 
 const NoUser = () => {
-  const show = useShow();
   const { changeShow } = useChangeActions();
 
   return (
@@ -321,7 +308,7 @@ const NoUser = () => {
               />
             }
           >
-            Sign in {show ? "showing" : "not showing"}
+            Sign in
           </DropdownMenuTrigger>
         </DropdownMenu>
       </SidebarMenuItem>
@@ -363,9 +350,25 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
 
 interface ApplicationShell1Props {
   className?: string;
+  children: React.ReactNode;
 }
 
-export function ApplicationShell1({ className }: ApplicationShell1Props) {
+export function ApplicationShell1({
+  className,
+  children,
+}: ApplicationShell1Props) {
+  const location = useLocation().pathname;
+  const breadcrumb = {
+    parent: "Overview",
+    current: "Dashboard",
+  };
+  if (location === "/about") {
+    breadcrumb.parent = "About";
+    breadcrumb.current = "Rules";
+  } else if (location === "/login") {
+    breadcrumb.parent = "User";
+    breadcrumb.current = "Sign in";
+  }
   return (
     <SidebarProvider className={cn(className)}>
       <AppSidebar />
@@ -382,18 +385,18 @@ export function ApplicationShell1({ className }: ApplicationShell1Props) {
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="#">Overview</BreadcrumbLink>
+                <BreadcrumbLink href={location}>
+                  {breadcrumb.parent}
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                <BreadcrumbPage>{breadcrumb.current}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

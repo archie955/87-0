@@ -3,6 +3,7 @@ import { useUserActions } from "./stores/userStore";
 import ErrorBoundary from "./ErrorBoundary";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Rules from "./pages/Rules";
 import "@/index.css";
 import Notification from "@/components/Notification";
 import { Route, Routes } from "react-router-dom";
@@ -21,8 +22,9 @@ const App = () => {
       </ErrorBoundary>
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/about" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<Rules />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </ErrorBoundary>
     </div>
