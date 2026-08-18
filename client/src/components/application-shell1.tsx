@@ -57,7 +57,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useChangeActions } from "@/stores/loginStore";
 import { useLocation } from "react-router-dom";
 
 // Base nav item - used by simple sidebars
@@ -297,9 +296,7 @@ const NoUser = () => {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <SidebarMenuSubButton
-            render={<a href="/login">Sign in</a>}
-          />
+          <SidebarMenuSubButton render={<a href="/login">Sign in</a>} />
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

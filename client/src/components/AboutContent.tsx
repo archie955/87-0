@@ -1,22 +1,17 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, Atom, Clapperboard, Columns3 } from "lucide-react";
 import SpanList from "./ui/span-list";
 
 const AboutContent = () => {
   return (
     <section className="min-h-screen overflow-hidden bg-linear-to-br dark:from-neutral-800 from-slate-50 to-blue-50 dark:to-neutral-950">
       <div className="py-20 relative flex flex-col justify-center items-center gap-y-8 z-10">
-        <span>RULES</span>
+        <span>HOW TO PLAY</span>
         <span className="text-6xl max-w-3xl mx-auto text-center font-medium">
-          How to play CS-ACE
+          CS-ACE
         </span>
         <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-          Get rolled a random team, pick a player, then repeat until you have a full team with genuine roles. Pick the IGL, and submit to get your score.
+          Build the best lineup you can
         </p>
-        <Button className="flex gap-2 items-center border-2 backdrop-blur-md border-black rounded-full p-2 px-3 cursor-pointer">
-          Scroll Down For In Depth Rules <ChevronDown />
-        </Button>
         <div className="absolute bottom-0 left-0 right-0 top-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-size-[48px_50px] mask-[radial-gradient(ellipse_25%_30%_at_50%_50%,#000_65%,transparent_110%)]"></div>
       </div>
 
@@ -27,7 +22,9 @@ const AboutContent = () => {
           </h2>
           <div className="">
             <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-              Get rolled a random team, pick a player, then repeat until you have a full team with genuine roles. Pick the IGL, and submit to get your score.
+              Get rolled a random team, pick a player, then repeat until you
+              have a full team with genuine roles. Pick the IGL, and submit to
+              get your score.
             </p>
           </div>
         </div>
@@ -37,10 +34,15 @@ const AboutContent = () => {
           </h2>
           <div className="">
             <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-              The teams contain the current players and their actual positions, as per the data from HLTV writer Harry Richards,
-              who amazingly publishes an up-to-date dataset of active teams and player roles, map positions, etc, located <a
-              style={{ "color": "blue" }} 
-              href={"https://public.tableau.com/app/profile/harry.richards4213/viz/PositionsDatabaseNER0cs/PositionsDatabaseNER0cs"}
+              The teams contain the current players and their actual positions,
+              as per the data from HLTV writer Harry Richards, who amazingly
+              publishes an up-to-date dataset of active teams and player roles,
+              map positions, etc, located{" "}
+              <a
+                style={{ color: "blue" }}
+                href={
+                  "https://public.tableau.com/app/profile/harry.richards4213/viz/PositionsDatabaseNER0cs/PositionsDatabaseNER0cs"
+                }
               >
                 here.
               </a>
@@ -53,11 +55,18 @@ const AboutContent = () => {
           </h2>
           <div className="">
             <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-              Players scores are their HLTV scores over a recent timespan at big events, as defined per HLTV. These events include most international LANs where you would
-              expect to see at least a few tier 1 teams compete. The players must be picked in their actual positions. This is to preserve simplicity, as adding adaptive positions
-              makes it near impossible to workout scoring. Attempting to predict a players ability in another role quantitatively isn't particularly possible as all statistics
-              are far too dependent on the role they actively play. IGL's is not considered a position, but all players receive an IGL bonus depending on their teams
-              performance with them IGLing. Obviously this means players that have never IGLed receive no bonus. More on that below.
+              Players scores are their HLTV scores over a recent timespan at big
+              events, as defined per HLTV. These events include most
+              international LANs where you would expect to see at least a few
+              tier 1 teams compete. The players must be picked in their actual
+              positions. This is to preserve simplicity, as adding adaptive
+              positions makes it near impossible to workout scoring. Attempting
+              to predict a players ability in another role quantitatively isn't
+              particularly possible as all statistics are far too dependent on
+              the role they actively play. IGL's is not considered a position,
+              but all players receive an IGL bonus depending on their teams
+              performance with them IGLing. Obviously this means players that
+              have never IGLed receive no bonus. More on that below.
             </p>
           </div>
         </div>
@@ -72,8 +81,9 @@ const AboutContent = () => {
               <SpanList>An AWPer</SpanList>
               <SpanList>A Closer</SpanList>
               <SpanList>A Support</SpanList>
-              Then the final player is a flex position, they can have any role. I have elected to go with Support as the
-              final position over Anchor for T side consistency.
+              Then the final player is a flex position, they can have any role.
+              I have elected to go with Support as the final position over
+              Anchor for T side consistency.
             </p>
           </div>
         </div>
@@ -83,9 +93,12 @@ const AboutContent = () => {
           </h2>
           <div className="">
             <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-              IGL's have their regular position, such as Opener, for which they are picked. You can pick no actual IGLs, or multiple. Once all five players have been chosen,
-              you can elect one of them the IGL, where they receive an IGL bonus. This is often worth it, especially for top IGLs such as karrigan, apEX, FalleN, and Aleksib,
-              who are some of the best overall players to pick.
+              IGL's have their regular position, such as Opener, for which they
+              are picked. You can pick no actual IGLs, or multiple. Once all
+              five players have been chosen, you can elect one of them the IGL,
+              where they receive an IGL bonus. This is often worth it,
+              especially for top IGLs such as karrigan, apEX, FalleN, and
+              Aleksib, who are some of the best overall players to pick.
             </p>
           </div>
         </div>
@@ -95,22 +108,43 @@ const AboutContent = () => {
           </h2>
           <div className="">
             <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
-              The IGL bonus follows similar logic to discussions I (the app creator) had with people about assessing football managers. Generally, four criteria seem to matter:
-              <SpanList>General performance considering duration of career</SpanList>
-              <SpanList>How many different teams/systems they have managed to win with</SpanList>
+              The IGL bonus follows similar logic to discussions I (the app
+              creator) had with people about assessing football managers.
+              Generally, four criteria seem to matter:
+              <SpanList>
+                General performance considering duration of career
+              </SpanList>
+              <SpanList>
+                How many different teams/systems they have managed to win with
+              </SpanList>
               <SpanList>Player development under them</SpanList>
               <SpanList>Cannot remember</SpanList>
-              The last two appear to be far more on the coaching than the IGL, so were ignored. The first two, however, form the basis of the score. The performance is a
-              weighted average depending on placement at each big event they have IGLed at. It is not a pure mean or a median, but an average over a reduced power
-              of the total number of tournaments. This is to avoid two scenarios that seem equally unpleasant. First, just rewarding a number of points depending on placement
-              for each tournament now rewards longevity too much. Mediocrity over a decade would be as good as top quality IGLing for 5 years, which feels wrong. Likewise just
-              doing a standard average would reward short but strong careers but punish a player who has perhaps laboured away for years in low performing teams before achieving
-              success. Also wrong feeling, so a middle ground has been attempted.
-
-              The second criteria is based off of the simple idea that an IGL could make a single good system with a single good team and win lots of tournaments, without
-              necessarily being any better than a less winningest IGL who has ultimately had to reinvent their team/teams multiple times. Pep and Zidane have both won everything as
-              managers, and both have 3 champions leagues as manager, yet which is more impressive, the same Madrid team winning 3 with Zidane or Pep winning with his with two
-              completely different teams?
+              The last two appear to be far more on the coaching than the IGL,
+              so were ignored. The first two, however, form the basis of the
+              score. The performance is a weighted average depending on
+              placement at each big event they have IGLed at. It is not a pure
+              mean or a median, but an average over a reduced power of the total
+              number of tournaments. This is to avoid two scenarios that seem
+              equally unpleasant. First, just rewarding a number of points
+              depending on placement for each tournament now rewards longevity
+              too much. Mediocrity over a decade would be as good as top quality
+              IGLing for 5 years, which feels wrong. Likewise just doing a
+              standard average would reward short but strong careers but punish
+              a player who has perhaps laboured away for years in low performing
+              teams before achieving success. Also wrong feeling, so a middle
+              ground has been attempted.
+            </p>
+            <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
+              The second criteria is based off of the simple idea that an IGL
+              could make a single good system with a single good team and win
+              lots of tournaments, without necessarily being any better than a
+              less winningest IGL who has ultimately had to reinvent their
+              team/teams multiple times. Pep and Zidane have both won 3
+              champions leagues as manager, yet which is more impressive? The
+              same Madrid team winning 3 with Zidane or Pep winning with his
+              with two completely different teams? As such, the number of unique
+              players that a player has IGLed to winning a big event contributes
+              to the score.
             </p>
           </div>
         </div>

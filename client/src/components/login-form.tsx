@@ -126,7 +126,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                   underline="always"
                   sx={{ ml: 1 }}
                 >
-                  Login
+                  Register
                 </Link>
               </FieldDescription>
             </FieldGroup>
