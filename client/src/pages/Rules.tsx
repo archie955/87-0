@@ -1,9 +1,10 @@
 import AppLayout from "@/layout/AppLayout";
+import AboutContent from "@/components/AboutContent";
 
 const Rules = () => {
   return (
     <AppLayout>
-      <h1>Rules Page</h1>
+      <AboutContent />
     </AppLayout>
   );
 };
