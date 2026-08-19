@@ -1,11 +1,11 @@
-import api from "./api";
+import api from "@/services/api";
 import {
   Credentials,
   UserReturned,
   TokenReturned,
   RegisterUser,
   UpdatedUser,
-} from "../types/userTypes";
+} from "@/types/userTypes";
 
 const createAccount = async (
   credentials: RegisterUser,

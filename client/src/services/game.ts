@@ -1,5 +1,5 @@
-import api from "./api";
-import { Game } from "../types/gameTypes";
+import api from "@/services/api";
+import { Game } from "@/types/gameTypes";
 
 const baseUrl = "/games";
 

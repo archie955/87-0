@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import loginService from "../services/user";
-import persistentUserService from "../services/persistentUser";
+import loginService from "@/services/user";
+import persistentUserService from "@/services/persistentUser";
 import {
   Credentials,
   PersistentUser,
   RegisterUser,
   UpdatedUser,
-} from "../types/userTypes";
+} from "@/types/userTypes";
 
 interface UserAction {
   create: (credentials: RegisterUser) => Promise<void>;

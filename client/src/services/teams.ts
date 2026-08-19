@@ -1,5 +1,5 @@
-import { Teams } from "../types/teamTypes";
-import api from "./api";
+import { Teams } from "@/types/teamTypes";
+import api from "@/services/api";
 
 const baseUrl = "/teams";
 

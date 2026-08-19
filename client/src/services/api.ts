@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import useUserStore from "../stores/userStore";
+import useUserStore from "@/stores/userStore";
 
 const api: AxiosInstance = axios.create({
   baseURL: "/api",
