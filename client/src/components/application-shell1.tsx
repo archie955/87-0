@@ -123,7 +123,7 @@ const sidebarData: SidebarData = {
           label: "Dashboard",
           icon: LayoutDashboard,
           href: "/",
-          isActive: true,
+          isActive: false,
         },
       ],
     },
@@ -135,13 +135,21 @@ const sidebarData: SidebarData = {
           label: "Rules",
           icon: BookText,
           href: "/about",
+          isActive: false,
         },
       ],
     },
     {
       title: "Play",
       defaultOpen: true,
-      items: [{ label: "Build", icon: Gamepad, href: "#" }],
+      items: [
+        {
+          label: "Build",
+          icon: Gamepad,
+          href: "#",
+          isActive: false,
+        },
+      ],
     },
   ],
   footerGroup: {
@@ -173,13 +181,16 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
 const NavMenuItem = ({ item }: { item: NavItem }) => {
   const Icon = item.icon;
   const hasChildren = item.children && item.children.length > 0;
+  const changeActive = (item: NavItem) => {
+    item.isActive = true;
+  };
 
   if (!hasChildren) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={item.isActive}
-          render={<a href={item.href} />}
+          render={<a href={item.href} onClick={() => changeActive(item)} />}
         >
           <Icon className="size-4" />
           <span>{item.label}</span>
@@ -195,7 +206,12 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
       render={<SidebarMenuItem />}
     >
       <CollapsibleTrigger
-        render={<SidebarMenuButton isActive={item.isActive} />}
+        render={
+          <SidebarMenuButton
+            isActive={item.isActive}
+            onClick={() => changeActive(item)}
+          />
+        }
       >
         <Icon className="size-4" />
         <span>{item.label}</span>
@@ -206,8 +222,10 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
           {item.children!.map((child) => (
             <SidebarMenuSubItem key={child.label}>
               <SidebarMenuSubButton
-                isActive={child.isActive}
-                render={<a href={child.href} />}
+                isActive={item.isActive}
+                render={
+                  <a href={child.href} onClick={() => changeActive(item)} />
+                }
               >
                 {child.label}
               </SidebarMenuSubButton>

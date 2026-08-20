@@ -1,9 +1,10 @@
 import AppLayout from "@/layout/AppLayout";
+import DashboardContent from "@/components/DashboardContent";
 
 const Home = () => {
   return (
     <AppLayout>
-      <h1>Home Page</h1>
+      <DashboardContent />
     </AppLayout>
   );
 };

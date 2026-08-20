@@ -1,5 +1,5 @@
 "use client";
-import SpanList from "./ui/span-list";
+import SpanList from "@/components/ui/span-list";
 
 const AboutContent = () => {
   return (
