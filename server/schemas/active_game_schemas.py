@@ -17,18 +17,14 @@ class Game(BaseModel):
     model_config = config
 
 
-class GamePlayer(Player):
-    igl: bool
-    model_config = config
-
-
 class GameResult(BaseModel):
     game_id: int
-    player_1: GamePlayer
-    player_2: GamePlayer
-    player_3: GamePlayer
-    player_4: GamePlayer
-    player_5: GamePlayer
+    player_1: Player
+    player_2: Player
+    player_3: Player
+    player_4: Player
+    player_5: Player
+    igl: int
 
 
 class ReducedGamePlayer(BaseModel):

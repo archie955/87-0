@@ -7,6 +7,7 @@ import Rules from "@/pages/Rules";
 import "@/index.css";
 import Notification from "@/components/Notification";
 import { Route, Routes } from "react-router-dom";
+import Game from "./pages/Game";
 
 const App = () => {
   const { init } = useUserActions();
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<Rules />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/game" element={<Game />} />
         </Routes>
       </ErrorBoundary>
     </div>

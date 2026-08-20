@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type Severity = "success" | "info" | "warning" | "error";
 
-interface NotificationAction {
+export interface NotificationAction {
   setNotification: (message: string, severity: Severity) => void;
   manualClose: () => void;
 }

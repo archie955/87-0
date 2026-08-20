@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import gameService from "@/services/game";
 import { Game } from "@/types/gameTypes";
 
-interface useGameResult {
+export interface useGameResult {
   game: Game;
   isPending: boolean;
 }

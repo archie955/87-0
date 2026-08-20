@@ -1,6 +1,6 @@
 import pytest
 
-from tests.game_helpers import play_game, play_game_multi_igl, play_game_switch_team
+from tests.game_helpers import play_game, play_game_switch_team, play_game_wrong_igl
 
 
 @pytest.mark.asyncio
@@ -119,8 +119,8 @@ async def test_frontend_state_edit_no_effect(auth_client_seed):
 
 
 @pytest.mark.asyncio
-async def test_play_game_multi_igl(auth_client_seed):
-    jsn = await play_game_multi_igl(auth_client_seed)
+async def test_play_game_wrong_igl(auth_client_seed):
+    jsn = await play_game_wrong_igl(auth_client_seed)
 
     response = await auth_client_seed.post(f"/games/{jsn['game_id']}/user", json=jsn)
 

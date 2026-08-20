@@ -76,64 +76,23 @@ async def validate_game(
     ):
         raise InvalidGameLineup(id=5, reason="wrong team")
 
-    igl = False
+    ids = {player_1.id, player_2.id, player_3.id, player_4.id, player_5.id}
 
-    if game.player_1.igl:
-        if igl:
-            raise InvalidGameLineup(id=1, reason="igl")
-        igl = True
+    if game.igl not in ids:
+        raise InvalidGameLineup(id=game.igl, reason="igl")
 
-    if game.player_2.igl:
-        if igl:
-            raise InvalidGameLineup(id=2, reason="igl")
-        igl = True
+    players = [player_1, player_2, player_3, player_4, player_5]
+    player_schema = []
 
-    if game.player_3.igl:
-        if igl:
-            raise InvalidGameLineup(id=3, reason="igl")
-        igl = True
+    for p in players:
+        igl = game.igl == p.id
+        score = p.hltv + p.igl_bonus if igl else p.hltv
+        ps = active_game_schemas.ReducedGamePlayer(
+            id=p.id, role=p.role, score=score, igl=igl
+        )
+        player_schema.append(ps)
 
-    if game.player_4.igl:
-        if igl:
-            raise InvalidGameLineup(id=4, reason="igl")
-        igl = True
-
-    if game.player_5.igl:
-        if igl:
-            raise InvalidGameLineup(id=5, reason="igl")
-        igl = True
-
-    if not igl:
-        raise
-
-    s = player_1.hltv + player_1.igl_bonus if game.player_1.igl else player_1.hltv
-    p1 = active_game_schemas.ReducedGamePlayer(
-        id=player_1.id, role=player_1.role, score=s, igl=game.player_1.igl
-    )
-
-    s = player_2.hltv + player_2.igl_bonus if game.player_2.igl else player_2.hltv
-    p2 = active_game_schemas.ReducedGamePlayer(
-        id=player_2.id, role=player_2.role, score=s, igl=game.player_2.igl
-    )
-
-    s = player_3.hltv + player_3.igl_bonus if game.player_3.igl else player_3.hltv
-    p3 = active_game_schemas.ReducedGamePlayer(
-        id=player_3.id, role=player_3.role, score=s, igl=game.player_3.igl
-    )
-
-    s = player_4.hltv + player_4.igl_bonus if game.player_4.igl else player_4.hltv
-    p4 = active_game_schemas.ReducedGamePlayer(
-        id=player_4.id, role=player_4.role, score=s, igl=game.player_4.igl
-    )
-
-    s = player_5.hltv + player_5.igl_bonus if game.player_5.igl else player_5.hltv
-    p5 = active_game_schemas.ReducedGamePlayer(
-        id=player_5.id, role=player_5.role, score=s, igl=game.player_5.igl
-    )
-
-    players = [p1, p2, p3, p4, p5]
-
-    return active_game_schemas.GameList(players=players)
+    return active_game_schemas.GameList(players=player_schema)
 
 
 def valid_lineup(game: active_game_schemas.GameList) -> bool:
