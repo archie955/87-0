@@ -29,7 +29,7 @@ services:
       timeout: 5s
       retries: 3
     env_file:
-      - ./.env.dev
+      - ".env.dev"
     container_name: server
     depends_on:
       db:

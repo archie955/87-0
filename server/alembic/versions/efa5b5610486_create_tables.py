@@ -87,7 +87,7 @@ def upgrade() -> None:
     )
 
     op.create_table(
-        "players",
+        "player",
         sa.Column(
             "id",
             sa.Integer,
@@ -172,14 +172,16 @@ def upgrade() -> None:
         ),
     )
 
-    (op.create_index("ix_player_name", "player", ["name"]),)
-    (op.create_index("ix_player_team_id", "player", ["team_id"]),)
-    (op.create_index("ix_player_role", "player", ["role"]),)
+    op.create_index("ix_player_name", "player", ["name"])
+    op.create_index("ix_player_team_id", "player", ["team_id"])
+    op.create_index("ix_player_role", "player", ["role"])
     op.create_unique_constraint("uq_player_name_team", "player", ["name", "team_id"])
 
     op.create_table(
         "active_game",
-        sa.Column("id", primary_key=True, autoincrement=True, nullable=False),
+        sa.Column(
+            "id", sa.Integer, primary_key=True, autoincrement=True, nullable=False
+        ),
         sa.Column("team_1_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
         sa.Column("team_2_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
         sa.Column("team_3_id", sa.Integer, sa.ForeignKey("team.id"), nullable=False),
