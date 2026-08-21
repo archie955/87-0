@@ -146,7 +146,7 @@ const sidebarData: SidebarData = {
         {
           label: "Build",
           icon: Gamepad,
-          href: "#",
+          href: "/game",
           isActive: false,
         },
       ],

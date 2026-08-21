@@ -1,11 +1,7 @@
 import { create } from "zustand";
 import { Player } from "@/types/playerTypes";
 import { Result } from "@/types/resultTypes";
-import {
-  useNotificationActions,
-  NotificationAction,
-} from "@/stores/notificationStore";
-import { Roles } from "@/services/enum";
+import { LineupRole, lineupRoles, Roles } from "@/services/enum";
 import gameService from "@/services/game";
 import { Lineup } from "@/types/gameTypes";
 
@@ -15,6 +11,7 @@ interface TeamActions {
   selectAwper: (player: Player) => void;
   selectSupport: (player: Player) => void;
   selectIgl: (p: Pick) => void;
+  compatibility: (p: Player) => LineupRole[];
   submit: (id: number) => Promise<Result | void>;
 }
 
@@ -25,7 +22,6 @@ interface TeamState {
   support: Player | null;
   flex: Player | null;
   igl: number | null;
-  note: NotificationAction;
   actions: TeamActions;
 }
 
@@ -44,19 +40,15 @@ const useTeamStore = create<TeamState>((set, get) => ({
   support: null,
   flex: null,
   igl: null,
-  note: useNotificationActions(),
   actions: {
     selectOpener: (player: Player) => {
       set((state) => {
         if (player.role !== Roles.OPENER) {
-          state.note.setNotification("This pick is invalid", "warning");
           return state;
         } else if (!state.opener) {
           state.opener = player;
         } else if (!state.flex) {
           state.flex = player;
-        } else {
-          state.note.setNotification("This role is already filled", "warning");
         }
         return state;
       });
@@ -64,14 +56,11 @@ const useTeamStore = create<TeamState>((set, get) => ({
     selectCloser: (player: Player) => {
       set((state) => {
         if (player.role !== Roles.CLOSER) {
-          state.note.setNotification("This pick is invalid", "warning");
           return state;
         } else if (!state.closer) {
           state.closer = player;
         } else if (!state.flex) {
           state.flex = player;
-        } else {
-          state.note.setNotification("This role is already filled", "warning");
         }
         return state;
       });
@@ -79,14 +68,11 @@ const useTeamStore = create<TeamState>((set, get) => ({
     selectAwper: (player: Player) => {
       set((state) => {
         if (player.role !== Roles.AWPER) {
-          state.note.setNotification("This pick is invalid", "warning");
           return state;
         } else if (!state.awper) {
           state.awper = player;
         } else if (!state.flex) {
           state.flex = player;
-        } else {
-          state.note.setNotification("This role is already filled", "warning");
         }
         return state;
       });
@@ -94,14 +80,11 @@ const useTeamStore = create<TeamState>((set, get) => ({
     selectSupport: (player: Player): void => {
       set((state) => {
         if (player.role !== Roles.SUPPORT) {
-          state.note.setNotification("This pick is invalid", "warning");
           return state;
         } else if (!state.support) {
           state.support = player;
         } else if (!state.flex) {
           state.flex = player;
-        } else {
-          state.note.setNotification("This role is already filled", "warning");
         }
         return state;
       });
@@ -114,6 +97,35 @@ const useTeamStore = create<TeamState>((set, get) => ({
         }
         return state;
       });
+    },
+    compatibility: (p: Player): LineupRole[] => {
+      const roles = [];
+      switch (p.role) {
+        case Roles.AWPER:
+          if (!get().awper) {
+            roles.push(lineupRoles.awper);
+          }
+          break;
+        case Roles.OPENER:
+          if (!get().opener) {
+            roles.push(lineupRoles.opener);
+          }
+          break;
+        case Roles.CLOSER:
+          if (!get().closer) {
+            roles.push(lineupRoles.closer);
+          }
+          break;
+        case Roles.SUPPORT:
+          if (!get().support) {
+            roles.push(lineupRoles.support);
+          }
+          break;
+      }
+      if (!get().flex) {
+        roles.push(lineupRoles.flex);
+      }
+      return roles;
     },
     submit: async (id: number): Promise<Result | void> => {
       const player_1 = get().opener;
@@ -130,7 +142,6 @@ const useTeamStore = create<TeamState>((set, get) => ({
         !player_5 ||
         !igl
       ) {
-        get().note.setNotification("Invalid lineup", "error");
         return;
       }
       const lineup: Lineup = {

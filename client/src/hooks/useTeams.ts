@@ -12,7 +12,7 @@ const useTeams = (): useTeamsResult => {
     queryKey: ["teams"],
     queryFn: teamService.getTeams,
     refetchOnWindowFocus: false,
-    initialData: {},
+    initialData: <Teams>{},
   });
 
   return {

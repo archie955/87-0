@@ -1,9 +1,10 @@
 import AppLayout from "@/layout/AppLayout";
+import TeamSelect from "@/components/TeamSelect";
 
 const Game = () => {
   return (
     <AppLayout>
-      <h1>Test</h1>
+      <TeamSelect />
     </AppLayout>
   );
 };

@@ -5,4 +5,13 @@ export const Roles = {
   SUPPORT: "Support",
 } as const;
 
+export const lineupRoles = {
+  opener: "opener",
+  closer: "closer",
+  awper: "awper",
+  support: "support",
+  flex: "flex",
+};
+
 export type Role = (typeof Roles)[keyof typeof Roles];
+export type LineupRole = (typeof lineupRoles)[keyof typeof lineupRoles];
