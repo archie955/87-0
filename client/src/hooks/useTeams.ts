@@ -3,7 +3,7 @@ import teamService from "@/services/teams";
 import { Teams } from "@/types/teamTypes";
 
 interface useTeamsResult {
-  teams: Teams | Record<string, never>;
+  teams: Teams;
   isPending: boolean;
 }
 
