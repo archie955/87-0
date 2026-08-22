@@ -37,6 +37,12 @@ class User(Base, Name, TimeStamps):
     best_score: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=True)
 
 
+class Team(Base, Name, TimeStamps):
+    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+
+    players: Mapped[list["Player"]] = relationship(back_populates="team")
+
+
 class Player(Base, Name, TimeStamps):
     __table_args__ = (
         Index("ix_player_name", "name"),
@@ -71,12 +77,6 @@ class Player(Base, Name, TimeStamps):
     win_teammates: Mapped[int] = mapped_column(Integer, nullable=False)
 
     team: Mapped["Team"] = relationship(back_populates="players")
-
-
-class Team(Base, Name, TimeStamps):
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
-
-    players: Mapped[list["Player"]] = relationship(back_populates="team")
 
 
 class Active_Game(Base, Name):
