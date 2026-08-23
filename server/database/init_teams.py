@@ -1,6 +1,9 @@
 from pathlib import Path
 
-import polars as pl
+import pandas as pd
+
+from database.database import AsyncSessionLocal
+from models.models import Team
 
 """
 IGL Bonus is calculated as:
@@ -9,6 +12,15 @@ IGL Bonus is calculated as:
 DATA_DIR = Path(__file__).parent
 
 
-def process_teams():
-    teams = pl.read_csv(DATA_DIR / "teams.csv")
-    return teams
+async def process_teams():
+    teams = pd.read_csv(DATA_DIR / "teams.csv")
+
+    async with AsyncSessionLocal() as db:
+        teams = teams.to_dict(orient="records")
+        filtered_data = [{"name": row.get("name")} for row in teams]
+
+        for item in filtered_data:
+            db.add(Team(**item))
+
+        await db.commit()
+    return {"status": "success"}
