@@ -56,9 +56,9 @@ class Player(Base, Name, TimeStamps):
 
     team_id: Mapped[int] = mapped_column(Integer, ForeignKey("team.id"), nullable=False)
 
-    hltv: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
+    hltv: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
 
-    igl_bonus: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=False)
+    igl_bonus: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
 
     majors: Mapped[int] = mapped_column(Integer, nullable=False)
 

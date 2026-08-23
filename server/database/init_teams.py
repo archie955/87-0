@@ -17,10 +17,9 @@ async def process_teams():
 
     async with AsyncSessionLocal() as db:
         teams = teams.to_dict(orient="records")
-        filtered_data = [{"name": row.get("name")} for row in teams]
 
-        for item in filtered_data:
-            db.add(Team(**item))
+        for team in teams:
+            db.add(Team(**team))
 
         await db.commit()
     return {"status": "success"}

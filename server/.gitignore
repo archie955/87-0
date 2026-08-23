@@ -19,8 +19,5 @@ wheels/
 notes.md
 old_ml
 
-# CSVs
-**/*.csv
-
 data
 redis_temp

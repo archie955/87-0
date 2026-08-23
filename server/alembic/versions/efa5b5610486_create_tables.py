@@ -102,7 +102,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "role",
-            sa.ARRAY(roles),
+            roles,
             nullable=False,
         ),
         sa.Column(
@@ -113,10 +113,10 @@ def upgrade() -> None:
         ),
         sa.Column(
             "hltv",
-            sa.DECIMAL(3, 2),
+            sa.DECIMAL(4, 2),
             nullable=False,
         ),
-        sa.Column("igl_bonus", sa.Integer, nullable=False),
+        sa.Column("igl_bonus", sa.DECIMAL(4, 2), nullable=False),
         sa.Column(
             "majors",
             sa.Integer,

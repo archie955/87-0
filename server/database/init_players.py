@@ -1,7 +1,8 @@
+import asyncio
 from pathlib import Path
 
 import numpy as np
-import polars as pl
+import pandas as pd
 from sqlalchemy import select
 
 from database.database import AsyncSessionLocal
@@ -16,68 +17,73 @@ DATA_DIR = Path(__file__).parent
 
 
 async def process_players():
-    players = pl.read_csv(DATA_DIR / "players.csv")  # contains all igl data too
+    players = pd.read_csv(DATA_DIR / "players.csv")  # contains all igl data too
 
-    players = players.with_columns(pl.col("role").replace("Opener", Roles.OPENER))
-    players = players.with_columns(pl.col("role").replace("Closer", Roles.CLOSER))
-    players = players.with_columns(pl.col("role").replace("AWPer", Roles.AWPER))
-    players = players.with_columns(pl.col("role").replace("Support", Roles.SUPPORT))
+    players["role"] = players["role"].replace(
+        {
+            "Opener": Roles.OPENER,
+            "Closer": Roles.CLOSER,
+            "AWPer": Roles.AWPER,
+            "Support": Roles.SUPPORT,
+        }
+    )
 
-    players = players.with_columns(
+    players["igl_bonus"] = np.where(
+        players["no_events"] > 0,
         (
             (
                 (
-                    4 * pl.col("wins")
-                    + 3 * pl.col("second")
-                    + 2 * pl.col("semi")
-                    + pl.col("quarter")
+                    8 * players["win"]
+                    + 4 * players["second"]
+                    + 2 * players["semi"]
+                    + players["quarter"]
                 )
-                / np.sqrt(pl.col("total_tournaments"))
+                / (750 * np.log(players["no_events"]))
             )
-            + (np.sqrt(pl.col("win_teammates")) / 10)
-        ).alias("igl_bonus")
+            + (np.sqrt(players["no_teammates"]) / 7.5)
+            + (np.sqrt(players["no_major_teammates"]) / 90)
+        )
+        / 1.3,
+        0.0,
     )
-
-    players = players.to_pandas()
 
     async with AsyncSessionLocal() as db:
         teams = (await db.execute(select(models.Team))).scalars().all()
-        team_map = {}
-        for t in teams:
-            team_map[t.name] = t.id
 
-        players["team_id"] = team_map[players["team"]]
+        team_map = {team.name: team.id for team in teams}
 
-        unmatched = players.filter(pl.col("team_id").is_null())
+        players["team_id"] = players["team"].map(team_map)
+
+        unmatched = players.loc[players["team_id"].isna(), "team"].unique()
 
         if len(unmatched) > 0:
-            print(unmatched)
+            print(f"unmatched teams: {unmatched}")
             raise ValueError("Some players lack team id")
 
         players = players.drop(columns=["team"])
 
-        players = players.to_dict(orient="records")
-        filtered_data = [
-            {
-                "name": row.get("name"),
-                "team_id": row.get("team_id"),
-                "role": row.get("role"),
-                "hltv": row.get("hltv"),
-                "igl_bonus": row.get("igl_bonus"),
-                "major_wins": row.get("major_wins"),
-                "win": row.get("first"),
-                "second": row.get("second"),
-                "semi": row.get("semi"),
-                "quarter": row.get("quarter"),
-                "no_major_teammates": row.get("no_major_teammates"),
-                "no_teammates": row.get("no_teammates"),
-                "no_events": row.get("no_events"),
+        players = players.rename(
+            columns={
+                "major_wins": "majors",
+                "win": "wins",
+                "no_major_teammates": "major_teammates",
+                "no_teammates": "win_teammates",
+                "no_events": "total_tournaments",
             }
-            for row in players
-        ]
+        )
 
-        for item in filtered_data:
-            db.add(models.Player(**item))
+        players = players.to_dict(orient="records")
+
+        for player in players:
+            db.add(models.Player(**player))
 
         await db.commit()
     return {"status": "success"}
+
+
+def main():
+    asyncio.run(process_players())
+
+
+if __name__ == "__main__":
+    main()
