@@ -5,7 +5,7 @@ import { Teams, Team } from "@/types/teamTypes";
 import { LineupRole } from "@/services/enum";
 import { useState } from "react";
 import useTeamStore, { useTeamActions } from "@/stores/teamStore";
-import Example from "./carousel-standard-1";
+import TeamRoll from "./TeamRoll";
 
 const TeamSelect = () => {
   const { game, isPending: gamePending } = useGame();
@@ -68,7 +68,11 @@ const TeamSelect = () => {
     return compatibility(p);
   };
   console.log(teams);
-  return <Example />;
+  const slides = [];
+  for (let i = 1; i < 81; i++) {
+    slides.push(i);
+  }
+  return <TeamRoll slides={slides} winnerIndex={75} />;
 };
 
 export default TeamSelect;
