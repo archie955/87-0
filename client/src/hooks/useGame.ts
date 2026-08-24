@@ -3,7 +3,7 @@ import gameService from "@/services/game";
 import { Game } from "@/types/gameTypes";
 
 export interface useGameResult {
-  game: Game;
+  game: Game | undefined;
   isPending: boolean;
 }
 
@@ -12,7 +12,6 @@ const useGame = (): useGameResult => {
     queryKey: ["game"],
     queryFn: gameService.getGame,
     refetchOnWindowFocus: false,
-    initialData: <Game>{},
   });
 
   return {

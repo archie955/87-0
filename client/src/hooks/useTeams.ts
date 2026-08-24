@@ -3,7 +3,7 @@ import teamService from "@/services/teams";
 import { Teams } from "@/types/teamTypes";
 
 interface useTeamsResult {
-  teams: Teams;
+  teams: Teams | undefined;
   isPending: boolean;
 }
 
@@ -12,7 +12,6 @@ const useTeams = (): useTeamsResult => {
     queryKey: ["teams"],
     queryFn: teamService.getTeams,
     refetchOnWindowFocus: false,
-    initialData: <Teams>{},
   });
 
   return {
