@@ -41,6 +41,8 @@ class Helpers:
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data
+
+        # ruff: ignore[S105]
         assert data["token_type"] == "bearer"
         user["access_token"] = data["access_token"]
         return user
@@ -49,6 +51,7 @@ class Helpers:
     def auth_headers(user: dict[str, str], expired: bool = False) -> dict[str, str]:
         token = user["access_token"]
         if expired:
+            # ruff: ignore[S105]
             token = "expired_token"
         return {"Authorization": f"Bearer {token}"}
 

@@ -36,8 +36,8 @@ def decode_token(token: str) -> dict[str, Any]:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except jwt.exceptions.InvalidTokenError:
-        raise CREDENTIALS_EXCEPTION
+    except jwt.exceptions.InvalidTokenError as e:
+        raise CREDENTIALS_EXCEPTION from e
 
 
 def verify_access_token(token: str) -> token_schemas.TokenData:

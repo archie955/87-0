@@ -69,7 +69,7 @@ async def login(
     return user_schemas.UserToken(
         user=user_schemas.UserOut.model_validate(user),
         access_token=create_access_token(data=user_data),
-        token_type="bearer",
+        token_type="bearer",  # ruff: ignore[S106]
     )
 
 

@@ -23,7 +23,8 @@ class AuthClient:
     def auth_headers(self, expired: bool = False) -> dict[str, str]:
         token = self.user["access_token"]
         if expired:
-            token = "expired_token" # ruff: ignore[S105]
+            # ruff: ignore[S105]
+            token = "expired_token"
         return {"Authorization": f"Bearer {token}"}
 
     async def request(self, method: str, url: str, **kwargs: Any) -> Response:

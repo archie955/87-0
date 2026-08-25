@@ -38,11 +38,11 @@ async def engine() -> AsyncGenerator[AsyncEngine, None]:
 
 @pytest_asyncio.fixture(scope="function")
 async def db(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    SessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    session_local: async_sessionmaker[AsyncSession] = async_sessionmaker(
         bind=engine, class_=AsyncSession, expire_on_commit=False
     )
 
-    async with SessionLocal() as session:
+    async with session_local() as session:
         yield session
         await session.rollback()
 

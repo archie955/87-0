@@ -19,16 +19,26 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "httpx>=0.28.1",
-    "pytest-asyncio>=1.4.0",
-    "ruff>=0.15.18",
-    "ty>=0.0.51",
-    "pandas>=2.3.3",
+data = [
     "ipykernel>=7.3.0",
     "matplotlib>=3.11.1",
+    "pandas>=3.0.3",
     "seaborn>=0.13.2",
 ]
+dev = [
+    { include-group = "data" },
+    { include-group = "lint" },
+    { include-group = "test" },
+]
+lint = [
+    "pyrefly>=1.2.0",
+    "ruff>=0.15.18",
+]
+test = [
+    "httpx>=0.28.1",
+    "pytest-asyncio>=1.4.0",
+]
+
 
 
 [tool.ruff]
@@ -60,30 +70,39 @@ exclude = [
     "site-packages",
     "tavenv",
 ]
-
 line-length = 88
 indent-width = 4
-
 target-version = "py312"
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "N", "S", "ASYNC", "C90"]
-ignore = ["B008", "B904", "S101", "S105", "N806", "S106", "S311", "N801", "N818"]
 
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "S", "SIM", "UP", "ASYNC", "C90"]
+ignore = []
+preview = true
 fixable = ["ALL"]
 unfixable = []
-
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*.py" = [
+    "S101"
+]
+
+
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+
 
 [tool.ruff.format]
 quote-style = "double"
-
 indent-style = "space"
-
 skip-magic-trailing-comma = false
-
 line-ending = "auto"
-
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
@@ -92,3 +111,9 @@ docstring-code-line-length = "dynamic"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["."]
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]

@@ -100,6 +100,8 @@ async def test_login_email(client, helpers):
 
     assert "access_token" in data
     assert "best_score" in data["user"]
+
+    # ruff: ignore[S105]
     assert data["token_type"] == "bearer"
     assert data["user"]["email"] == user["email"]
     assert data["user"]["username"] == user["username"]
@@ -121,6 +123,7 @@ async def test_login_username(client, helpers):
 
     assert "access_token" in data
 
+    # ruff: ignore[S105]
     assert data["token_type"] == "bearer"
     assert data["user"]["email"] == user["email"]
     assert data["user"]["username"] == user["username"]

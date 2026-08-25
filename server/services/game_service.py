@@ -20,6 +20,7 @@ async def create_game(db: AsyncSession) -> active_game_schemas.Game:
 
     ids = {}
     for i in range(1, 7):
+        # ruff: ignore[S311]
         ids[f"team_{i}_id"] = teams[randint(0, n - 1)].id
 
     active_game = Active_Game(**ids)
