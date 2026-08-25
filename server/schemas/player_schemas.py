@@ -15,11 +15,11 @@ class Player(BaseModel):
     model_config = config
 
 
-class Team_Players(BaseModel):
+class TeamPlayers(BaseModel):
     players: list[Player]
     model_config = config
 
 
-class Alt_Team_Players(Team_Players):
+class AltTeamPlayers(TeamPlayers):
     team_id: int
     model_config = config

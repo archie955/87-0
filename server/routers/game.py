@@ -11,7 +11,7 @@ from services import game_service
 router = APIRouter(prefix="/games", tags=["Games"])
 
 
-@router.get(
+@router.post(
     "", status_code=status.HTTP_201_CREATED, response_model=active_game_schemas.Game
 )
 async def create_game(db: AsyncSession = Depends(get_db)):

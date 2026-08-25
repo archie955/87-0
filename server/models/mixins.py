@@ -8,8 +8,8 @@ class Name:
     """define table name and id primary key for all models that use this class"""
 
     @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()  # ty: ignore[unresolved-attribute]
+    def __tablename__(self) -> str:
+        return self.__name__.lower()  # ty: ignore[unresolved-attribute]
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True, nullable=False

@@ -21,17 +21,17 @@ logger = logging.getLogger(__name__)
 def redirect(url: str) -> RedirectResponse:
     steam = SteamLogin(url)
     logger.info("User redirected")
-    return steam.Redirect()
+    return steam.redirect()
 
 
 async def validate(db: AsyncSession, query_params: QueryParams):
     validator = SteamValidator()
-    steamID = validator.ValidateLogin(query_params)
+    steam_id = validator.validate_login(query_params)
 
-    if not steamID or not isinstance(steamID, str):
+    if not steam_id or not isinstance(steam_id, str):
         raise InvalidCredentialsError()
 
-    profile = validator.FetchDetails()
+    profile = validator.fetch_details()
 
     user = (
         await db.execute(

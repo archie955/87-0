@@ -56,13 +56,13 @@ class SteamLogin:
             "openid.return_to": home_url,
         }
 
-    def __createUrl(self) -> str:
+    def __create_url(self) -> str:
         return f"{BASEURL}?{urlencode(self.__params)}"
 
     # This redirects to steam.
     # Upon login it will send a request to the return_to url provided.
-    def Redirect(self) -> RedirectResponse:
-        url = self.__createUrl()
+    def redirect(self) -> RedirectResponse:
+        url = self.__create_url()
         response = RedirectResponse(
             url=url,
             status_code=status.HTTP_303_SEE_OTHER,
@@ -73,10 +73,10 @@ class SteamLogin:
 
 class SteamValidator:
     def __init__(self):
-        self.__validationParams = {}
+        self.__validation_params = {}
         self.__identity = None
 
-    def ValidateLogin(self, data) -> str | bool:
+    def validate_login(self, data) -> str | bool:
         string_params = (
             "openid.ns",
             "openid.mode",
@@ -94,11 +94,15 @@ class SteamValidator:
             val = data.get(param)
             if not val or not isinstance(val, str):
                 return False
-            self.__validationParams[param] = val
+            self.__validation_params[param] = val
 
-        self.__validationParams["openid.mode"] = "check_authentication"
+        self.__validation_params["openid.mode"] = "check_authentication"
 
-        response = requests.get(BASEURL, params=self.__validationParams).text
+        response = requests.get(
+            BASEURL,
+            params=self.__validation_params,
+            timeout=10
+        ).text
 
         validator = {}
 
@@ -123,9 +127,9 @@ class SteamValidator:
 
         return identity[p:]
 
-    def FetchDetails(self) -> Profile:
+    def fetch_details(self) -> Profile:
         params = {"key": KEY, "steamids": self.__identity}
-        response = requests.get(FETCHURL, params=params).json()
+        response = requests.get(FETCHURL, params=params, timeout=10).json()
 
         if not response.players or not response.players[0]:
             raise DataNotFoundError(datatype="user")

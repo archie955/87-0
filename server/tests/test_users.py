@@ -120,6 +120,7 @@ async def test_login_username(client, helpers):
     data = response.json()
 
     assert "access_token" in data
+
     assert data["token_type"] == "bearer"
     assert data["user"]["email"] == user["email"]
     assert data["user"]["username"] == user["username"]

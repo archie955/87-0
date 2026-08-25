@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import case
 
 from exceptions.app_exceptions import (
     DataNotFoundError,
@@ -27,61 +28,45 @@ async def validate_game(
     Explicitly, this checks that the 5 players exist in the database first. Then,
     It checks that the players are selected from the teams generated in the order
     generated. It then checks that there is one and only one igl listed."""
-    player_1 = (
-        await db.execute(select(Player).filter(Player.id == game.player_1.id))
-    ).scalar_one_or_none()
+    ids = [
+        game.player_1.id,
+        game.player_2.id,
+        game.player_3.id,
+        game.player_4.id,
+        game.player_5.id,
+    ]
+    ordering = case({id: index for index, id in enumerate(ids)}, value=Player.id)
+    players = (
+        (await db.execute(select(Player).filter(Player.id.in_(ids)).order_by(ordering)))
+        .scalars()
+        .all()
+    )
 
-    player_2 = (
-        await db.execute(select(Player).filter(Player.id == game.player_2.id))
-    ).scalar_one_or_none()
+    if not players or len(players) != 5:
+        raise DataNotFoundError(datatype="players")
 
-    player_3 = (
-        await db.execute(select(Player).filter(Player.id == game.player_3.id))
-    ).scalar_one_or_none()
-
-    player_4 = (
-        await db.execute(select(Player).filter(Player.id == game.player_4.id))
-    ).scalar_one_or_none()
-
-    player_5 = (
-        await db.execute(select(Player).filter(Player.id == game.player_5.id))
-    ).scalar_one_or_none()
-
-    if not (player_1 and player_2 and player_3 and player_4 and player_5):
-        raise DataNotFoundError(datatype="Players")
+    team_ids = [
+        active_game.team_1_id,
+        active_game.team_2_id,
+        active_game.team_3_id,
+        active_game.team_4_id,
+        active_game.team_5_id,
+        active_game.team_6_id,
+    ]
 
     skip = False
-    if player_1.team_id != active_game.team_1_id and not (
-        skip and player_1.team_id == active_game.team_2_id
-    ):
-        raise InvalidGameLineup(id=1, reason="wrong team")
-
-    if player_2.team_id != active_game.team_2_id and not (
-        skip and player_2.team_id == active_game.team_3_id
-    ):
-        raise InvalidGameLineup(id=2, reason="wrong team")
-
-    if player_3.team_id != active_game.team_3_id and not (
-        skip and player_3.team_id == active_game.team_4_id
-    ):
-        raise InvalidGameLineup(id=3, reason="wrong team")
-
-    if player_4.team_id != active_game.team_4_id and not (
-        skip and player_4.team_id == active_game.team_5_id
-    ):
-        raise InvalidGameLineup(id=4, reason="wrong team")
-
-    if player_5.team_id != active_game.team_5_id and not (
-        skip and player_5.team_id == active_game.team_6_id
-    ):
-        raise InvalidGameLineup(id=5, reason="wrong team")
-
-    ids = {player_1.id, player_2.id, player_3.id, player_4.id, player_5.id}
+    for i in range(5):
+        if players[i].team_id != team_ids[i] and not (
+            skip and players[i] == team_ids[i + 1]
+        ):
+            if players[i] == team_ids[i + 1]:
+                skip = True
+            else:
+                raise InvalidGameLineup(id=i, reason="wrong team")
 
     if game.igl not in ids:
         raise InvalidGameLineup(id=game.igl, reason="igl")
 
-    players = [player_1, player_2, player_3, player_4, player_5]
     player_schema = []
 
     for p in players:
