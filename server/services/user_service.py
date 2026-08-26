@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from sqlalchemy import or_, select
@@ -34,10 +35,12 @@ async def create_user(
     if existing_user:
         raise DataAlreadyExistsError(datatype="User")
 
+    hashed_pwd = await asyncio.to_thread(utils.hash, password=user.password)
+
     new_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=utils.hash(user.password),
+        hashed_password=hashed_pwd,
     )
 
     db.add(new_user)
@@ -59,8 +62,17 @@ async def login(
         )
     ).scalar_one_or_none()
 
-    # pyrefly: ignore [bad-argument-type]
-    if not (user and utils.verify(password, user.hashed_password)):
+    if not user:
+        raise InvalidCredentialsError()
+
+    verified = await asyncio.to_thread(
+        utils.verify,
+        plain_password=password,
+        # pyrefly: ignore [bad-argument-type]
+        hashed_password=user.hashed_password,
+    )
+
+    if not verified:
         raise InvalidCredentialsError()
 
     user_data = {"sub": str(user.id)}
@@ -78,22 +90,36 @@ async def update(
     db: AsyncSession, user: User, updated: user_schemas.UserUpdate
 ) -> user_schemas.UserOut:
     # pyrefly: ignore [bad-argument-type]
-    if not utils.verify(updated.password, user.hashed_password):
+    verified = await asyncio.to_thread(
+        utils.verify,
+        plain_password=updated.password,
+        # pyrefly: ignore [bad-argument-type]
+        hashed_password=user.hashed_password,
+    )
+    if not verified:
         raise InvalidCredentialsError()
 
     updated_user = updated.updated_user
 
+    updated_verified = await asyncio.to_thread(
+        utils.verify,
+        plain_password=updated_user.password,
+        # pyrefly: ignore [bad-argument-type]
+        hashed_password=user.hashed_password,
+    )
+
     if (
         user.email == updated_user.email
-        # pyrefly: ignore [bad-argument-type]
-        and utils.verify(updated_user.password, user.hashed_password)
+        and updated_verified
         and user.username == updated_user.username
     ):
         raise BadRequestError(message="No new information provided, nothing updated")
 
     user.email = updated_user.email
     user.username = updated_user.username
-    user.hashed_password = utils.hash(updated_user.password)
+    user.hashed_password = await asyncio.to_thread(
+        utils.hash, password=updated_user.password
+    )
 
     await db.commit()
     await db.refresh(user)
