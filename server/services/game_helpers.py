@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import case
 
 from exceptions.app_exceptions import (
+    BadRequestError,
     DataNotFoundError,
     InvalidGameLineup,
 )
@@ -111,3 +112,16 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
             return False
 
     return double_key
+
+
+async def evaluation_base(
+    game: active_game_schemas.GameResult, active_game: Active_Game, db: AsyncSession
+) -> active_game_schemas.GameEvaluation:
+    game_list = await validate_game(game=game, active_game=active_game, db=db)
+
+    if not valid_lineup(game=game_list):
+        raise BadRequestError(message="Invalid Game")
+
+    score = eval_lineup(game_list)
+
+    return active_game_schemas.GameEvaluation(score=score, best=False)
