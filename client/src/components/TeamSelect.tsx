@@ -2,9 +2,16 @@ import useGame from "@/hooks/useGame";
 import useTeams from "@/hooks/useTeams";
 import { Player } from "@/types/playerTypes";
 import { Teams, Team } from "@/types/teamTypes";
-import { LineupRole } from "@/services/enum";
+import { LineupRole, Role, Roles } from "@/services/enum";
 import { useState } from "react";
-import useTeamStore, { useTeamActions } from "@/stores/teamStore";
+import useTeamStore, {
+  useTeamActions,
+  useOpener,
+  useCloser,
+  useAwper,
+  useSupport,
+  useFlex,
+} from "@/stores/teamStore";
 import TeamRoll from "./TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
 
@@ -12,12 +19,26 @@ const TeamSelect = () => {
   const { game, isPending: gamePending } = useGame();
   const { teams, isPending: teamPending } = useTeams();
   const [teamId, setTeamId] = useState(1);
-  const { compatibility } = useTeamActions();
+  const {
+    compatibility,
+    selectOpener,
+    selectCloser,
+    selectAwper,
+    selectSupport,
+    selectIgl,
+    submit,
+  } = useTeamActions();
   const WINNER_INDEX = 35;
   const reroll = useRerollStatus();
   const status = useStatus();
   const { startRoll, finishRoll, Reroll } = useRollActions();
-  const [slides, setSlides] = useState<number[]>([]);
+  const [slides, setSlides] = useState<Team[]>([]);
+  const [team, setTeam] = useState<Team | null>(null);
+  const opener = useOpener();
+  const closer = useCloser();
+  const awper = useAwper();
+  const support = useSupport();
+  const flex = useFlex();
 
   if (teamPending || gamePending || !teams || !game) {
     return <h1>Loading data...</h1>;
@@ -27,16 +48,16 @@ const TeamSelect = () => {
     return 1 + Math.floor(Math.random() * max);
   };
 
-  const make_slides = (id: number): number[] => {
+  const make_slides = (team: Team): Team[] => {
     const slides = [];
     const n = Object.keys(teams).length;
-    for (let i = 0; i < WINNER_INDEX - 1; i++) {
+    for (let i = 0; i < WINNER_INDEX; i++) {
       const j = getRandomInt(n);
-      slides.push(teams[j]["id"]);
+      slides.push(teams[j]);
     }
-    slides.push(id);
+    slides.push(team);
     for (let i = 0; i < 4; i++) {
-      slides.push(teams[getRandomInt(n)]["id"]);
+      slides.push(teams[getRandomInt(n)]);
     }
     return slides;
   };
@@ -58,9 +79,11 @@ const TeamSelect = () => {
     }
   };
 
-  const handleSelectTeam = (turn: number): number[] => {
+  const handleSelectTeam = (turn: number): Team[] => {
     const id = getTeamId(turn);
-    const slides = make_slides(id);
+    const team = teams[id];
+    const slides = make_slides(team);
+    setTeam(team);
     return slides;
   };
 
@@ -81,8 +104,11 @@ const TeamSelect = () => {
     }
   };
 
-  const handlePlayers = (id: number): Player[] => {
-    const players = teams[id].players;
+  const handlePlayers = (): Player[] | void => {
+    if (!team) {
+      return;
+    }
+    const players = team.players;
     return players;
   };
 
@@ -99,6 +125,26 @@ const TeamSelect = () => {
     startRoll();
   };
 
+  const handleSelectPlayer = (player: Player) => {
+    switch (player.role) {
+      case Roles.AWPER:
+        selectAwper(player);
+        break;
+      case Roles.CLOSER:
+        selectCloser(player);
+        break;
+      case Roles.OPENER:
+        selectOpener(player);
+        break;
+      case Roles.SUPPORT:
+        selectSupport(player);
+        break;
+    }
+
+    setTeam(null);
+    makeSelection();
+  };
+
   return (
     <div>
       <button onClick={startRolling}>Start</button>
@@ -109,8 +155,23 @@ const TeamSelect = () => {
           onComplete={handleRollComplete}
         />
       )}
+      {status === "picking" &&
+        team &&
+        team.players.map((player) => (
+          <div key={player.id}>
+            <button onClick={() => handleSelectPlayer(player)}>
+              {player.name}
+            </button>
+          </div>
+        ))}
       <button onClick={handleReroll}>Reroll</button>
-      <button onClick={makeSelection}>Make Selection</button>
+      <div>
+        <div>opener = {(opener && opener.name) || "None"}</div>
+        <div>closer = {(closer && closer.name) || "None"}</div>
+        <div>awper = {(awper && awper.name) || "None"}</div>
+        <div>support = {(support && support.name) || "None"}</div>
+        <div>flex = {(flex && flex.name) || "None"}</div>
+      </div>
     </div>
   );
 };

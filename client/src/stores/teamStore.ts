@@ -66,6 +66,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
       });
     },
     selectAwper: (player: Player) => {
+      console.log("Chose awper");
       set((state) => {
         if (player.role !== Roles.AWPER) {
           return state;

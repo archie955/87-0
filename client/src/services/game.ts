@@ -5,7 +5,7 @@ import { Result } from "@/types/resultTypes";
 const baseUrl = "/games";
 
 const getGame = async (): Promise<Game> => {
-  const response = await api.get(baseUrl);
+  const response = await api.post(baseUrl);
   return response.data;
 };
 

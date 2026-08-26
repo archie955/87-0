@@ -1,10 +1,11 @@
+import { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
 
 const SLIDE_WIDTH = 120;
 const START_SPEED = 1600;
 
 type TeamRollProps = {
-  slides: number[];
+  slides: Team[];
   winnerIndex: number;
   onComplete: () => void;
 };
@@ -70,7 +71,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
             className="flex h-32 shrink-0 items-center justify-center border"
             style={{ width: SLIDE_WIDTH }}
           >
-            {slide}
+            {slide.name} {index}
           </div>
         ))}
       </div>
