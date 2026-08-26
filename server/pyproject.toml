@@ -7,13 +7,13 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.4",
     "fastapi>=0.138.0",
+    "httpx>=0.28.1",
     "psycopg>=3.3.4",
     "pwdlib[argon2]>=0.3.1",
     "pydantic-settings>=2.14.2",
     "pydantic[email]>=2.13.4",
     "pyjwt>=2.13.0",
     "python-multipart>=0.0.32",
-    "requests>=2.34.2",
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.52.4",
 ]
@@ -35,7 +35,6 @@ lint = [
     "ruff>=0.15.18",
 ]
 test = [
-    "httpx>=0.28.1",
     "pytest-asyncio>=1.4.0",
 ]
 

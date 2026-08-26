@@ -1,8 +1,8 @@
 from urllib.parse import urlencode
 
-import requests
 from fastapi import status
 from fastapi.responses import RedirectResponse
+from httpx import AsyncClient
 
 from exceptions.app_exceptions import (
     DataNotFoundError,
@@ -75,7 +75,7 @@ class SteamValidator:
         self.__validation_params = {}
         self.__identity = None
 
-    def validate_login(self, data) -> str | bool:
+    async def validate_login(self, data) -> str | bool:
         string_params = (
             "openid.ns",
             "openid.mode",
@@ -97,9 +97,10 @@ class SteamValidator:
 
         self.__validation_params["openid.mode"] = "check_authentication"
 
-        response = requests.get(
-            BASEURL, params=self.__validation_params, timeout=10
-        ).text
+        async with AsyncClient() as client:
+            response = (
+                await client.get(BASEURL, params=self.__validation_params, timeout=10)
+            ).text
 
         validator = {}
 
@@ -124,9 +125,11 @@ class SteamValidator:
 
         return identity[p:]
 
-    def fetch_details(self) -> Profile:
+    async def fetch_details(self) -> Profile:
         params = {"key": KEY, "steamids": self.__identity}
-        response = requests.get(FETCHURL, params=params, timeout=10).json()
+
+        async with AsyncClient() as client:
+            response = (await client.get(FETCHURL, params=params, timeout=10)).json()
 
         if not response.players or not response.players[0]:
             raise DataNotFoundError(datatype="user")

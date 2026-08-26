@@ -26,12 +26,12 @@ def redirect(url: str) -> RedirectResponse:
 
 async def validate(db: AsyncSession, query_params: QueryParams):
     validator = SteamValidator()
-    steam_id = validator.validate_login(query_params)
+    steam_id = await validator.validate_login(query_params)
 
     if not steam_id or not isinstance(steam_id, str):
         raise InvalidCredentialsError()
 
-    profile = validator.fetch_details()
+    profile = await validator.fetch_details()
 
     user = (
         await db.execute(
