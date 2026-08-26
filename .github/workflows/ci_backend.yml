@@ -5,8 +5,6 @@ on:
     paths:
       - "server/**"
       - ".github/workflows/ci_backend.yml"
-    branches-ignore:
-      - main
   pull_request:
     branches-ignore:
       - main
