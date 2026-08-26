@@ -77,4 +77,8 @@ jobs:
           ALGORITHM: ${{ secrets.ALGORITHM }}
           ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
           ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS_TESTING }}
+          STEAM_KEY: ${{ secrets.STEAM_KEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
         run: uv run pytest
