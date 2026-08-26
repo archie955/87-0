@@ -99,9 +99,7 @@ class SteamValidator:
         self.__validation_params["openid.mode"] = "check_authentication"
 
         response = requests.get(
-            BASEURL,
-            params=self.__validation_params,
-            timeout=10
+            BASEURL, params=self.__validation_params, timeout=10
         ).text
 
         validator = {}

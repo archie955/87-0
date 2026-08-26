@@ -1,6 +1,5 @@
 from _collections_abc import dict_keys
-from sqlalchemy.dialects.postgresql import Any
-from sqlalchemy import Case
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import case
@@ -77,7 +76,11 @@ async def validate_game(
         score = p.hltv + p.igl_bonus if igl else p.hltv
         ps = active_game_schemas.ReducedGamePlayer(
             # pyrefly: ignore [bad-argument-type]
-            id=p.id, role=p.role, score=score, igl=igl
+            id=p.id,
+            role=p.role,
+            # pyrefly: ignore [bad-argument-type]
+            score=score,
+            igl=igl,
         )
         player_schema.append(ps)
 
@@ -86,7 +89,12 @@ async def validate_game(
 
 def valid_lineup(game: active_game_schemas.GameList) -> bool:
     """Validates the player roles"""
-    freq: dict[Roles, int] = {Roles.OPENER: 0, Roles.CLOSER: 0, Roles.AWPER: 0, Roles.SUPPORT: 0}
+    freq: dict[Roles, int] = {
+        Roles.OPENER: 0,
+        Roles.CLOSER: 0,
+        Roles.AWPER: 0,
+        Roles.SUPPORT: 0,
+    }
     keys: dict_keys[Roles, int] = freq.keys()
 
     for p in game.players:
