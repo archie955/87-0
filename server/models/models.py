@@ -79,7 +79,7 @@ class Player(Base, Name, TimeStamps):
     team: Mapped["Team"] = relationship(back_populates="players")
 
 
-class Active_Game(Base, Name):  # ruff: ignore[N801]
+class Active_Game(Base, Name):  # ruff: ignore[invalid-class-name]
     team_1_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("team.id"), nullable=False
     )

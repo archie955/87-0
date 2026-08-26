@@ -13,4 +13,3 @@ class Team(BaseModel):
 
 class Teams(RootModel[dict[int, Team]]):
     model_config = config
-    pass

@@ -38,7 +38,7 @@ app.include_router(game.router)
 
 
 @app.exception_handler(AppException)
-async def app_exception_handler(
+def app_exception_handler(
     request: Request,
     exc: AppException,
 ) -> JSONResponse:
@@ -51,7 +51,7 @@ async def app_exception_handler(
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
+def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
@@ -65,7 +65,7 @@ async def validation_exception_handler(
 
 @app.exception_handler(Exception)
 def global_expression_handler(request: Request, exc: Exception):
-    logger.exception(
+    logger.error(
         f"Unhandled exception: {exc} | {request.method} {request.url} from "
         f"{request.client.host if request.client else 'HOST NOT FOUND'}"
     )
@@ -80,6 +80,8 @@ def global_expression_handler(request: Request, exc: Exception):
 async def health(db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     try:
         await db.execute(text("SELECT 1"))
-        return {"status": "healthy"}
     except Exception:
+        logger.exception("DB is not healthy")
         return {"status": "unhealthy"}
+    else:
+        return {"status": "healthy"}

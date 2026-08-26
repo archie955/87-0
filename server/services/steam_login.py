@@ -63,12 +63,11 @@ class SteamLogin:
     # Upon login it will send a request to the return_to url provided.
     def redirect(self) -> RedirectResponse:
         url = self.__create_url()
-        response = RedirectResponse(
+        return RedirectResponse(
             url=url,
             status_code=status.HTTP_303_SEE_OTHER,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        return response
 
 
 class SteamValidator:
@@ -149,11 +148,9 @@ class SteamValidator:
         if not isinstance(self.__identity, str):
             raise PermissionDeniedError()
 
-        profile = Profile(
+        return Profile(
             username=player.personaname,
             url=player.profileurl,
             avatar=player.avatar,
             steam_id=self.__identity,
         )
-
-        return profile

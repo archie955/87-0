@@ -42,16 +42,16 @@ class Helpers:
         data = response.json()
         assert "access_token" in data
 
-        # ruff: ignore[S105]
+        # ruff: ignore[hardcoded-password-string]
         assert data["token_type"] == "bearer"
         user["access_token"] = data["access_token"]
         return user
 
     @staticmethod
-    def auth_headers(user: dict[str, str], expired: bool = False) -> dict[str, str]:
+    def auth_headers(user: dict[str, str], expired: bool) -> dict[str, str]:
         token = user["access_token"]
         if expired:
-            # ruff: ignore[S105]
+            # ruff: ignore[hardcoded-password-string]
             token = "expired_token"
         return {"Authorization": f"Bearer {token}"}
 

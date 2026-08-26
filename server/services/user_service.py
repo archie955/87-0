@@ -70,7 +70,7 @@ async def login(
     return user_schemas.UserToken(
         user=user_schemas.UserOut.model_validate(user),
         access_token=create_access_token(data=user_data),
-        token_type="bearer",  # ruff: ignore[S106]
+        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
     )
 
 
@@ -108,5 +108,3 @@ async def delete(db: AsyncSession, user: User):
     await db.commit()
 
     logger.info("User deleted", extra={"user_id": user.id})
-
-    return

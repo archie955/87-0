@@ -21,7 +21,7 @@ SQLALCHEMY_DATABASE_URL = (
 )
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture
 async def engine() -> AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
 
@@ -36,7 +36,7 @@ async def engine() -> AsyncGenerator[AsyncEngine, None]:
     await engine.dispose()
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture
 async def db(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
     session_local: async_sessionmaker[AsyncSession] = async_sessionmaker(
         bind=engine, class_=AsyncSession, expire_on_commit=False
@@ -47,8 +47,9 @@ async def db(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
         await session.rollback()
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture
 async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+    # ruff: ignore[unused-async]
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db
 

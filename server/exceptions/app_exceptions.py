@@ -1,4 +1,4 @@
-class AppException(Exception):  # ruff: ignore[N818]
+class AppException(Exception):  # ruff: ignore[error-suffix-on-exception-name]
     def __init__(
         self, status_code: int, message: str, headers: dict[str, str] | None = None
     ):

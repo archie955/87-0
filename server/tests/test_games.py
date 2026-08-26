@@ -38,7 +38,6 @@ async def test_play_game_user(auth_client_seed):
     assert "best" in data
 
     assert isinstance(data["score"], float)
-    print(data)
     assert data["best"]
 
 

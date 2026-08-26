@@ -15,8 +15,7 @@ router = APIRouter(prefix="/games", tags=["Games"])
     "", status_code=status.HTTP_201_CREATED, response_model=active_game_schemas.Game
 )
 async def create_game(db: AsyncSession = Depends(get_db)):
-    game = await game_service.create_game(db=db)
-    return game
+    return await game_service.create_game(db=db)
 
 
 @router.post(
@@ -31,10 +30,9 @@ async def submit_user_lineup(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    evaluation = await game_service.evaluate_user_game(
+    return await game_service.evaluate_user_game(
         game=game, active_game=active_game, user=user, db=db
     )
-    return evaluation
 
 
 @router.post(
@@ -48,7 +46,4 @@ async def submit_lineup(
     active_game: Active_Game = Depends(get_current_game),
     db: AsyncSession = Depends(get_db),
 ):
-    evaluation = await game_service.evaluate_game(
-        game=game, active_game=active_game, db=db
-    )
-    return evaluation
+    return await game_service.evaluate_game(game=game, active_game=active_game, db=db)

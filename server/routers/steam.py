@@ -23,8 +23,7 @@ def redirect(request: Request):
     response_model=token_schemas.UserToken,
 )
 async def validate_login(request: Request, db: AsyncSession = Depends(get_db)):
-    user_token = await steam_service.validate(db=db, query_params=request.query_params)
-    return user_token
+    return await steam_service.validate(db=db, query_params=request.query_params)
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
@@ -33,4 +32,3 @@ async def delete_user(
     user: User = Depends(auth.get_current_user),
 ):
     await steam_service.delete(db=db, user=user)
-    return

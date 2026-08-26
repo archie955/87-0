@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next) -> Response:
+    @staticmethod
+    async def dispatch(request: Request, call_next) -> Response:
         method = request.method
         url = request.url.path
         client_ip = request.client.host if request.client else "NO HOST"

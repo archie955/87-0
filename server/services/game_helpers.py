@@ -1,5 +1,3 @@
-from _collections_abc import dict_keys
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import case
@@ -11,6 +9,9 @@ from exceptions.app_exceptions import (
 from models.enums import Roles
 from models.models import Active_Game, Player
 from schemas import active_game_schemas
+
+MAX_DOUBLE_PLAYER = 2
+TEAM_SIZE = 5
 
 
 def eval_lineup(game: active_game_schemas.GameList) -> float:
@@ -44,7 +45,7 @@ async def validate_game(
         .all()
     )
 
-    if not players or len(players) != 5:
+    if not players or len(players) != TEAM_SIZE:
         raise DataNotFoundError(datatype="players")
 
     team_ids = [
@@ -95,17 +96,16 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
         Roles.AWPER: 0,
         Roles.SUPPORT: 0,
     }
-    keys: dict_keys[Roles, int] = freq.keys()
+    keys = freq.keys()
 
     for p in game.players:
         if p.role not in keys:
             return False
-        else:
-            freq[p.role] += 1
+        freq[p.role] += 1
 
     double_key = False
     for key in keys:
-        if freq[key] == 2 and not double_key:
+        if freq[key] == MAX_DOUBLE_PLAYER and not double_key:
             double_key = True
         elif freq[key] != 1:
             return False

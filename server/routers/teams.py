@@ -10,5 +10,4 @@ router = APIRouter(prefix="/teams", tags=["Teams"])
 
 @router.get(path="", status_code=status.HTTP_200_OK, response_model=team_schemas.Teams)
 async def get_teams(db: AsyncSession = Depends(get_db)):
-    teams = await team_service.get(db=db)
-    return teams
+    return await team_service.get(db=db)

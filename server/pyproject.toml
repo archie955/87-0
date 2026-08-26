@@ -69,6 +69,9 @@ exclude = [
     "node_modules",
     "site-packages",
     "tavenv",
+    "database/init_players.py",
+    "database/init_db.py",
+    "database/init_teams.py",
 ]
 line-length = 88
 indent-width = 4
@@ -77,8 +80,128 @@ target-version = "py312"
 
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "N", "S", "SIM", "UP", "ASYNC", "C90"]
-ignore = []
+select = [
+    # pycodestyle errors
+    "E",
+
+    # pyflakes
+    "F",
+
+    # import sorting
+    "I",
+
+    # flake8 bugbear
+    "B",
+
+    # pyugrade
+    "UP",
+
+    # pydocstyle
+    # "D",
+
+    # pep8 naming
+    "N",
+
+    # flake8 bandit
+    "S",
+
+    # flake8 trailing comma
+    "COM",
+
+    # flake8 comprehensions
+    "C4",
+
+    # flake8 logging
+    "LOG",
+    "G",
+
+    # flake8 print
+    "T",
+
+    # flake8 simplify
+    "SIM",
+    
+    # flake8 async
+    "ASYNC",
+
+    # mccabe complexity
+    "C90",
+
+    # FastAPI response models, Annotation, path params
+    "FAST",
+
+    # flake8 2020
+    "YTT",
+
+    # flake8 blind except
+    "BLE",
+
+    # flake8 datetime
+    "DTZ",
+
+    # flake8 debugger
+    "T10",
+
+    # flake8 executable
+    "EXE",
+
+    # flake8 future Annotation
+    "FA",
+
+    # flake8 get text
+    "INT",
+
+    # flake8 implicit string concat
+    "ISC",
+
+    # flake8 pie
+    "PIE",
+
+    # flake8 pytest style
+    "PT",
+
+    # flake8 return
+    "RET",
+
+    # flake8 type checking
+    "TC",
+
+    # flake8 pathlib
+    "PTH",
+
+    # flynt
+    "FLY",
+
+    # perflint
+    "PERF",
+
+    # pycodestyle warnings
+    "W",
+
+    # pygrep hooks
+    "PGH",
+
+    # pylint
+    "PL",
+
+    # refurb
+    "FURB",
+    
+    # ruff specific rules
+    "RUF",
+
+    # Tryceratops
+    "TRY",
+]
+
+# to eventually include fastapi one when typing-annotated is sorted
+ignore = [
+    "incorrect-blank-line-before-class",
+    "multi-line-summary-second-line",
+    "missing-trailing-comma",
+    "fast-api-non-annotated-dependency",
+    "logging-f-string",
+]
 preview = true
 fixable = ["ALL"]
 unfixable = []
@@ -88,7 +211,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/*.py" = [
-    "S101"
+    "assert",
+    "magic-value-comparison",
 ]
 
 

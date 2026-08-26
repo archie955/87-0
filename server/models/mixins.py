@@ -8,7 +8,7 @@ class Name:
     """define table name and id primary key for all models that use this class"""
 
     @declared_attr.directive
-    def __tablename__(self) -> str:
+    def __tablename__(self) -> str:  # ruff: ignore[bad-dunder-method-name]
         return self.__class__.__name__.lower()
 
     id: Mapped[int] = mapped_column(

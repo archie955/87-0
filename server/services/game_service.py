@@ -9,18 +9,20 @@ from schemas import active_game_schemas
 from services import game_helpers
 from services.helpers import safe_commit
 
+MIN_TEAMS = 2
+
 
 async def create_game(db: AsyncSession) -> active_game_schemas.Game:
     teams = (await db.execute(select(Team))).scalars().all()
 
-    if not teams or len(teams) < 2:
+    if not teams or len(teams) < MIN_TEAMS:
         raise DataNotFoundError(datatype="Teams")
 
     n = len(teams)
 
     ids = {}
     for i in range(1, 7):
-        # ruff: ignore[S311]
+        # ruff: ignore[suspicious-non-cryptographic-random-usage]
         ids[f"team_{i}_id"] = teams[randint(0, n - 1)].id
 
     active_game = Active_Game(**ids)

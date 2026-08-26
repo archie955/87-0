@@ -16,7 +16,7 @@ async def play_game(auth_client_seed):
     last = teams[str(game["team_5_id"])]["players"][-1]
     players.append(last)
 
-    jsn = {
+    return {
         "game_id": game["id"],
         "player_1": players[0],
         "player_2": players[1],
@@ -25,8 +25,6 @@ async def play_game(auth_client_seed):
         "player_5": players[4],
         "igl": last["id"],
     }
-
-    return jsn
 
 
 async def play_game_switch_team(auth_client_seed):
@@ -48,7 +46,7 @@ async def play_game_switch_team(auth_client_seed):
     last = teams[id]["players"][-1]
     players.append(last)
 
-    jsn = {
+    return {
         "game_id": game["id"],
         "player_1": players[0],
         "player_2": players[1],
@@ -58,14 +56,11 @@ async def play_game_switch_team(auth_client_seed):
         "igl": last["id"],
     }
 
-    return jsn
-
 
 async def play_game_wrong_igl(auth_client_seed):
     game = (await auth_client_seed.get("/games")).json()
 
     teams = (await auth_client_seed.get("/teams")).json()
-    print(teams)
 
     roles = set()
     ids = [game["team_1_id"], game["team_2_id"], game["team_3_id"], game["team_4_id"]]
@@ -80,7 +75,7 @@ async def play_game_wrong_igl(auth_client_seed):
     last = teams[str(game["team_5_id"])]["players"][-1]
     players.append(last)
 
-    jsn = {
+    return {
         "game_id": game["id"],
         "player_1": players[0],
         "player_2": players[1],
@@ -89,5 +84,3 @@ async def play_game_wrong_igl(auth_client_seed):
         "player_5": players[4],
         "igl": 9999,
     }
-
-    return jsn

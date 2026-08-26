@@ -11,8 +11,7 @@ def mock_igl_bonus(p) -> float:
         else 0.0
     )
     team_bonus = np.sqrt(p["win_teammates"]) / 10
-    bonus = perf + team_bonus
-    return bonus
+    return perf + team_bonus
 
 
 data = {
