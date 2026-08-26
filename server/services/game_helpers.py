@@ -1,3 +1,6 @@
+from _collections_abc import dict_keys
+from sqlalchemy.dialects.postgresql import Any
+from sqlalchemy import Case
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import case
@@ -67,12 +70,13 @@ async def validate_game(
     if game.igl not in ids:
         raise InvalidGameLineup(id=game.igl, reason="igl")
 
-    player_schema = []
+    player_schema: list[active_game_schemas.ReducedGamePlayer] = []
 
     for p in players:
         igl = game.igl == p.id
         score = p.hltv + p.igl_bonus if igl else p.hltv
         ps = active_game_schemas.ReducedGamePlayer(
+            # pyrefly: ignore [bad-argument-type]
             id=p.id, role=p.role, score=score, igl=igl
         )
         player_schema.append(ps)
@@ -82,8 +86,8 @@ async def validate_game(
 
 def valid_lineup(game: active_game_schemas.GameList) -> bool:
     """Validates the player roles"""
-    freq = {Roles.OPENER: 0, Roles.CLOSER: 0, Roles.AWPER: 0, Roles.SUPPORT: 0}
-    keys = freq.keys()
+    freq: dict[Roles, int] = {Roles.OPENER: 0, Roles.CLOSER: 0, Roles.AWPER: 0, Roles.SUPPORT: 0}
+    keys: dict_keys[Roles, int] = freq.keys()
 
     for p in game.players:
         if p.role not in keys:
@@ -99,55 +103,3 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
             return False
 
     return double_key
-
-
-"""
-async def update_lineup(
-    game: active_game_schemas.GameList, score: float, user: User, db: AsyncSession
-) -> None:
-    best_game = user.best_game
-    keys = set()
-
-    for p in game.players:
-        key = f"{str(p.role).lower()}_id"
-
-        if key in keys:
-            best_game.flex_id = p.id
-
-        else:
-            keys.add(key)
-            best_game[key] = p.id
-
-        if p.igl:
-            best_game.igl_id = p.id
-    best_game.score = score
-
-    await safe_commit(db=db, datatype="Game")
-    return
-
-
-async def create_lineup(
-    game: active_game_schemas.GameList, score: float, user: User, db: AsyncSession
-) -> None:
-    game_dict = {}
-
-    for p in game.players:
-        key = f"{str(p.role).lower()}_id"
-
-        if key in game_dict:
-            game_dict["flex_id"] = p.id
-
-        else:
-            game_dict[key] = p.id
-
-        if p.igl:
-            game_dict["igl_id"] = p.id
-
-    game_dict["score"] = score
-
-    best_game = Game(**game_dict, owner=user)
-    db.add(best_game)
-
-    await safe_commit(db=db, datatype="Game")
-    return
-"""

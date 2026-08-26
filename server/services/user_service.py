@@ -59,6 +59,7 @@ async def login(
         )
     ).scalar_one_or_none()
 
+    # pyrefly: ignore [bad-argument-type]
     if not (user and utils.verify(password, user.hashed_password)):
         raise InvalidCredentialsError()
 
@@ -76,6 +77,7 @@ async def login(
 async def update(
     db: AsyncSession, user: User, updated: user_schemas.UserUpdate
 ) -> user_schemas.UserOut:
+    # pyrefly: ignore [bad-argument-type]
     if not utils.verify(updated.password, user.hashed_password):
         raise InvalidCredentialsError()
 
@@ -83,6 +85,7 @@ async def update(
 
     if (
         user.email == updated_user.email
+        # pyrefly: ignore [bad-argument-type]
         and utils.verify(updated_user.password, user.hashed_password)
         and user.username == updated_user.username
     ):

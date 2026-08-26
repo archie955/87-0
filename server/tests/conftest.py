@@ -62,6 +62,7 @@ async def client(db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides.clear()
 
 
+# pyrefly: ignore [no-matching-overload]
 @pytest_asyncio.fixture
 def helpers() -> Helpers:
     return Helpers()

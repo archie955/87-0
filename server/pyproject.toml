@@ -117,3 +117,5 @@ project-includes = [
     "**/*.py*",
     "**/*.ipynb",
 ]
+python-platform = "linux"
+python-version = "3.12"

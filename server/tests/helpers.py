@@ -68,7 +68,9 @@ class Helpers:
         assert response.status_code == 200
         data = response.json()
 
-        assert data["username"] == updated["updated_user"]["username"]  # ty:ignore[invalid-argument-type]
-        assert data["email"] == updated["updated_user"]["email"]  # ty:ignore[invalid-argument-type]
+        # pyrefly: ignore[bad-index]
+        assert data["username"] == updated["updated_user"]["username"]
+        # pyrefly: ignore[bad-index]
+        assert data["email"] == updated["updated_user"]["email"]
 
         return data

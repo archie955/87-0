@@ -27,6 +27,7 @@ async def get(db: AsyncSession) -> team_schemas.Teams:
         team_players = []
         for p in t.players:
             team_players.append(player_schemas.Player.model_validate(p))
+        # pyrefly: ignore [bad-argument-type]
         team = team_schemas.Team(id=t.id, name=t.name, players=team_players)
         team_dict[t.id] = team
 
