@@ -1,5 +1,5 @@
 async def play_game(auth_client_seed):
-    game = (await auth_client_seed.get("/games")).json()
+    game = (await auth_client_seed.post("/games")).json()
 
     teams = (await auth_client_seed.get("/teams")).json()
 
@@ -28,7 +28,7 @@ async def play_game(auth_client_seed):
 
 
 async def play_game_switch_team(auth_client_seed):
-    game = (await auth_client_seed.get("/games")).json()
+    game = (await auth_client_seed.post("/games")).json()
 
     teams = (await auth_client_seed.get("/teams")).json()
 
@@ -58,7 +58,7 @@ async def play_game_switch_team(auth_client_seed):
 
 
 async def play_game_wrong_igl(auth_client_seed):
-    game = (await auth_client_seed.get("/games")).json()
+    game = (await auth_client_seed.post("/games")).json()
 
     teams = (await auth_client_seed.get("/teams")).json()
 

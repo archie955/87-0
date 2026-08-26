@@ -238,7 +238,7 @@ pythonpath = ["."]
 
 [tool.pyrefly]
 project-includes = [
-    "**/*.py*",
+    "**/*.py",
     "**/*.ipynb",
 ]
 python-platform = "linux"

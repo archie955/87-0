@@ -5,7 +5,7 @@ from tests.game_helpers import play_game, play_game_switch_team, play_game_wrong
 
 @pytest.mark.asyncio
 async def test_create_game(auth_client_seed):
-    response = await auth_client_seed.get("/games")
+    response = await auth_client_seed.post("/games")
 
     assert response.status_code == 201
 
@@ -22,7 +22,7 @@ async def test_create_game(auth_client_seed):
 
 @pytest.mark.asyncio
 async def test_create_game_no_teams(auth_client):
-    response = await auth_client.get("/games")
+    response = await auth_client.post("/games")
 
     assert response.status_code == 404
 

@@ -225,7 +225,9 @@ async def test_update_incorrect_password(client, helpers):
         "password": "incorrect",
     }
     response = await client.put(
-        "/users", json=updated_payload, headers=helpers.auth_headers(user)
+        "/users",
+        json=updated_payload,
+        headers=helpers.auth_headers(user, expired=False),
     )
 
     assert response.status_code == 401
@@ -244,7 +246,9 @@ async def test_update_same_info(client, helpers):
         "password": user["password"],
     }
     response = await client.put(
-        "/users", json=updated_payload, headers=helpers.auth_headers(user)
+        "/users",
+        json=updated_payload,
+        headers=helpers.auth_headers(user, expired=False),
     )
 
     assert response.status_code == 400
@@ -257,7 +261,9 @@ async def test_update_same_info(client, helpers):
 async def test_delete(client, helpers):
     user = await helpers.full_login(client)
 
-    response = await client.delete("/users", headers=helpers.auth_headers(user))
+    response = await client.delete(
+        "/users", headers=helpers.auth_headers(user, expired=False)
+    )
 
     assert response.status_code == 204
 
