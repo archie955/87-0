@@ -1,0 +1,82 @@
+name: CI-backend
+
+on:
+  push:
+    paths:
+      - "server/**"
+      - ".github/workflows/ci_backend.yml"
+    branches-ignore:
+      - main
+  pull_request:
+    branches-ignore:
+      - main
+
+concurrency:
+  group: development-backend
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USERNAME}}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: test_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.17"
+
+      - name: Sync linting dependencies
+        working-directory: server
+        run: uv sync --group lint
+
+      - name: Check formatting
+        working-directory: server
+        run: uv run ruff format
+
+      - name: Run linting
+        working-directory: server
+        run: uv run ruff check
+
+      - name: Run type checking
+        working-directory: server
+        run: uv run pyrefly check
+
+      - name: Sync testing dependencies
+        working-directory: server
+        run: uv sync --group test
+
+      - name: Run tests
+        working-directory: server
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          POSTGRES_HOSTNAME: ${{ secrets.POSTGRES_HOSTNAME }}
+          POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_NAME: ${{ secrets.POSTGRES_NAME }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS_TESTING }}
+        run: uv run pytest
