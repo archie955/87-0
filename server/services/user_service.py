@@ -1,3 +1,4 @@
+from services.helpers import safe_commit_delete
 import asyncio
 import logging
 
@@ -121,7 +122,7 @@ async def update(
         utils.hash, password=updated_user.password
     )
 
-    await db.commit()
+    await safe_commit(db, datatype="User")
     await db.refresh(user)
 
     logger.info("User updated", extra={"user_id": user.id})
@@ -131,6 +132,6 @@ async def update(
 
 async def delete(db: AsyncSession, user: User):
     await db.delete(user)
-    await db.commit()
+    await safe_commit_delete(db, datatype="User")
 
     logger.info("User deleted", extra={"user_id": user.id})

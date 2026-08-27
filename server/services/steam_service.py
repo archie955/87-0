@@ -12,7 +12,7 @@ from exceptions.app_exceptions import (
 )
 from models.models import User
 from schemas import token_schemas
-from services.helpers import safe_commit, safe_commit_add
+from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
 
 logger = logging.getLogger(__name__)
@@ -73,6 +73,6 @@ async def validate(db: AsyncSession, query_params: QueryParams):
 
 async def delete(db: AsyncSession, user: User):
     await db.delete(user)
-    await db.commit()
+    await safe_commit_delete(db, datatype="User")
 
     logger.info("User deleted", extra={"user_id": user.id})

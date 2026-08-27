@@ -1,3 +1,4 @@
+from exceptions.app_exceptions import DataNotFoundError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,3 +17,9 @@ async def safe_commit_add(db: AsyncSession, datatype: str) -> None:
         await db.commit()
     except IntegrityError as exc:
         raise DataAlreadyAddedError(datatype) from exc
+
+async def safe_commit_delete(db: AsyncSession, datatype: str) -> None:
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        raise DataNotFoundError(datatype)

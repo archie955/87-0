@@ -1,3 +1,4 @@
+from services.helpers import safe_commit_delete
 from random import randint
 
 from sqlalchemy import select
@@ -50,7 +51,7 @@ async def evaluate_user_game(
         game_evaluation.best = True
 
     await db.delete(active_game)
-    await db.commit()
+    await safe_commit_delete(db, datatype="Active Game")
 
     return game_evaluation
 
@@ -63,6 +64,6 @@ async def evaluate_game(
     )
 
     await db.delete(active_game)
-    await db.commit()
+    await safe_commit_delete(db, datatype="Active Game")
 
     return game_evaluation
