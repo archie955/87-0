@@ -1,6 +1,8 @@
 from fastapi import APIRouter, status
 
-from routers.dependencies import DBDep, GameDep, UserDep
+from authentication.auth import UserDep
+from database.database import DBDep
+from routers.game_dep import GameDep
 from schemas import active_game_schemas
 from services import game_service
 

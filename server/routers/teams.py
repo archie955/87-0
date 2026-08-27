@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from routers.dependencies import DBDep
+from database.database import DBDep
 from schemas import team_schemas
 from services import team_service
 

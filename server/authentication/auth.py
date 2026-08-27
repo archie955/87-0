@@ -1,16 +1,22 @@
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Annotated, Any
 
 import jwt
+from fastapi import Depends
+from fastapi.security.oauth2 import OAuth2PasswordBearer
 from sqlalchemy import select
 
+from database.database import DBDep
 from exceptions.app_exceptions import InvalidCredentialsError
 from models.models import User
-from routers.dependencies import BearerDep, DBDep
 from schemas import token_schemas
 from utils.config import Settings, SettingsDep
 
 CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Bearer"})
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+BearerDep = Annotated[str, Depends(oauth2_scheme)]
 
 
 def create_access_token(data: dict, settings: Settings) -> str:
@@ -54,3 +60,6 @@ async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -
         raise CREDENTIALS_EXCEPTION
 
     return user
+
+
+UserDep = Annotated[User, Depends(get_current_user)]

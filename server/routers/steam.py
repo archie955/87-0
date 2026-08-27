@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request, status
 from fastapi.responses import RedirectResponse
 
-from routers.dependencies import DBDep, UserDep
+from authentication.auth import UserDep
+from database.database import DBDep
 from schemas import token_schemas
 from services import steam_service
 from utils.config import SettingsDep

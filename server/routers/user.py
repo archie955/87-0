@@ -1,9 +1,15 @@
-from fastapi import APIRouter, status
+from typing import Annotated
 
-from routers.dependencies import AuthDep, DBDep, UserDep
+from fastapi import APIRouter, Depends, status
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+
+from authentication.auth import UserDep
+from database.database import DBDep
 from schemas import user_schemas
 from services import user_service
 from utils.config import SettingsDep
+
+AuthDep = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
