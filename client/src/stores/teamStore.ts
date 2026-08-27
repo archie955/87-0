@@ -11,7 +11,7 @@ interface TeamActions {
   selectAwper: (player: Player) => void;
   selectSupport: (player: Player) => void;
   selectIgl: (p: Pick) => void;
-  compatibility: (p: Player) => LineupRole[];
+  compatibility: (p: Player) => boolean;
   submit: (id: number) => Promise<Result | void>;
 }
 
@@ -25,7 +25,7 @@ interface TeamState {
   actions: TeamActions;
 }
 
-enum Pick {
+export enum Pick {
   opener = "opener",
   closer = "closer",
   awper = "awper",
@@ -99,34 +99,36 @@ const useTeamStore = create<TeamState>((set, get) => ({
         return state;
       });
     },
-    compatibility: (p: Player): LineupRole[] => {
-      const roles = [];
+    compatibility: (p: Player): boolean => {
       switch (p.role) {
         case Roles.AWPER:
           if (!get().awper) {
-            roles.push(lineupRoles.awper);
+            return true;
           }
           break;
+
         case Roles.OPENER:
           if (!get().opener) {
-            roles.push(lineupRoles.opener);
+            return true;
           }
           break;
+
         case Roles.CLOSER:
           if (!get().closer) {
-            roles.push(lineupRoles.closer);
+            return true;
           }
           break;
+
         case Roles.SUPPORT:
           if (!get().support) {
-            roles.push(lineupRoles.support);
+            return true;
           }
           break;
       }
       if (!get().flex) {
-        roles.push(lineupRoles.flex);
+        return true;
       }
-      return roles;
+      return false;
     },
     submit: async (id: number): Promise<Result | void> => {
       const player_1 = get().opener;

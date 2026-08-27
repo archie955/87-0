@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
+import { useEmail, useUsername } from "@/stores/userStore";
 
 // Base nav item - used by simple sidebars
 type NavItem = {
@@ -84,13 +85,15 @@ type UserData = {
   avatar: string;
 };
 
+type Logo = {
+  title: string;
+  description: string;
+};
+
 // Complete sidebar data structure
 type SidebarData = {
   // Logo/branding (all sidebars)
-  logo: {
-    title: string;
-    description: string;
-  };
+  logo: Logo;
   // Main navigation groups (all sidebars)
   navGroups: NavGroup[];
   // Footer navigation group (all sidebars)
@@ -106,59 +109,6 @@ type SidebarData = {
   }>;
   // Currently active workspace (Sidebar7+)
   activeWorkspace?: string;
-};
-
-// Shared sidebar data - works with all sidebar variations
-const sidebarData: SidebarData = {
-  logo: {
-    title: "CS-ACE",
-    description: "Build the best 5-stack",
-  },
-  navGroups: [
-    {
-      title: "Overview",
-      defaultOpen: true,
-      items: [
-        {
-          label: "Dashboard",
-          icon: LayoutDashboard,
-          href: "/",
-          isActive: false,
-        },
-      ],
-    },
-    {
-      title: "About",
-      defaultOpen: true,
-      items: [
-        {
-          label: "Rules",
-          icon: BookText,
-          href: "/about",
-          isActive: false,
-        },
-      ],
-    },
-    {
-      title: "Play",
-      defaultOpen: true,
-      items: [
-        {
-          label: "Build",
-          icon: Gamepad,
-          href: "/game",
-          isActive: false,
-        },
-      ],
-    },
-  ],
-  footerGroup: {
-    title: "Support",
-    items: [
-      { label: "Help Center", icon: HelpCircle, href: "#" },
-      { label: "Settings", icon: Settings, href: "#" },
-    ],
-  },
 };
 
 const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
@@ -321,15 +271,22 @@ const NoUser = () => {
   );
 };
 
-const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+interface AppSidebarProps {
+  props: React.ComponentProps<typeof Sidebar>;
+  logo: Logo;
+  navGroups: NavGroup[];
+  user: UserData | null;
+}
+
+const AppSidebar = ({ logo, navGroups, user, ...props }: AppSidebarProps) => {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <SidebarLogo logo={sidebarData.logo} />
+        <SidebarLogo logo={logo} />
       </SidebarHeader>
       <SidebarContent className="overflow-hidden">
         <ScrollArea className="min-h-0 flex-1">
-          {sidebarData.navGroups.map((group) => (
+          {navGroups.map((group) => (
             <SidebarGroup key={group.title}>
               <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -344,9 +301,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        {(sidebarData.user && <NavUser user={sidebarData.user} />) || (
-          <NoUser />
-        )}
+        {(user && <NavUser user={user} />) || <NoUser />}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
@@ -373,10 +328,82 @@ export function ApplicationShell1({
   } else if (location === "/login") {
     breadcrumb.parent = "User";
     breadcrumb.current = "Sign in";
+  } else if (location === "/game") {
+    breadcrumb.parent = "Play";
+    breadcrumb.current = "Build";
   }
+
+  const username = useUsername();
+  const email = useEmail();
+  const avatar = "...";
+  let user: UserData | null = null;
+
+  if (username && email) {
+    user = {
+      name: username,
+      email: email,
+      avatar: avatar,
+    };
+  }
+
+  const sidebarData: SidebarData = {
+    logo: {
+      title: "CS-ACE",
+      description: "Build the best 5-stack",
+    },
+    navGroups: [
+      {
+        title: "Overview",
+        defaultOpen: true,
+        items: [
+          {
+            label: "Dashboard",
+            icon: LayoutDashboard,
+            href: "/",
+            isActive: false,
+          },
+        ],
+      },
+      {
+        title: "About",
+        defaultOpen: true,
+        items: [
+          {
+            label: "Rules",
+            icon: BookText,
+            href: "/about",
+            isActive: false,
+          },
+        ],
+      },
+      {
+        title: "Play",
+        defaultOpen: true,
+        items: [
+          {
+            label: "Build",
+            icon: Gamepad,
+            href: "/game",
+            isActive: false,
+          },
+        ],
+      },
+    ],
+    footerGroup: {
+      title: "Support",
+      items: [
+        { label: "Help Center", icon: HelpCircle, href: "#" },
+        { label: "Settings", icon: Settings, href: "#" },
+      ],
+    },
+  };
   return (
     <SidebarProvider className={cn(className)}>
-      <AppSidebar />
+      <AppSidebar
+        logo={sidebarData.logo}
+        user={user}
+        navGroups={sidebarData.navGroups}
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

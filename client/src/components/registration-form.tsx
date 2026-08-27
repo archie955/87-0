@@ -19,7 +19,8 @@ import { Link } from "@mui/material";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { create } = useUserActions();
-  const email = useField("text");
+  const email = useField("email");
+  const username = useField("text");
   const password = useField("password");
   const { changeLogin } = useChangeActions();
   const { setNotification } = useNotificationActions();
@@ -43,6 +44,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
 
     const credentials: RegisterUser = {
       email: email.value,
+      username: username.value,
       password: password.value,
     };
     if (!validateInputs(credentials.email, credentials.password)) {
@@ -81,6 +83,15 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                   id="email"
                   {...email}
                   placeholder="user@example.com"
+                  required
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="username">Username</FieldLabel>
+                <Input
+                  id="username"
+                  {...username}
+                  placeholder="username"
                   required
                 />
               </Field>

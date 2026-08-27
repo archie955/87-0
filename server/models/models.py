@@ -34,7 +34,7 @@ class User(Base, Name, TimeStamps):
         String(200), nullable=False, unique=False
     )
 
-    best_score: Mapped[float] = mapped_column(DECIMAL(3, 2), nullable=True)
+    best_score: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
 
 
 class Team(Base, Name, TimeStamps):

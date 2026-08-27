@@ -40,7 +40,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
       await login(credentials);
 
       setNotification("Successfully logged in", "success");
-      navigate("/leagues");
+      navigate("/");
     } catch {
       setNotification("Login Failed", "error");
     }

@@ -11,9 +11,12 @@ import useTeamStore, {
   useAwper,
   useSupport,
   useFlex,
+  Pick,
 } from "@/stores/teamStore";
 import TeamRoll from "./TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
+
+const WINNER_INDEX = 35;
 
 const TeamSelect = () => {
   const { game, isPending: gamePending } = useGame();
@@ -28,12 +31,13 @@ const TeamSelect = () => {
     selectIgl,
     submit,
   } = useTeamActions();
-  const WINNER_INDEX = 35;
-  const reroll = useRerollStatus();
+  const rerollStatus = useRerollStatus();
   const status = useStatus();
-  const { startRoll, finishRoll, Reroll } = useRollActions();
+  const { startRoll, finishRoll, resetRoll, reroll } = useRollActions();
   const [slides, setSlides] = useState<Team[]>([]);
   const [team, setTeam] = useState<Team | null>(null);
+  const [igl, setIgl] = useState<Pick>(Pick.opener);
+  const [rollId, setRollId] = useState(0);
   const opener = useOpener();
   const closer = useCloser();
   const awper = useAwper();
@@ -48,17 +52,21 @@ const TeamSelect = () => {
     return 1 + Math.floor(Math.random() * max);
   };
 
-  const make_slides = (team: Team): Team[] => {
-    const slides = [];
-    const n = Object.keys(teams).length;
+  const makeSlides = (team: Team): Team[] => {
+    const slides: Team[] = [];
+    const numberOfTeams = Object.keys(teams).length;
+
     for (let i = 0; i < WINNER_INDEX; i++) {
-      const j = getRandomInt(n);
-      slides.push(teams[j]);
+      const randomId = getRandomInt(numberOfTeams);
+      slides.push(teams[randomId]);
     }
+
     slides.push(team);
     for (let i = 0; i < 4; i++) {
-      slides.push(teams[getRandomInt(n)]);
+      const randomId = getRandomInt(numberOfTeams);
+      slides.push(teams[randomId]);
     }
+
     return slides;
   };
 
@@ -66,63 +74,63 @@ const TeamSelect = () => {
     switch (turn) {
       case 1:
         return game.team_1_id;
+
       case 2:
         return game.team_2_id;
+
       case 3:
         return game.team_3_id;
+
       case 4:
         return game.team_4_id;
+
       case 5:
         return game.team_5_id;
+
       default:
         return game.team_6_id;
     }
   };
 
-  const handleSelectTeam = (turn: number): Team[] => {
-    const id = getTeamId(turn);
-    const team = teams[id];
-    const slides = make_slides(team);
-    setTeam(team);
-    return slides;
+  const prepareRoll = (turn: number) => {
+    const selectedTeamId = getTeamId(turn);
+    const selectedTeam = teams[selectedTeamId];
+
+    const slides = makeSlides(selectedTeam);
+
+    setTeam(selectedTeam);
+    setSlides(slides);
+    setRollId((current) => current + 1);
+  };
+
+  const startRolling = () => {
+    if (status !== "idle") {
+      return;
+    }
+
+    prepareRoll(teamId);
+    startRoll();
   };
 
   const handleReroll = () => {
-    if (status === "picking" && reroll) {
-      setTeamId(teamId + 1);
-      Reroll();
-      setSlides(handleSelectTeam(teamId));
-    }
-  };
-
-  const makeSelection = () => {
-    if (
-      status === "picking" &&
-      ((reroll && teamId < 5) || (!reroll && teamId < 6))
-    ) {
-      setTeamId(teamId + 1);
-    }
-  };
-
-  const handlePlayers = (): Player[] | void => {
-    if (!team) {
+    if (status !== "picking" || !rerollStatus) {
       return;
     }
-    const players = team.players;
-    return players;
-  };
 
-  const handleAvailability = (p: Player): LineupRole[] => {
-    return compatibility(p);
+    const nextTeamId = teamId + 1;
+
+    if (nextTeamId > 6) {
+      return;
+    }
+
+    setTeamId(nextTeamId);
+    prepareRoll(nextTeamId);
+
+    reroll();
   };
 
   const handleRollComplete = () => {
     finishRoll();
-  };
-
-  const startRolling = () => {
-    setSlides(handleSelectTeam(teamId));
-    startRoll();
   };
 
   const handleSelectPlayer = (player: Player) => {
@@ -130,47 +138,122 @@ const TeamSelect = () => {
       case Roles.AWPER:
         selectAwper(player);
         break;
+
       case Roles.CLOSER:
         selectCloser(player);
         break;
+
       case Roles.OPENER:
         selectOpener(player);
         break;
+
       case Roles.SUPPORT:
         selectSupport(player);
         break;
     }
 
     setTeam(null);
-    makeSelection();
+    setTeamId((current) => current + 1);
+    resetRoll();
+  };
+
+  const handleSelectIgl = (p: Pick): (() => void) => {
+    return () => setIgl(p);
+  };
+
+  const handleSubmit = () => {
+    selectIgl(igl);
+    submit(game.id);
   };
 
   return (
     <div>
-      <button onClick={startRolling}>Start</button>
-      {slides && (
+      {status === "idle" && teamId <= 6 && (
+        <button onClick={startRolling}>Start</button>
+      )}
+
+      {slides.length > 0 && (
         <TeamRoll
+          key={rollId}
           slides={slides}
           winnerIndex={WINNER_INDEX}
           onComplete={handleRollComplete}
         />
       )}
-      {status === "picking" &&
-        team &&
-        team.players.map((player) => (
-          <div key={player.id}>
-            <button onClick={() => handleSelectPlayer(player)}>
-              {player.name}
-            </button>
-          </div>
-        ))}
-      <button onClick={handleReroll}>Reroll</button>
+
       <div>
-        <div>opener = {(opener && opener.name) || "None"}</div>
-        <div>closer = {(closer && closer.name) || "None"}</div>
-        <div>awper = {(awper && awper.name) || "None"}</div>
-        <div>support = {(support && support.name) || "None"}</div>
-        <div>flex = {(flex && flex.name) || "None"}</div>
+        {status === "picking" &&
+          team &&
+          team.players.map((player) => (
+            <div key={player.id}>
+              <button
+                onClick={() => handleSelectPlayer(player)}
+                disabled={!compatibility(player)}
+              >
+                {player.name}
+              </button>
+            </div>
+          ))}
+
+        {status === "picking" && rerollStatus && teamId < 6 && (
+          <button onClick={handleReroll}>Reroll</button>
+        )}
+        <div>
+          <div>
+            opener = {(opener && opener.name) || "None"}{" "}
+            {opener &&
+              (igl === Pick.opener ? (
+                "IGL"
+              ) : (
+                <button onClick={handleSelectIgl(Pick.opener)}>Make IGL</button>
+              ))}
+          </div>
+
+          <div>
+            closer = {(closer && closer.name) || "None"}{" "}
+            {closer &&
+              (igl === Pick.closer ? (
+                "IGL"
+              ) : (
+                <button onClick={handleSelectIgl(Pick.closer)}>Make IGL</button>
+              ))}
+          </div>
+
+          <div>
+            awper = {(awper && awper.name) || "None"}{" "}
+            {awper &&
+              (igl === Pick.awper ? (
+                "IGL"
+              ) : (
+                <button onClick={handleSelectIgl(Pick.awper)}>Make IGL</button>
+              ))}
+          </div>
+
+          <div>
+            support = {(support && support.name) || "None"}{" "}
+            {support &&
+              (igl === Pick.support ? (
+                "IGL"
+              ) : (
+                <button onClick={handleSelectIgl(Pick.support)}>
+                  Make IGL
+                </button>
+              ))}
+          </div>
+
+          <div>
+            flex = {(flex && flex.name) || "None"}{" "}
+            {flex &&
+              (igl === Pick.flex ? (
+                "IGL"
+              ) : (
+                <button onClick={handleSelectIgl(Pick.flex)}>Make IGL</button>
+              ))}
+          </div>
+        </div>
+        {opener && closer && awper && support && flex && (
+          <button onClick={handleSubmit}>Submit</button>
+        )}
       </div>
     </div>
   );

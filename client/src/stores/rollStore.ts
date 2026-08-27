@@ -3,7 +3,8 @@ import { create } from "zustand";
 interface RollActions {
   startRoll: () => void;
   finishRoll: () => void;
-  Reroll: () => void;
+  resetRoll: () => void;
+  reroll: () => void;
 }
 
 type RollStatus = "idle" | "rolling" | "picking";
@@ -22,17 +23,25 @@ const useRollStore = create<RollStore>((set, get) => ({
       set(() => ({
         status: "rolling",
       })),
+
     finishRoll: () =>
       set(() => ({
         status: "picking",
       })),
-    Reroll: () => {
-      if (get().rerollStatus) {
-        set(() => ({
-          status: "rolling",
-          reroll: false,
-        }));
+
+    resetRoll: () =>
+      set(() => ({
+        status: "idle",
+      })),
+
+    reroll: () => {
+      if (!get().rerollStatus) {
+        return;
       }
+      set(() => ({
+        status: "rolling",
+        rerollStatus: false,
+      }));
     },
   },
 }));

@@ -44,6 +44,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("hashed_password", sa.String(200), nullable=False, unique=False),
+        sa.Column("best_score", sa.DECIMAL(4,2), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
