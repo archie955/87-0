@@ -1,4 +1,3 @@
-from services.helpers import safe_commit_delete
 import asyncio
 import logging
 
@@ -13,7 +12,7 @@ from exceptions.app_exceptions import (
 )
 from models.models import User
 from schemas import user_schemas
-from services.helpers import safe_commit
+from services.helpers import safe_commit, safe_commit_delete
 from utils import utils
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,6 @@
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, status
 
-from authentication.auth import get_current_user
-from database.database import get_db
-from models.models import Active_Game, User
-from routers.game_dep import get_current_game
+from routers.dependencies import DBDep, GameDep, UserDep
 from schemas import active_game_schemas
 from services import game_service
 
@@ -14,7 +10,7 @@ router = APIRouter(prefix="/games", tags=["Games"])
 @router.post(
     "", status_code=status.HTTP_201_CREATED, response_model=active_game_schemas.Game
 )
-async def create_game(db: AsyncSession = Depends(get_db)):
+async def create_game(db: DBDep):
     return await game_service.create_game(db=db)
 
 
@@ -26,9 +22,9 @@ async def create_game(db: AsyncSession = Depends(get_db)):
 async def submit_user_lineup(
     game_id: int,
     game: active_game_schemas.GameResult,
-    active_game: Active_Game = Depends(get_current_game),
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    active_game: GameDep,
+    user: UserDep,
+    db: DBDep,
 ):
     return await game_service.evaluate_user_game(
         game=game, active_game=active_game, user=user, db=db
@@ -43,7 +39,7 @@ async def submit_user_lineup(
 async def submit_lineup(
     game_id: int,
     game: active_game_schemas.GameResult,
-    active_game: Active_Game = Depends(get_current_game),
-    db: AsyncSession = Depends(get_db),
+    active_game: GameDep,
+    db: DBDep,
 ):
     return await game_service.evaluate_game(game=game, active_game=active_game, db=db)

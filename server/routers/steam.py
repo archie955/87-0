@@ -1,10 +1,7 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Request, status
 from fastapi.responses import RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from authentication import auth
-from database.database import get_db
-from models.models import User
+from routers.dependencies import DBDep, UserDep
 from schemas import token_schemas
 from services import steam_service
 
@@ -22,13 +19,13 @@ def redirect(request: Request):
     status_code=status.HTTP_200_OK,
     response_model=token_schemas.UserToken,
 )
-async def validate_login(request: Request, db: AsyncSession = Depends(get_db)):
+async def validate_login(request: Request, db: DBDep):
     return await steam_service.validate(db=db, query_params=request.query_params)
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(auth.get_current_user),
+    db: DBDep,
+    user: UserDep,
 ):
     await steam_service.delete(db=db, user=user)

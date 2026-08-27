@@ -1,10 +1,6 @@
-from fastapi import APIRouter, Depends, status
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, status
 
-from authentication.auth import get_current_user
-from database.database import get_db
-from models.models import User
+from routers.dependencies import AuthDep, DBDep, UserDep
 from schemas import user_schemas
 from services import user_service
 
@@ -14,9 +10,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.post(
     path="", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut
 )
-async def create_user(
-    user: user_schemas.UserCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_user(user: user_schemas.UserCreate, db: DBDep):
     return await user_service.create_user(db=db, user=user)
 
 
@@ -24,8 +18,8 @@ async def create_user(
     path="/login", status_code=status.HTTP_200_OK, response_model=user_schemas.UserToken
 )
 async def login(
-    user_credentials: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncSession = Depends(get_db),
+    user_credentials: AuthDep,
+    db: DBDep,
 ):
     return await user_service.login(
         db=db, username=user_credentials.username, password=user_credentials.password
@@ -35,15 +29,15 @@ async def login(
 @router.put("", status_code=status.HTTP_200_OK, response_model=user_schemas.UserOut)
 async def update_user(
     updated_payload: user_schemas.UserUpdate,
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    db: DBDep,
+    user: UserDep,
 ):
     return await user_service.update(db=db, user=user, updated=updated_payload)
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    db: DBDep,
+    user: UserDep,
 ):
     await user_service.delete(db=db, user=user)

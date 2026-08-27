@@ -1,4 +1,3 @@
-from services.helpers import safe_commit_delete
 from random import randint
 
 from sqlalchemy import select
@@ -8,7 +7,7 @@ from exceptions.app_exceptions import DataNotFoundError
 from models.models import Active_Game, Team, User
 from schemas import active_game_schemas
 from services import game_helpers
-from services.helpers import safe_commit
+from services.helpers import safe_commit, safe_commit_delete
 
 MIN_TEAMS = 2
 
