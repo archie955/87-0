@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 from routers.dependencies import DBDep, UserDep
 from schemas import token_schemas
 from services import steam_service
+from utils.config import SettingsDep
 
 router = APIRouter(prefix="/steam", tags=["Users"])
 
@@ -19,8 +20,10 @@ def redirect(request: Request):
     status_code=status.HTTP_200_OK,
     response_model=token_schemas.UserToken,
 )
-async def validate_login(request: Request, db: DBDep):
-    return await steam_service.validate(db=db, query_params=request.query_params)
+async def validate_login(request: Request, db: DBDep, settings: SettingsDep):
+    return await steam_service.validate(
+        db=db, settings=settings, query_params=request.query_params
+    )
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)

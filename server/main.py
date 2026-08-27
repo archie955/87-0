@@ -12,7 +12,9 @@ from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from routers import game, teams, user
-from utils.config import settings
+from utils.config import get_settings
+
+settings = get_settings()
 
 origins = settings.allowed_origins.split(",")
 

@@ -3,6 +3,7 @@ from fastapi import APIRouter, status
 from routers.dependencies import AuthDep, DBDep, UserDep
 from schemas import user_schemas
 from services import user_service
+from utils.config import SettingsDep
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -17,12 +18,12 @@ async def create_user(user: user_schemas.UserCreate, db: DBDep):
 @router.post(
     path="/login", status_code=status.HTTP_200_OK, response_model=user_schemas.UserToken
 )
-async def login(
-    user_credentials: AuthDep,
-    db: DBDep,
-):
+async def login(user_credentials: AuthDep, db: DBDep, settings: SettingsDep):
     return await user_service.login(
-        db=db, username=user_credentials.username, password=user_credentials.password
+        db=db,
+        settings=settings,
+        username=user_credentials.username,
+        password=user_credentials.password,
     )
 
 

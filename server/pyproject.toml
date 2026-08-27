@@ -268,12 +268,12 @@ project-excludes = [
     "dist",
     "node_modules",
     "site-packages",
-    "old_ml",
-    "redis_temp",
-    "alembic",
-    "database/init_players.py",
-    "database/init_db.py",
-    "database/init_teams.py",
+    "/old_ml/*",
+    "/redis_temp/*",
+    "/alembic/*",
+    "/database/init_players.py",
+    "/database/init_db.py",
+    "/database/init_teams.py",
 ]
 python-platform = "linux"
 python-version = "3.12"

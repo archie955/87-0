@@ -3,7 +3,9 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 
-from utils.config import settings
+from utils.config import get_settings
+
+settings = get_settings()
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.postgres_username}:{settings.postgres_password}@{settings.postgres_hostname}/{settings.postgres_name}"
 

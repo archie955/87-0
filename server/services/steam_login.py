@@ -10,7 +10,7 @@ from exceptions.app_exceptions import (
     PermissionDeniedError,
 )
 from schemas.steam_schemas import Profile
-from utils.config import settings
+from utils.config import get_settings
 
 """example output of fetch here:
 {"response":
@@ -39,7 +39,7 @@ from utils.config import settings
 }
 """
 
-
+settings = get_settings()
 KEY = settings.steam_key
 BASEURL = "https://steamcommunity.com/openid/login"
 FETCHURL = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"

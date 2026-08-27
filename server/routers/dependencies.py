@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, Path
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from fastapi.security.oauth2 import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,6 +28,9 @@ async def get_current_game(
     return game
 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
 UserDep = Annotated[User, Depends(get_current_user)]
 AuthDep = Annotated[OAuth2PasswordRequestForm, Depends()]
+BearerDep = Annotated[str, Depends(oauth2_scheme)]
 GameDep = Annotated[Active_Game, Depends(get_current_game)]

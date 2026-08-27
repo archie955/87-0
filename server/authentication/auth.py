@@ -2,43 +2,35 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.database import get_db
 from exceptions.app_exceptions import InvalidCredentialsError
 from models.models import User
+from routers.dependencies import BearerDep, DBDep
 from schemas import token_schemas
-from utils.config import settings
+from utils.config import Settings, SettingsDep
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
-
-SECRET_KEY = settings.secret_key
-ALGORITHM = settings.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Bearer"})
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(data: dict, settings: Settings) -> str:
     to_encode = data.copy()
 
-    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode.update({"exp": expire, "type": "access"})
 
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
-def decode_token(token: str) -> dict[str, Any]:
+def decode_token(token: str, settings: Settings) -> dict[str, Any]:
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     except jwt.exceptions.InvalidTokenError as e:
         raise CREDENTIALS_EXCEPTION from e
 
 
-def verify_access_token(token: str) -> token_schemas.TokenData:
-    payload = decode_token(token)
+def verify_access_token(token: str, settings: Settings) -> token_schemas.TokenData:
+    payload = decode_token(token, settings)
 
     if payload.get("type") != "access":
         raise CREDENTIALS_EXCEPTION
@@ -51,10 +43,8 @@ def verify_access_token(token: str) -> token_schemas.TokenData:
     return token_schemas.TokenData(id=user_id)
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
-) -> User:
-    user_id_token = verify_access_token(token=token)
+async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -> User:
+    user_id_token = verify_access_token(token=token, settings=settings)
 
     user = (
         await db.execute(select(User).where(User.id == int(user_id_token.id)))

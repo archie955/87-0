@@ -14,6 +14,7 @@ from models.models import User
 from schemas import user_schemas
 from services.helpers import safe_commit, safe_commit_delete
 from utils import utils
+from utils.config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ async def create_user(
 
 
 async def login(
-    db: AsyncSession, username: str, password: str
+    db: AsyncSession, settings: Settings, username: str, password: str
 ) -> user_schemas.UserToken:
     user = (
         await db.execute(
@@ -81,7 +82,7 @@ async def login(
 
     return user_schemas.UserToken(
         user=user_schemas.UserOut.model_validate(user),
-        access_token=create_access_token(data=user_data),
+        access_token=create_access_token(data=user_data, settings=settings),
         token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
     )
 

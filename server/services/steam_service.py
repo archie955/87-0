@@ -14,6 +14,7 @@ from models.models import User
 from schemas import token_schemas
 from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
+from utils.config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def redirect(url: str) -> RedirectResponse:
     return steam.redirect()
 
 
-async def validate(db: AsyncSession, query_params: QueryParams):
+async def validate(db: AsyncSession, settings: Settings, query_params: QueryParams):
     validator = SteamValidator()
     steam_id = await validator.validate_login(query_params)
 
@@ -66,7 +67,7 @@ async def validate(db: AsyncSession, query_params: QueryParams):
 
     return token_schemas.UserToken(
         user=user,
-        access_token=create_access_token(data=user_data),
+        access_token=create_access_token(data=user_data, settings=settings),
         token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
     )
 
