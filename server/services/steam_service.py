@@ -31,7 +31,7 @@ def redirect(return_url: str) -> RedirectResponse:
     return steam.redirect()
 
 
-async def validate(query_params: QueryParams) -> steam_schemas.SteamProfile:
+async def validate_profile(query_params: QueryParams) -> steam_schemas.SteamProfile:
     validator = SteamValidator()
     steam_id = await validator.validate_login(query_params)
 
@@ -122,16 +122,32 @@ async def update_steam_login(
     )
 
 
-async def steam_register(
-    db: AsyncSession, settings: Settings, query_params: QueryParams
+async def add_steam_login_to_preexisting_account(
+    db: AsyncSession, profile: steam_schemas.SteamProfile, user: models.User
 ):
-    profile = await validate(query_params)
-    return await create_steam_login(db=db, profile=profile, settings=settings)
+    if user.steam_login:
+        raise DataAlreadyExistsError(datatype="Steam Login")
 
+    if not user.email_login:
+        raise BadRequestError(message="Account not authenticated")
 
-async def steam_login(db: AsyncSession, settings: Settings, query_params: QueryParams):
-    profile = await validate(query_params)
-    return await update_steam_login(db=db, profile=profile, settings=settings)
+    steam_login = models.Steam(
+        profile_name=profile.profile_name,
+        url=profile.url,
+        avatar=profile.avatar,
+        steam_id=profile.steam_id,
+        user=user,
+    )
+
+    db.add(steam_login)
+
+    await safe_commit_add(db=db, datatype="User")
+
+    await db.refresh(steam_login)
+
+    logger.info("Added steam login", extra={"user_id": str(user.id)})
+
+    return steam_schemas.SteamOut.model_validate(steam_login)
 
 
 async def delete(db: AsyncSession, user: models.User) -> None:

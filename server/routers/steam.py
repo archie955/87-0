@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from authentication.auth import UserDep
 from database.database import DBDep
-from schemas import token_schemas
+from schemas import steam_schemas, token_schemas
 from services import steam_service
 from utils.config import SettingsDep
 
@@ -23,8 +23,9 @@ def steam_register(request: Request):
     response_model=token_schemas.TokenOut,
 )
 async def steam_validate_register(request: Request, db: DBDep, settings: SettingsDep):
-    return await steam_service.steam_register(
-        db=db, settings=settings, query_params=request.query_params
+    profile = await steam_service.validate_profile(request.query_params)
+    return await steam_service.create_steam_login(
+        db=db, settings=settings, profile=profile
     )
 
 
@@ -43,8 +44,30 @@ def steam_login(request: Request):
     response_model=token_schemas.TokenOut,
 )
 async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDep):
-    return await steam_service.steam_login(
-        db=db, settings=settings, query_params=request.query_params
+    profile = await steam_service.validate_profile(request.query_params)
+    return await steam_service.update_steam_login(
+        db=db, settings=settings, profile=profile
+    )
+
+
+@router.get(
+    "/add", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse
+)
+def steam_add(request: Request):
+    return steam_service.redirect(
+        return_url=str(request.url_for("steam_add_to_account"))
+    )
+
+
+@router.get(
+    "/add/validate",
+    status_code=status.HTTP_200_OK,
+    response_model=steam_schemas.SteamOut,
+)
+async def steam_add_validate(request: Request, db: DBDep, user: UserDep):
+    profile = await steam_service.validate_profile(request.query_params)
+    return await steam_service.add_steam_login_to_preexisting_account(
+        db=db, profile=profile, user=user
     )
 
 
