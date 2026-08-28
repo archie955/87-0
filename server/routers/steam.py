@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from authentication.auth import UserDep
 from database.database import DBDep
-from schemas import token_schemas
+from schemas import user_schemas
 from services import steam_service
 from utils.config import SettingsDep
 
@@ -19,7 +19,7 @@ def redirect(request: Request):
 @router.get(
     "/validatelogin",
     status_code=status.HTTP_200_OK,
-    response_model=token_schemas.UserToken,
+    response_model=user_schemas.UserToken,
 )
 async def validate_login(request: Request, db: DBDep, settings: SettingsDep):
     return await steam_service.validate(

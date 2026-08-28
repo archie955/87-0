@@ -11,7 +11,7 @@ from exceptions.app_exceptions import (
     InvalidCredentialsError,
 )
 from models.models import User
-from schemas import token_schemas
+from schemas import user_schemas
 from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
 from utils.config import Settings
@@ -65,7 +65,7 @@ async def validate(db: AsyncSession, settings: Settings, query_params: QueryPara
 
     logger.info("User logged in", extra={"user_id": str(id)})
 
-    return token_schemas.UserToken(
+    return user_schemas.UserToken(
         user=user,
         access_token=create_access_token(data=user_data, settings=settings),
         token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]

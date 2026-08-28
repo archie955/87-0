@@ -9,7 +9,7 @@ from exceptions.app_exceptions import (
     InvalidCredentialsError,
     PermissionDeniedError,
 )
-from schemas.steam_schemas import Profile
+from schemas.steam_schemas import SteamProfile
 from utils.config import get_settings
 
 """example output of fetch here:
@@ -125,7 +125,7 @@ class SteamValidator:
 
         return identity[p:]
 
-    async def fetch_details(self) -> Profile:
+    async def fetch_details(self) -> SteamProfile:
         params = {"key": KEY, "steamids": self.__identity}
 
         async with AsyncClient() as client:
@@ -151,7 +151,7 @@ class SteamValidator:
         if not isinstance(self.__identity, str):
             raise PermissionDeniedError()
 
-        return Profile(
+        return SteamProfile(
             username=player.personaname,
             url=player.profileurl,
             avatar=player.avatar,

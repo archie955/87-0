@@ -1,8 +1,7 @@
-from pydantic import BaseModel, ConfigDict, RootModel
+from pydantic import BaseModel, RootModel
 
+from schemas.base_schema import OrmModel
 from schemas.player_schemas import Player
-
-config = ConfigDict(from_attributes=True)
 
 
 class Team(BaseModel):
@@ -11,5 +10,5 @@ class Team(BaseModel):
     players: list[Player]
 
 
-class Teams(RootModel[dict[int, Team]]):
-    model_config = config
+class Teams(RootModel[dict[int, Team]], OrmModel):
+    pass

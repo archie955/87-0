@@ -1,25 +1,19 @@
-from pydantic import BaseModel, ConfigDict
-
 from models.enums import Roles
+from schemas.base_schema import OrmModel
 
-config = ConfigDict(from_attributes=True)
 
-
-class Player(BaseModel):
+class Player(OrmModel):
     id: int
     team_id: int
     name: str
     role: Roles
     hltv: float
     igl_bonus: float
-    model_config = config
 
 
-class TeamPlayers(BaseModel):
+class TeamPlayers(OrmModel):
     players: list[Player]
-    model_config = config
 
 
 class AltTeamPlayers(TeamPlayers):
     team_id: int
-    model_config = config

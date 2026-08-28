@@ -1,12 +1,11 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from models.enums import Roles
+from schemas.base_schema import OrmModel
 from schemas.player_schemas import Player
 
-config = ConfigDict(from_attributes=True)
 
-
-class Game(BaseModel):
+class ActiveGame(OrmModel):
     id: int
     team_1_id: int
     team_2_id: int
@@ -14,7 +13,6 @@ class Game(BaseModel):
     team_4_id: int
     team_5_id: int
     team_6_id: int
-    model_config = config
 
 
 class GameResult(BaseModel):

@@ -1,29 +1,24 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
-
+from schemas.base_schema import OrmModel
 from schemas.game_schemas import Game
 
-config = ConfigDict(from_attributes=True)
 
-
-class User(BaseModel):
+class SteamUser(OrmModel):
     username: str
     url: str
     avatar: str
-    model_config = config
 
 
-class Profile(User):
+class SteamProfile(SteamUser):
     username: str
     url: str
     avatar: str
     steam_id: str
 
 
-class UserOut(User):
+class SteamUserOut(SteamUser):
     id: int
     created_at: datetime
     updated_at: datetime
     best_game: Game
-    model_config = config

@@ -10,7 +10,9 @@ router = APIRouter(prefix="/games", tags=["Games"])
 
 
 @router.post(
-    "", status_code=status.HTTP_201_CREATED, response_model=active_game_schemas.Game
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=active_game_schemas.ActiveGame,
 )
 async def create_game(db: DBDep):
     return await game_service.create_game(db=db)

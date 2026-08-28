@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, EmailStr
 
-config = ConfigDict(from_attributes=True)
+from schemas.base_schema import OrmModel
 
 
 class UserBase(BaseModel):
@@ -14,12 +14,11 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserOut(UserBase):
+class UserOut(UserBase, OrmModel):
     id: int
     best_score: float | None = None
     created_at: datetime
     updated_at: datetime
-    model_config = config
 
 
 class UserUpdate(BaseModel):

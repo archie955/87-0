@@ -12,7 +12,7 @@ from services.helpers import safe_commit, safe_commit_delete
 MIN_TEAMS = 2
 
 
-async def create_game(db: AsyncSession) -> active_game_schemas.Game:
+async def create_game(db: AsyncSession) -> active_game_schemas.ActiveGame:
     teams = (await db.execute(select(Team))).scalars().all()
 
     if not teams or len(teams) < MIN_TEAMS:
@@ -32,7 +32,7 @@ async def create_game(db: AsyncSession) -> active_game_schemas.Game:
 
     await db.refresh(active_game)
 
-    return active_game_schemas.Game.model_validate(active_game)
+    return active_game_schemas.ActiveGame.model_validate(active_game)
 
 
 async def evaluate_user_game(
