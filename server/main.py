@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -7,22 +8,29 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.database import get_db
+from database.database import engine, get_db
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
+from models.models import Base
 from routers import game, teams, user
 from utils.config import get_settings
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    configure_logging()
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 settings = get_settings()
 
 origins = settings.allowed_origins.split(",")
 
-configure_logging()
-
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
