@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from authentication.auth import create_access_token
 from exceptions.app_exceptions import (
+    BadRequestError,
     DataAlreadyExistsError,
+    DataNotFoundError,
     InvalidCredentialsError,
 )
 from models import models
@@ -92,12 +94,20 @@ async def login(
     )
 
 
-async def delete(db: AsyncSession, email_user: models.Email) -> None:
-    user_id = email_user.user_id
+async def delete(db: AsyncSession, user: models.User) -> None:
+    if not user.steam_login:
+        raise BadRequestError(
+            message="Cannot delete only authentication method for account"
+        )
+
+    if not user.email_login:
+        raise DataNotFoundError(datatype="Email Login")
+
+    email_user = user.email_login
 
     await db.delete(email_user)
     await safe_commit_delete(db, datatype="Email Login")
 
     logger.info("email User deleted", extra={"email_user_id": email_user.id})
 
-    logger.info("Associated user remains", extra={"user_id": user_id})
+    logger.info("Associated user remains", extra={"user_id": user.id})

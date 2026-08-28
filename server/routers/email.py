@@ -44,4 +44,4 @@ async def email_delete(
     db: DBDep,
     user: UserDep,
 ):
-    await email_service.delete(db=db, email_user=user.email_login)
+    await email_service.delete(db=db, user=user)

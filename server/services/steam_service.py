@@ -9,10 +9,13 @@ from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token
 from exceptions.app_exceptions import (
+    BadRequestError,
+    DataAlreadyExistsError,
+    DataNotFoundError,
     InvalidCredentialsError,
 )
 from models import models
-from schemas import token_schemas
+from schemas import steam_schemas, token_schemas
 from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
 from utils.config import Settings
@@ -28,17 +31,19 @@ def redirect(return_url: str) -> RedirectResponse:
     return steam.redirect()
 
 
-async def validate(
-    db: AsyncSession, settings: Settings, query_params: QueryParams
-) -> token_schemas.TokenOut:
+async def validate(query_params: QueryParams) -> steam_schemas.SteamProfile:
     validator = SteamValidator()
     steam_id = await validator.validate_login(query_params)
 
     if not steam_id:
         raise InvalidCredentialsError()
 
-    profile = await validator.fetch_details(steam_id)
+    return await validator.fetch_details(steam_id)
 
+
+async def create_steam_login(
+    db: AsyncSession, profile: steam_schemas.SteamProfile, settings: Settings
+):
     steam_login = (
         await db.execute(
             select(models.Steam)
@@ -47,35 +52,29 @@ async def validate(
         )
     ).scalar_one_or_none()
 
-    if steam_login is None:
-        user = models.User(
-            best_score=0.0,
-        )
-        steam_login = models.Steam(
-            profile_name=profile.profile_name,
-            url=profile.url,
-            avatar=profile.avatar,
-            steam_id=profile.steam_id,
-            user=user,
-        )
+    if steam_login is not None:
+        raise DataAlreadyExistsError(datatype="Steam Login")
 
-        db.add(user)
-        db.add(steam_login)
+    user = models.User(
+        best_score=0.0,
+    )
 
-        await safe_commit_add(db=db, datatype="User")
-        await db.refresh(steam_login)
+    steam_login = models.Steam(
+        profile_name=profile.profile_name,
+        url=profile.url,
+        avatar=profile.avatar,
+        steam_id=profile.steam_id,
+        user=user,
+    )
 
-        user = steam_login.user
+    db.add(user)
+    db.add(steam_login)
 
-    else:
-        user = steam_login.user
+    await safe_commit_add(db=db, datatype="User")
 
-        steam_login.username = profile.profile_name
-        steam_login.url = profile.url
-        steam_login.avatar = profile.avatar
+    await db.refresh(steam_login)
 
-        await safe_commit(db=db, datatype="User")
-        await db.refresh(steam_login)
+    user = steam_login.user
 
     user_data = {"sub": str(user.id)}
 
@@ -88,12 +87,67 @@ async def validate(
     )
 
 
-async def delete(db: AsyncSession, steam_user: models.Steam) -> None:
-    user_id = steam_user.user_id
+async def update_steam_login(
+    db: AsyncSession, profile: steam_schemas.SteamProfile, settings: Settings
+):
+    steam_login = (
+        await db.execute(
+            select(models.Steam)
+            .where(models.Steam.steam_id == profile.steam_id)
+            .options(selectinload(models.Steam.user))
+        )
+    ).scalar_one_or_none()
+
+    if steam_login is None:
+        raise DataNotFoundError(datatype="Steam Login")
+
+    user = steam_login.user
+
+    steam_login.username = profile.profile_name
+    steam_login.url = profile.url
+    steam_login.avatar = profile.avatar
+
+    await safe_commit(db=db, datatype="User")
+
+    await db.refresh(steam_login)
+
+    user_data = {"sub": str(user.id)}
+
+    logger.info("User logged in", extra={"user_id": str(user.id)})
+
+    return token_schemas.TokenOut(
+        user=user,
+        access_token=create_access_token(data=user_data, settings=settings),
+        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
+    )
+
+
+async def steam_register(
+    db: AsyncSession, settings: Settings, query_params: QueryParams
+):
+    profile = await validate(query_params)
+    return await create_steam_login(db=db, profile=profile, settings=settings)
+
+
+async def steam_login(db: AsyncSession, settings: Settings, query_params: QueryParams):
+    profile = await validate(query_params)
+    return await update_steam_login(db=db, profile=profile, settings=settings)
+
+
+async def delete(db: AsyncSession, user: models.User) -> None:
+    if not user.email_login:
+        raise BadRequestError(
+            message="Cannot delete only authentication method for account"
+        )
+
+    if not user.steam_login:
+        raise DataNotFoundError(datatype="Steam Login")
+
+    steam_user = user.steam_login
 
     await db.delete(steam_user)
     await safe_commit_delete(db, datatype="Steam Login")
 
     logger.info("Steam User deleted", extra={"steam_user_id": steam_user.id})
 
-    logger.info("Associated user remains", extra={"user_id": user_id})
+    logger.info("Associated user remains", extra={"user_id": user.id})

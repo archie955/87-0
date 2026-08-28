@@ -12,7 +12,7 @@ from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from models.models import Base
-from routers import game, steam, teams, user
+from routers import email, game, steam, teams, user
 from utils.config import get_settings
 
 
@@ -45,6 +45,7 @@ app.include_router(user.router)
 app.include_router(teams.router)
 app.include_router(game.router)
 app.include_router(steam.router)
+app.include_router(email.router)
 
 
 @app.exception_handler(AppException)
