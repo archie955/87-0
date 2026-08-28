@@ -1,3 +1,4 @@
+# pyrefly: ignore-errors[bad-argument-type]
 import logging
 
 from fastapi.datastructures import QueryParams
@@ -10,8 +11,8 @@ from authentication.auth import create_access_token
 from exceptions.app_exceptions import (
     InvalidCredentialsError,
 )
-from models.models import User
-from schemas import user_schemas
+from models import models
+from schemas import token_schemas
 from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
 from utils.config import Settings
@@ -19,61 +20,80 @@ from utils.config import Settings
 logger = logging.getLogger(__name__)
 
 
-def redirect(url: str) -> RedirectResponse:
-    steam = SteamLogin(url)
+def redirect(return_url: str) -> RedirectResponse:
+    steam = SteamLogin(return_url)
+
     logger.info("User redirected")
+
     return steam.redirect()
 
 
-async def validate(db: AsyncSession, settings: Settings, query_params: QueryParams):
+async def validate(
+    db: AsyncSession, settings: Settings, query_params: QueryParams
+) -> token_schemas.TokenOut:
     validator = SteamValidator()
     steam_id = await validator.validate_login(query_params)
 
-    if not steam_id or not isinstance(steam_id, str):
+    if not steam_id:
         raise InvalidCredentialsError()
 
-    profile = await validator.fetch_details()
+    profile = await validator.fetch_details(steam_id)
 
-    user = (
+    steam_login = (
         await db.execute(
-            select(User)
-            .where(User.steam_id == profile.steam_id)
-            .options(selectinload(User.best_game))
+            select(models.Steam)
+            .where(models.Steam.steam_id == profile.steam_id)
+            .options(selectinload(models.Steam.user))
         )
     ).scalar_one_or_none()
 
-    if user is None:
-        user = User(
-            username=profile.username,
+    if steam_login is None:
+        user = models.User(
+            best_score=0.0,
+        )
+        steam_login = models.Steam(
+            profile_name=profile.profile_name,
             url=profile.url,
             avatar=profile.avatar,
             steam_id=profile.steam_id,
+            user=user,
         )
+
         db.add(user)
+        db.add(steam_login)
+
         await safe_commit_add(db=db, datatype="User")
-        await db.refresh(user)
-        id = user.id
+        await db.refresh(steam_login)
+
+        user = steam_login.user
+
     else:
-        user.username = profile.username
-        user.url = profile.url
-        user.avatar = profile.avatar
+        user = steam_login.user
+
+        steam_login.username = profile.profile_name
+        steam_login.url = profile.url
+        steam_login.avatar = profile.avatar
+
         await safe_commit(db=db, datatype="User")
-        await db.refresh(user)
-        id = user.id
+        await db.refresh(steam_login)
 
-    user_data = {"sub": str(id)}
+    user_data = {"sub": str(user.id)}
 
-    logger.info("User logged in", extra={"user_id": str(id)})
+    logger.info("User logged in", extra={"user_id": str(user.id)})
 
-    return user_schemas.UserToken(
+    return token_schemas.TokenOut(
         user=user,
         access_token=create_access_token(data=user_data, settings=settings),
         token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
     )
 
 
-async def delete(db: AsyncSession, user: User):
-    await db.delete(user)
-    await safe_commit_delete(db, datatype="User")
+async def delete(db: AsyncSession, steam_user: models.Steam) -> None:
+    user_id = steam_user.user_id
 
-    logger.info("User deleted", extra={"user_id": user.id})
+    await db.delete(steam_user)
+    await safe_commit_delete(db, datatype="Steam Login")
+
+    logger.info("Steam User deleted", extra={"steam_user_id": steam_user.id})
+
+    logger.info("Associated user remains", extra={"user_id": user_id})

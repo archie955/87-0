@@ -195,12 +195,10 @@ select = [
     "TRY",
 ]
 
-# to eventually include fastapi one when typing-annotated is sorted
 ignore = [
     "incorrect-blank-line-before-class",
     "multi-line-summary-second-line",
     "missing-trailing-comma",
-    "fast-api-non-annotated-dependency",
     "logging-f-string",
 ]
 preview = true

@@ -2,9 +2,10 @@ from urllib.parse import urlencode
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
-from httpx import AsyncClient
+from httpx import AsyncClient, HTTPStatusError, RequestError
 
 from exceptions.app_exceptions import (
+    BadRequestError,
     DataNotFoundError,
     InvalidCredentialsError,
     PermissionDeniedError,
@@ -46,14 +47,14 @@ FETCHURL = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
 
 
 class SteamLogin:
-    def __init__(self, home_url: str):
+    def __init__(self, return_url: str):
         self.__params = {
             "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.mode": "checkid_setup",
             "openid.ns": "http://specs.openid.net/auth/2.0",
-            "openid.realm": home_url,
-            "openid.return_to": home_url,
+            "openid.realm": return_url,
+            "openid.return_to": return_url,
         }
 
     def __create_url(self) -> str:
@@ -62,98 +63,130 @@ class SteamLogin:
     # This redirects to steam.
     # Upon login it will send a request to the return_to url provided.
     def redirect(self) -> RedirectResponse:
-        url = self.__create_url()
         return RedirectResponse(
-            url=url,
+            url=self.__create_url(),
             status_code=status.HTTP_303_SEE_OTHER,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
 
 class SteamValidator:
-    def __init__(self):
-        self.__validation_params = {}
-        self.__identity = None
+    __IDENTITY_PREFIX = "https://steamcommunity.com/openid/id/"
 
-    async def validate_login(self, data) -> str | bool:
-        string_params = (
-            "openid.ns",
-            "openid.mode",
-            "openid.op_endpoint",
-            "openid.claimed_id",
-            "openid.identity",
-            "openid.return_to",
-            "openid.response_nonce",
-            "openid.assoc_handle",
-            "openid.signed",
-            "openid.sig",
-        )
+    __OPENID_PARAMETERS = (
+        "openid.ns",
+        "openid.mode",
+        "openid.op_endpoint",
+        "openid.claimed_id",
+        "openid.identity",
+        "openid.return_to",
+        "openid.response_nonce",
+        "openid.assoc_handle",
+        "openid.signed",
+        "openid.sig",
+    )
 
-        for param in string_params:
-            val = data.get(param)
-            if not val or not isinstance(val, str):
-                return False
-            self.__validation_params[param] = val
+    async def validate_login(self, data) -> str:  # ruff: ignore[complex-structure]
+        validation_params: dict[str, str] = {}
+        for param in self.__OPENID_PARAMETERS:
+            value = data.get(param)
 
-        self.__validation_params["openid.mode"] = "check_authentication"
+            if not value or not isinstance(value, str):
+                raise InvalidCredentialsError()
+
+            validation_params[param] = value
+
+        validation_params["openid.mode"] = "check_authentication"
 
         async with AsyncClient() as client:
-            response = (
-                await client.get(BASEURL, params=self.__validation_params, timeout=10)
-            ).text
+            try:
+                response = await client.get(
+                    BASEURL, params=validation_params, timeout=10
+                )
+                response.raise_for_status()
+            except RequestError as exc:
+                raise BadRequestError(
+                    message=f"Error whilst requesting {exc.request.url}"
+                ) from exc
+            except HTTPStatusError as exc:
+                raise InvalidCredentialsError() from exc
 
-        validator = {}
+        validation_result = {}
 
-        for line in response.splitlines():
+        for line in response.text.splitlines():
             if ":" in line:
-                k, v = line.split(":", 1)
-                validator[k.strip()] = v.strip()
+                key, value = line.split(":", 1)
+                validation_result[key.strip()] = value.strip()
 
-        if validator["is_valid"] != "true":
-            return False
-
-        identity = data.get("openid.identity")
-        if identity != data.get("openid.claimed_id"):
-            return False
-
-        prefix = "https://steamcommunity.com/openid/id/"
-        p = len(prefix)
-        if identity[:p] != prefix:
-            return False
-
-        self.__identity = identity[p:]
-
-        return identity[p:]
-
-    async def fetch_details(self) -> SteamProfile:
-        params = {"key": KEY, "steamids": self.__identity}
-
-        async with AsyncClient() as client:
-            response = (await client.get(FETCHURL, params=params, timeout=10)).json()
-
-        if not response.players or not response.players[0]:
-            raise DataNotFoundError(datatype="user")
-
-        player = response.players[0]
-
-        if not player.steamid or player.steamid != self.__identity:
+        if validation_result.get("is_valid") != "true":
             raise InvalidCredentialsError()
 
-        if not player.personaname:
-            raise DataNotFoundError(datatype="username")
+        identity = data.get("openid.identity")
+        claimed_id = data.get("openid,claimed_id")
 
-        if not player.profileurl:
-            raise DataNotFoundError(datatype="profile")
+        if identity != claimed_id:
+            raise InvalidCredentialsError()
 
-        if not player.avatar:
-            raise DataNotFoundError(datatype="avatar")
+        if not isinstance(identity, str):
+            raise InvalidCredentialsError()
 
-        if not isinstance(self.__identity, str):
+        if not identity.startswith(self.__IDENTITY_PREFIX):
             raise PermissionDeniedError()
 
+        steam_id = identity.removeprefix(self.__IDENTITY_PREFIX)
+
+        if not steam_id:
+            raise InvalidCredentialsError()
+
+        return steam_id
+
+    @staticmethod
+    async def fetch_details(steam_id: str) -> SteamProfile:
+        params = {"key": KEY, "steamids": steam_id}
+
+        async with AsyncClient() as client:
+            try:
+                response = await client.get(
+                    FETCHURL,
+                    params=params,
+                    timeout=10,
+                )
+                response.raise_for_status()
+            except RequestError as exc:
+                raise BadRequestError(
+                    message=f"Error while requesting {exc.request.url}"
+                ) from exc
+            except HTTPStatusError as exc:
+                raise DataNotFoundError(datatype="Steam user") from exc
+
+        data = response.json()
+
+        players = data.get("response", {}).get("players", [])
+
+        if not players:
+            raise DataNotFoundError(datatype="user")
+
+        player = players[0]
+
+        if player.get("steamid") != steam_id:
+            raise InvalidCredentialsError()
+
+        profile_name = player.get("personaname")
+        profile_url = player.get("profileurl")
+        avatar = player.get("avatar")
+
+        if not profile_name:
+            raise DataNotFoundError(datatype="username")
+
+        if not profile_url:
+            raise DataNotFoundError(datatype="profile")
+
+        if not avatar:
+            raise DataNotFoundError(datatype="avatar")
+
         return SteamProfile(
-            username=player.personaname,
-            url=player.profileurl,
-            avatar=player.avatar,
-            steam_id=self.__identity,
+            steam_id=steam_id,
+            profile_name=profile_name,
+            url=profile_url,
+            avatar=avatar,
         )

@@ -1,22 +1,25 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 from schemas.base_schema import OrmModel
+from schemas.email_schemas import EmailOut
+from schemas.steam_schemas import SteamOut
 
 
 class UserBase(BaseModel):
-    email: EmailStr
-    username: str
+    pass
 
 
 class UserCreate(UserBase):
     password: str
 
 
-class UserOut(UserBase, OrmModel):
+class UserOut(OrmModel):
     id: int
     best_score: float | None = None
+    steam: SteamOut | None = None
+    email: EmailOut | None = None
     created_at: datetime
     updated_at: datetime
 

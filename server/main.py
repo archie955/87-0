@@ -1,19 +1,18 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.database import engine, get_db
+from database.database import DBDep, engine
 from exceptions.app_exceptions import AppException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from models.models import Base
-from routers import game, teams, user
+from routers import game, steam, teams, user
 from utils.config import get_settings
 
 
@@ -45,6 +44,7 @@ app.add_middleware(LoggingMiddleware)
 app.include_router(user.router)
 app.include_router(teams.router)
 app.include_router(game.router)
+app.include_router(steam.router)
 
 
 @app.exception_handler(AppException)
@@ -87,7 +87,7 @@ def global_expression_handler(request: Request, exc: Exception):
 
 
 @app.get("/health")
-async def health(db: AsyncSession = Depends(get_db)) -> dict[str, str]:
+async def health(db: DBDep) -> dict[str, str]:
     try:
         await db.execute(text("SELECT 1"))
     except Exception:

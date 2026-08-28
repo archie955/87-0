@@ -5,6 +5,7 @@ import jwt
 from fastapi import Depends
 from fastapi.security.oauth2 import OAuth2PasswordBearer
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from database.database import DBDep
 from exceptions.app_exceptions import InvalidCredentialsError
@@ -14,7 +15,7 @@ from utils.config import Settings, SettingsDep
 
 CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Bearer"})
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 BearerDep = Annotated[str, Depends(oauth2_scheme)]
 
@@ -53,7 +54,11 @@ async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -
     user_id_token = verify_access_token(token=token, settings=settings)
 
     user = (
-        await db.execute(select(User).where(User.id == int(user_id_token.id)))
+        await db.execute(
+            select(User)
+            .where(User.id == int(user_id_token.id))
+            .options(selectinload(User.steam_login, User.email_login, User.best_score))
+        )
     ).scalar_one_or_none()
 
     if not user:

@@ -1,24 +1,22 @@
 from datetime import datetime
 
+from pydantic import BaseModel
+
 from schemas.base_schema import OrmModel
-from schemas.game_schemas import Game
 
 
-class SteamUser(OrmModel):
-    username: str
+class SteamUser(BaseModel):
+    profile_name: str
     url: str
     avatar: str
 
 
 class SteamProfile(SteamUser):
-    username: str
-    url: str
-    avatar: str
     steam_id: str
 
 
-class SteamUserOut(SteamUser):
+class SteamOut(OrmModel):
     id: int
+    user_id: int
     created_at: datetime
     updated_at: datetime
-    best_game: Game
