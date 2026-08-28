@@ -39,6 +39,15 @@ async def email_login(email_credentials: AuthDep, db: DBDep, settings: SettingsD
     )
 
 
+@router.put(
+    path="", status_code=status.HTTP_200_OK, response_model=email_schemas.EmailOut
+)
+async def email_update(
+    updated_payload: email_schemas.EmailUpdate, db: DBDep, user: UserDep
+):
+    return await email_service.update(db=db, user=user, updated=updated_payload)
+
+
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def email_delete(
     db: DBDep,

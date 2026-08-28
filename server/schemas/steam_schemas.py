@@ -5,13 +5,10 @@ from pydantic import BaseModel
 from schemas.base_schema import OrmModel
 
 
-class SteamUser(BaseModel):
+class SteamProfile(BaseModel):
     profile_name: str
     url: str
     avatar: str
-
-
-class SteamProfile(SteamUser):
     steam_id: str
 
 

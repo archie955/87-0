@@ -16,3 +16,8 @@ class EmailOut(OrmModel):
     user_id: int
     created_at: datetime
     updated_at: datetime
+
+
+class EmailUpdate(BaseModel):
+    updated_password: str
+    password: str

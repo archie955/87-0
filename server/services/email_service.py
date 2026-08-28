@@ -111,3 +111,27 @@ async def delete(db: AsyncSession, user: models.User) -> None:
     logger.info("email User deleted", extra={"email_user_id": email_user.id})
 
     logger.info("Associated user remains", extra={"user_id": user.id})
+
+
+async def update(
+    db: AsyncSession, user: models.Email, updated: email_schemas.EmailUpdate
+) -> email_schemas.EmailOut:
+    verified = await asyncio.to_thread(
+        utils.verify,
+        plain_password=updated.password,
+        # pyrefly: ignore [bad-argument-type]
+        hashed_password=user.hashed_password,
+    )
+    if not verified:
+        raise InvalidCredentialsError()
+
+    user.hashed_password = await asyncio.to_thread(
+        utils.hash, password=updated.updated_password
+    )
+
+    await safe_commit(db=db, datatype="Email password")
+    await db.refresh(user)
+
+    logger.info("Email login updated", extra={"user_id": user.user_id})
+
+    return email_schemas.EmailOut.model_validate(user)
