@@ -38,7 +38,7 @@ class Steam(Base, Name, TimeStamps):
     profile_name: Mapped[str] = mapped_column(String(200), unique=False, nullable=False)
     url: Mapped[str] = mapped_column(String(200), unique=False, nullable=False)
     avatar: Mapped[str] = mapped_column(String(200), unique=False, nullable=True)
-    steam_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    steam_id: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True, nullable=False
     )
@@ -56,10 +56,6 @@ class Email(Base, Name, TimeStamps):
     )
 
     user: Mapped["User"] = relationship(back_populates="email_login")
-
-
-class Google(Base, Name, TimeStamps):
-    pass
 
 
 class Team(Base, Name, TimeStamps):

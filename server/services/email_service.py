@@ -14,7 +14,7 @@ from exceptions.app_exceptions import (
 )
 from models import models
 from schemas import email_schemas, token_schemas, user_schemas
-from services.helpers import safe_commit, safe_commit_delete
+from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from utils import utils
 from utils.config import Settings
 
@@ -63,6 +63,34 @@ async def create_email(
     )
 
 
+async def add_email_login_to_preexisting_account(
+    db: AsyncSession, email_profile: email_schemas.EmailCreate, user: models.User
+) -> email_schemas.EmailOut:
+    if user.email_login:
+        raise DataAlreadyExistsError(datatype="Email Login")
+
+    if not user.steam_login:
+        raise BadRequestError(message="Account not authenticated")
+
+    hashed_pwd = await asyncio.to_thread(utils.hash, email_profile.password)
+
+    email_login = models.Email(
+        email=email_profile.email,
+        hashed_password=hashed_pwd,
+        user=user,
+    )
+
+    db.add(email_login)
+
+    await safe_commit_add(db=db, datatype="User")
+
+    await db.refresh(email_login)
+
+    logger.info("Added email login", extra={"user_id": str(user.id)})
+
+    return email_schemas.EmailOut.model_validate(email_login)
+
+
 async def login(
     db: AsyncSession, settings: Settings, email: EmailStr, password: str
 ) -> token_schemas.TokenOut:
@@ -94,25 +122,6 @@ async def login(
     )
 
 
-async def delete(db: AsyncSession, user: models.User) -> None:
-    if not user.steam_login:
-        raise BadRequestError(
-            message="Cannot delete only authentication method for account"
-        )
-
-    if not user.email_login:
-        raise DataNotFoundError(datatype="Email Login")
-
-    email_user = user.email_login
-
-    await db.delete(email_user)
-    await safe_commit_delete(db, datatype="Email Login")
-
-    logger.info("email User deleted", extra={"email_user_id": email_user.id})
-
-    logger.info("Associated user remains", extra={"user_id": user.id})
-
-
 async def update(
     db: AsyncSession, user: models.Email, updated: email_schemas.EmailUpdate
 ) -> email_schemas.EmailOut:
@@ -135,3 +144,22 @@ async def update(
     logger.info("Email login updated", extra={"user_id": user.user_id})
 
     return email_schemas.EmailOut.model_validate(user)
+
+
+async def delete(db: AsyncSession, user: models.User) -> None:
+    if not user.steam_login:
+        raise BadRequestError(
+            message="Cannot delete only authentication method for account"
+        )
+
+    if not user.email_login:
+        raise DataNotFoundError(datatype="Email Login")
+
+    email_user = user.email_login
+
+    await db.delete(email_user)
+    await safe_commit_delete(db, datatype="Email Login")
+
+    logger.info("email User deleted", extra={"email_user_id": email_user.id})
+
+    logger.info("Associated user remains", extra={"user_id": user.id})

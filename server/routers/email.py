@@ -39,6 +39,17 @@ async def email_login(email_credentials: AuthDep, db: DBDep, settings: SettingsD
     )
 
 
+@router.post(
+    path="/add",
+    status_code=status.HTTP_201_CREATED,
+    response_model=email_schemas.EmailOut,
+)
+async def email_add(email_profile: email_schemas.EmailCreate, db: DBDep, user: UserDep):
+    return await email_service.add_email_login_to_preexisting_account(
+        db=db, email_profile=email_profile, user=user
+    )
+
+
 @router.put(
     path="", status_code=status.HTTP_200_OK, response_model=email_schemas.EmailOut
 )

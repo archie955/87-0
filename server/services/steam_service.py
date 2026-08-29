@@ -124,7 +124,7 @@ async def update_steam_login(
 
 async def add_steam_login_to_preexisting_account(
     db: AsyncSession, profile: steam_schemas.SteamProfile, user: models.User
-):
+) -> steam_schemas.SteamOut:
     if user.steam_login:
         raise DataAlreadyExistsError(datatype="Steam Login")
 

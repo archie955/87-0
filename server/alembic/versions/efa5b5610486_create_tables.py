@@ -31,19 +31,6 @@ def upgrade() -> None:
             autoincrement=True,
             nullable=False,
         ),
-        sa.Column(
-            "email",
-            sa.String(100),
-            nullable=False,
-            unique=True,
-        ),
-        sa.Column(
-            "username",
-            sa.String(100),
-            unique=True,
-            nullable=False,
-        ),
-        sa.Column("hashed_password", sa.String(200), nullable=False, unique=False),
         sa.Column("best_score", sa.DECIMAL(4, 2), nullable=True),
         sa.Column(
             "created_at",
@@ -59,8 +46,103 @@ def upgrade() -> None:
             onupdate=sa.func.now(),
         ),
     )
-    op.create_index("ix_user_email", "user", ["email"])
-    op.create_index("ix_user_username", "user", ["username"])
+
+    op.create_table(
+        "steam",
+        sa.Column(
+            "id",
+            sa.Integer,
+            primary_key=True,
+            autoincrement=True,
+            nullable=False
+        ),
+        sa.Column(
+            "profile_name",
+            sa.String(200),
+            unique=False,
+            nullable=False
+        ),
+        sa.Column(
+            "url",
+            sa.String(200),
+            unique=False,
+            nullable=False
+        ),
+        sa.Column(
+            "avatar",
+            sa.String(200),
+            unique=False,
+            nullable=True
+        ),
+        sa.Column(
+            "steam_id",
+            sa.String(200),
+            unique=True,
+            nullable=False
+        ),
+        sa.Column(
+            "user_id",
+            sa.Integer,
+            sa.ForeignKey("user.id", ondelete="CASCADE"),
+            unique=True,
+            nullable=False
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+        ),
+    )
+
+    op.create_table(
+        "Email",
+        sa.Column(
+            "id",
+            primary_key=True,
+            autoincrement=True,
+            nullable=False
+        ),
+        sa.Column(
+            "steam_id",
+            sa.String(100),
+            unique=True,
+            nullable=False
+        ),
+        sa.Column(
+            "hashed_password",
+            sa.String(200),
+            unique=False,
+            nullable=False
+        ),
+        sa.Column(
+            "user_id",
+            sa.Integer,
+            sa.ForeignKey("user.id", ondelete="CASCADE"),
+            unique=True,
+            nullable=False
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+        ),
+    )
 
     op.create_table(
         "team",
@@ -209,6 +291,6 @@ def downgrade() -> None:
 
     op.drop_table("team")
 
-    op.drop_index("ix_user_email", "user")
-    op.drop_index("ix_user_username", "user")
+    op.drop_table("email")
+    op.drop_table("steam")
     op.drop_table("user")
