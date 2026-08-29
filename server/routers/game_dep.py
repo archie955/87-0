@@ -1,26 +1,23 @@
 from typing import Annotated
 
 from fastapi import Depends, Path
-from sqlalchemy import select
 
-from database.database import DBDep
+from cache.redis import RedisDep
 from exceptions.app_exceptions import DataNotFoundError
-from models.models import Active_Game
+from schemas import active_game_schemas
 
 
 async def get_current_game(
-    db: DBDep,
-    game_id: int = Path(..., description="ID of active game"),
-) -> Active_Game:
+    cache: RedisDep,
+    game_id: str = Path(..., description="ID of active game"),
+) -> active_game_schemas.ActiveGame:
 
-    game = (
-        await db.execute(select(Active_Game).where(Active_Game.id == game_id))
-    ).scalar_one_or_none()
+    game = await cache.get(game_id)
 
     if not game:
         raise DataNotFoundError(datatype="Active Game")
 
-    return game
+    return active_game_schemas.ActiveGame.model_validate_json(game)
 
 
-GameDep = Annotated[Active_Game, Depends(get_current_game)]
+GameDep = Annotated[active_game_schemas.ActiveGame, Depends(get_current_game)]

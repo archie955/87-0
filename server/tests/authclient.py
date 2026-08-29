@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import redis.asyncio as redis
@@ -103,6 +104,7 @@ class AuthClient:
             .all()
         )
         team_dict = {}
+        teams_list = []
 
         for t in teams:
             team_dict[t.id] = team_schemas.Team(
@@ -112,6 +114,8 @@ class AuthClient:
                 name=t.name,
                 players=[player_schemas.Player.model_validate(p) for p in t.players],
             )
+            teams_list.append(t.id)
         teams = team_schemas.Teams.model_validate(team_dict)
 
         await self.cache.set("teams", teams.model_dump_json())
+        await self.cache.set("team_ids", json.dumps(teams_list))

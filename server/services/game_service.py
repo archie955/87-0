@@ -1,45 +1,55 @@
+import json
+import uuid
 from random import randint
 
-from sqlalchemy import select
+import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from exceptions.app_exceptions import DataNotFoundError
-from models.models import Active_Game, Team, User
+from models.models import User
 from schemas import active_game_schemas
 from services import game_helpers
-from services.helpers import safe_commit, safe_commit_delete
 
 MIN_TEAMS = 2
 
 
-async def create_game(db: AsyncSession) -> active_game_schemas.ActiveGame:
-    teams = (await db.execute(select(Team))).scalars().all()
+async def create_game(cache: redis.Redis) -> active_game_schemas.ActiveGame:
+    teams = await cache.get("team_ids")
 
-    if not teams or len(teams) < MIN_TEAMS:
+    if not teams:
+        raise DataNotFoundError(datatype="Teams")
+
+    teams = json.loads(teams)
+
+    if not isinstance(teams, list) and not all(isinstance(t, int) for t in teams):
+        raise DataNotFoundError(datatype="Teams")
+
+    if len(teams) < MIN_TEAMS:
         raise DataNotFoundError(datatype="Teams")
 
     n = len(teams)
 
-    ids = {}
+    active_game = {}
     for i in range(1, 7):
         # ruff: ignore[suspicious-non-cryptographic-random-usage]
-        ids[f"team_{i}_id"] = teams[randint(0, n - 1)].id
+        active_game[f"team_{i}_id"] = teams[randint(0, n - 1)]
 
-    active_game = Active_Game(**ids)
+    id = str(uuid.uuid4())
+    active_game["id"] = id
 
-    db.add(active_game)
-    await safe_commit(db, datatype="Active Game")
+    active_game = active_game_schemas.ActiveGame.model_validate(active_game)
 
-    await db.refresh(active_game)
+    await cache.set(id, active_game.model_dump_json(), ex=15 * 60)
 
-    return active_game_schemas.ActiveGame.model_validate(active_game)
+    return active_game
 
 
 async def evaluate_user_game(
     game: active_game_schemas.GameResult,
-    active_game: Active_Game,
+    active_game: active_game_schemas.ActiveGame,
     user: User,
     db: AsyncSession,
+    cache: redis.Redis,
 ) -> active_game_schemas.GameEvaluation:
     game_evaluation = await game_helpers.evaluation_base(
         game=game, active_game=active_game, db=db
@@ -49,20 +59,21 @@ async def evaluate_user_game(
         user.best_score = game_evaluation.score
         game_evaluation.best = True
 
-    await db.delete(active_game)
-    await safe_commit_delete(db, datatype="Active Game")
+    await cache.delete(active_game.id)
 
     return game_evaluation
 
 
 async def evaluate_game(
-    game: active_game_schemas.GameResult, active_game: Active_Game, db: AsyncSession
+    game: active_game_schemas.GameResult,
+    active_game: active_game_schemas.ActiveGame,
+    db: AsyncSession,
+    cache: redis.Redis,
 ) -> active_game_schemas.GameEvaluation:
     game_evaluation = await game_helpers.evaluation_base(
         game=game, active_game=active_game, db=db
     )
 
-    await db.delete(active_game)
-    await safe_commit_delete(db, datatype="Active Game")
+    await cache.delete(active_game.id)
 
     return game_evaluation

@@ -8,7 +8,7 @@ from exceptions.app_exceptions import (
     InvalidGameLineup,
 )
 from models.enums import Roles
-from models.models import Active_Game, Player
+from models.models import Player
 from schemas import active_game_schemas
 
 MAX_DOUBLE_PLAYER = 2
@@ -24,7 +24,9 @@ def eval_lineup(game: active_game_schemas.GameList) -> float:
 
 
 async def validate_game(
-    game: active_game_schemas.GameResult, active_game: Active_Game, db: AsyncSession
+    game: active_game_schemas.GameResult,
+    active_game: active_game_schemas.ActiveGame,
+    db: AsyncSession,
 ) -> active_game_schemas.GameList:
     """Validates the game exists, is live, and the players were selected
     from the generated teams in the correct order.
@@ -115,7 +117,9 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
 
 
 async def evaluation_base(
-    game: active_game_schemas.GameResult, active_game: Active_Game, db: AsyncSession
+    game: active_game_schemas.GameResult,
+    active_game: active_game_schemas.ActiveGame,
+    db: AsyncSession,
 ) -> active_game_schemas.GameEvaluation:
     game_list = await validate_game(game=game, active_game=active_game, db=db)
 

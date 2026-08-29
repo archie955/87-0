@@ -1,3 +1,5 @@
+import json
+
 import redis.asyncio as redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +38,7 @@ async def initialise_db_and_cache(db: AsyncSession, cache: redis.Redis) -> None:
         raise DataNotFoundError(datatype="Teams")
 
     team_dict = {}
+    team_ids = []
 
     for t in teams:
         team_dict[t.id] = team_schemas.Team(
@@ -45,6 +48,8 @@ async def initialise_db_and_cache(db: AsyncSession, cache: redis.Redis) -> None:
             name=t.name,
             players=[player_schemas.Player.model_validate(p) for p in t.players],
         )
+        team_ids.append(t.id)
     teams = team_schemas.Teams.model_validate(team_dict)
 
     await cache.set("teams", teams.model_dump_json())
+    await cache.set("team_ids", json.dumps(team_ids))

@@ -6,7 +6,7 @@ from schemas.player_schemas import Player
 
 
 class ActiveGame(OrmModel):
-    id: int
+    id: str
     team_1_id: int
     team_2_id: int
     team_3_id: int
@@ -16,7 +16,7 @@ class ActiveGame(OrmModel):
 
 
 class GameResult(BaseModel):
-    game_id: int
+    game_id: str
     player_1: Player
     player_2: Player
     player_3: Player
