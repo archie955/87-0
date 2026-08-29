@@ -1,4 +1,3 @@
-import json
 
 import redis.asyncio as redis
 from sqlalchemy import select
@@ -8,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from database import init_db
 from exceptions.app_exceptions import DataNotFoundError
 from models import models
+from schemas import player_schemas, team_schemas
 
 
 async def initialise_db_and_cache(db: AsyncSession, cache: redis.Redis) -> None:
@@ -36,30 +36,16 @@ async def initialise_db_and_cache(db: AsyncSession, cache: redis.Redis) -> None:
     if not teams:
         raise DataNotFoundError(datatype="Teams")
 
-    team_ids = []
+    team_dict = {}
 
-    async with cache.pipeline(transaction=False) as pipe:
-        for team in teams:
-            pipe.set(
-                f"team:{team.id}",
-                json.dumps(
-                    {
-                        "id": team.id,
-                        "name": team.name,
-                        "players": [
-                            {
-                                "id": player.id,
-                                "team_id": player.team_id,
-                                "name": player.name,
-                                "role": player.role,
-                                "hltv": player.hltv,
-                                "igl_bonus": player.igl_bonus,
-                            }
-                            for player in team.players
-                        ],
-                    }
-                ),
-            )
-            team_ids.append(team.id)
-        pipe.set("team_ids", json.dumps(team_ids))
-        await pipe.execute()
+    for t in teams:
+        team_dict[t.id] = team_schemas.Team(
+            # pyrefly: ignore [bad-argument-type]
+            id=t.id,
+            # pyrefly: ignore [bad-argument-type]
+            name=t.name,
+            players=[player_schemas.Player.model_validate(p) for p in t.players],
+        )
+    teams = team_schemas.Teams.model_validate(team_dict)
+
+    await cache.set("teams", teams.model_dump_json())
