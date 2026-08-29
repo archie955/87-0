@@ -17,14 +17,10 @@ router = APIRouter(prefix="/email", tags=["Authentication"])
 @router.post(
     path="",
     status_code=status.HTTP_201_CREATED,
-    response_model=token_schemas.TokenOut,
+    response_model=email_schemas.EmailOut,
 )
-async def email_create(
-    email_user: email_schemas.EmailCreate, db: DBDep, settings: SettingsDep
-):
-    return await email_service.create_email(
-        db=db, email_user=email_user, settings=settings
-    )
+async def email_create(email_user: email_schemas.EmailCreate, db: DBDep):
+    return await email_service.create_email(db=db, email_user=email_user)
 
 
 @router.post(
@@ -56,7 +52,9 @@ async def email_add(email_profile: email_schemas.EmailCreate, db: DBDep, user: U
 async def email_update(
     updated_payload: email_schemas.EmailUpdate, db: DBDep, user: UserDep
 ):
-    return await email_service.update(db=db, user=user, updated=updated_payload)
+    return await email_service.update(
+        db=db, user=user.email_login, updated=updated_payload
+    )
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)

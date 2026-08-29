@@ -52,7 +52,7 @@ class Email(Base, Name, TimeStamps):
         String(200), nullable=False, unique=False
     )
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user,id", ondelete="CASCADE"), unique=True, nullable=False
+        Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True, nullable=False
     )
 
     user: Mapped["User"] = relationship(back_populates="email_login")

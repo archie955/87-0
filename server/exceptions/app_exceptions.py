@@ -66,3 +66,12 @@ class InvalidGameLineup(AppException):
             message=f"Lineup is invalid because {reason}, id={id}",
             headers=headers,
         )
+
+
+class RequiredAuthentication(AppException):
+    def __init__(self, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=409,
+            message="Resource locked as only Authentication source",
+            headers=headers,
+        )

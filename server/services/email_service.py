@@ -4,6 +4,7 @@ import logging
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token
 from exceptions.app_exceptions import (
@@ -11,6 +12,7 @@ from exceptions.app_exceptions import (
     DataAlreadyExistsError,
     DataNotFoundError,
     InvalidCredentialsError,
+    RequiredAuthentication,
 )
 from models import models
 from schemas import email_schemas, token_schemas, user_schemas
@@ -22,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 async def create_email(
-    db: AsyncSession, email_user: email_schemas.EmailCreate, settings: Settings
-) -> token_schemas.TokenOut:
+    db: AsyncSession, email_user: email_schemas.EmailCreate
+) -> email_schemas.EmailOut:
     existing_user = (
         await db.execute(
             select(models.Email).where(
@@ -39,7 +41,7 @@ async def create_email(
 
     user = models.User(best_score=0.0)
     email_user = models.Email(
-        email=user.email,
+        email=email_user.email,
         hashed_password=hashed_pwd,
         user=user,
     )
@@ -50,17 +52,9 @@ async def create_email(
     await safe_commit(db=db, datatype="User")
     await db.refresh(email_user)
 
-    user = email_user.user
+    logger.info("User created", extra={"user_id": user.id})
 
-    user_data = {"sub": str(user.id)}
-
-    logger.info("User created", extra={"user_id": email_user.id})
-
-    return token_schemas.TokenOut(
-        user=email_user.user,
-        access_token=create_access_token(data=user_data, settings=settings),
-        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
-    )
+    return email_schemas.EmailOut.model_validate(email_user)
 
 
 async def add_email_login_to_preexisting_account(
@@ -94,26 +88,35 @@ async def add_email_login_to_preexisting_account(
 async def login(
     db: AsyncSession, settings: Settings, email: EmailStr, password: str
 ) -> token_schemas.TokenOut:
-    user = (
-        await db.execute(select(models.Email).where(models.Email.email == email))
+    email_user = (
+        await db.execute(
+            select(models.Email)
+            .where(models.Email.email == email)
+            .options(
+                selectinload(models.Email.user).selectinload(models.User.email_login),
+                selectinload(models.Email.user).selectinload(models.User.steam_login),
+            )
+        )
     ).scalar_one_or_none()
 
-    if not user:
+    if not email_user:
         raise InvalidCredentialsError()
 
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=password,
         # pyrefly: ignore [bad-argument-type]
-        hashed_password=user.hashed_password,
+        hashed_password=email_user.hashed_password,
     )
 
     if not verified:
         raise InvalidCredentialsError()
 
-    user_data = {"sub": str(user.id)}
+    user_data = {"sub": str(email_user.user_id)}
 
-    logger.info("User logged in", extra={"user_id": user.id})
+    logger.info("User logged in", extra={"user_id": email_user.user_id})
+
+    user = email_user.user
 
     return token_schemas.TokenOut(
         user=user_schemas.UserOut.model_validate(user),
@@ -147,13 +150,11 @@ async def update(
 
 
 async def delete(db: AsyncSession, user: models.User) -> None:
-    if not user.steam_login:
-        raise BadRequestError(
-            message="Cannot delete only authentication method for account"
-        )
-
     if not user.email_login:
         raise DataNotFoundError(datatype="Email Login")
+
+    if not user.steam_login:
+        raise RequiredAuthentication()
 
     email_user = user.email_login
 

@@ -57,7 +57,10 @@ async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -
         await db.execute(
             select(User)
             .where(User.id == int(user_id_token.id))
-            .options(selectinload(User.steam_login, User.email_login, User.best_score))
+            .options(
+                selectinload(User.steam_login),
+                selectinload(User.email_login),
+            )
         )
     ).scalar_one_or_none()
 

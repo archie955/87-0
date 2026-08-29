@@ -8,7 +8,7 @@ from schemas.steam_schemas import SteamOut
 class UserOut(OrmModel):
     id: int
     best_score: float | None = None
-    steam: SteamOut | None = None
-    email: EmailOut | None = None
+    steam_login: SteamOut | None = None
+    email_login: EmailOut | None = None
     created_at: datetime
     updated_at: datetime

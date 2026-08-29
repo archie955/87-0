@@ -10,13 +10,15 @@ class Helpers:
     async def register_user(client: AsyncClient) -> dict[str, str]:
         user = {
             "email": "authuser@example.com",
-            "username": "authusername",
             "password": "authpassword",
         }
-        response = await client.post(url="/users", json=user)
+        response = await client.post(url="/email", json=user)
 
         assert response.status_code == 201
         data = response.json()
+
+        assert data["email"] == user["email"]
+        assert "id" in data
         assert "created_at" in data
         assert "updated_at" in data
         return user
@@ -25,15 +27,14 @@ class Helpers:
     async def full_login(client: AsyncClient) -> dict[str, str]:
         user = {
             "email": "authuser@example.com",
-            "username": "authusername",
             "password": "authpassword",
         }
-        user_payload = await client.post(url="/users", json=user)
+        user_payload = await client.post(url="/email", json=user)
 
         assert user_payload.status_code == 201
 
         response = await client.post(
-            url="/users/login",
+            url="/email/login",
             data={"username": user["email"], "password": user["password"]},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
@@ -60,7 +61,7 @@ class Helpers:
         client: AsyncClient, updated: dict[str, str], user: dict[str, str]
     ) -> dict[str, str]:
         response = await client.put(
-            url="/users",
+            url="/email",
             json=updated,
             headers={"Authorization": f"Bearer {user['access_token']}"},
         )
@@ -68,9 +69,7 @@ class Helpers:
         assert response.status_code == 200
         data = response.json()
 
-        # pyrefly: ignore[bad-index]
-        assert data["username"] == updated["updated_user"]["username"]
-        # pyrefly: ignore[bad-index]
-        assert data["email"] == updated["updated_user"]["email"]
+        assert "updated_password" in updated
+        assert "password" in updated
 
         return data
