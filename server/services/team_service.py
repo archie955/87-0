@@ -9,13 +9,13 @@ logger = logging.getLogger(__name__)
 
 
 async def get(cache: Redis) -> team_schemas.Teams:
-    teams = await cache.get("team_ids")
+    teams = await cache.get("teams")
     if not teams:
         raise DataNotFoundError("Teams")
 
     teams = team_schemas.Teams.model_validate_json(teams)
 
-    if not isinstance(teams, team_schemas.Teams):
+    if not teams:
         raise DataNotFoundError("Teams")
 
     logger.info("Successfully returned teams")

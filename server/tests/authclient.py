@@ -1,10 +1,13 @@
 from typing import Any
 
+import redis.asyncio as redis
 from httpx import AsyncClient, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from models.models import Player, Team
+from schemas import player_schemas, team_schemas
 from tests.mockdata import mock_igl_bonus
 
 SQLALCHEMY_DATABASE_URL = (
@@ -14,10 +17,15 @@ SQLALCHEMY_DATABASE_URL = (
 
 class AuthClient:
     def __init__(
-        self, client: AsyncClient, user: dict[str, str], db: AsyncSession
+        self,
+        client: AsyncClient,
+        user: dict[str, str],
+        db: AsyncSession,
+        cache: redis.Redis,
     ) -> None:
         self.client = client
         self.db = db
+        self.cache = cache
         self.user = user
 
     def auth_headers(self, expired: bool) -> dict[str, str]:
@@ -59,7 +67,7 @@ class AuthClient:
     async def seed_data(self, data: dict[str, Any]) -> None:
         for t in data["teams"]:
             team = Team(name=t["name"])
-            self.db.add(instance=team)
+            self.db.add(team)
             await self.db.flush()
 
         teams = (await self.db.execute(select(Team))).scalars().all()
@@ -87,3 +95,23 @@ class AuthClient:
 
             self.db.add(player)
             await self.db.flush()
+
+    async def seed_cache(self) -> None:
+        teams = (
+            (await self.db.execute(select(Team).options(selectinload(Team.players))))
+            .scalars()
+            .all()
+        )
+        team_dict = {}
+
+        for t in teams:
+            team_dict[t.id] = team_schemas.Team(
+                # pyrefly: ignore [bad-argument-type]
+                id=t.id,
+                # pyrefly: ignore [bad-argument-type]
+                name=t.name,
+                players=[player_schemas.Player.model_validate(p) for p in t.players],
+            )
+        teams = team_schemas.Teams.model_validate(team_dict)
+
+        await self.cache.set("teams", teams.model_dump_json())
