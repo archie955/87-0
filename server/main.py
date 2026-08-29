@@ -7,8 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from database.database import DBDep, engine
-from exceptions.app_exceptions import AppException
+from cache.init_cache import initialise_db_and_cache
+from cache.redis import RedisDep, create_redis
+from database.database import AsyncSessionLocal, DBDep, engine
+from exceptions.app_exceptions import AppException, UninstantiatedCache
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from models.models import Base
@@ -19,8 +21,21 @@ from utils.config import get_settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
-    Base.metadata.create_all(bind=engine)
-    yield
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    app.state.redis = create_redis()
+
+    try:
+        await app.state.redis.ping()
+        await app.state.redis.set("app:status", "healthy")
+
+        async with AsyncSessionLocal() as db:
+            await initialise_db_and_cache(db=db, cache=app.state.redis)
+        yield
+    finally:
+        await app.state.redis.aclose()
 
 
 settings = get_settings()
@@ -88,11 +103,19 @@ def global_expression_handler(request: Request, exc: Exception):
 
 
 @app.get("/health")
-async def health(db: DBDep) -> dict[str, str]:
+async def health(request: Request, db: DBDep, cache: RedisDep) -> dict[str, str]:
     try:
         await db.execute(text("SELECT 1"))
     except Exception:
         logger.exception("DB is not healthy")
         return {"status": "unhealthy"}
     else:
-        return {"status": "healthy"}
+        status = {"status": "healthy"}
+    try:
+        redis_state = await cache.get("app:status")
+    except Exception:
+        logger.exception("Redis Cache is not healthy")
+        return {"status": "unhealthy"}
+    if redis_state != "healthy":
+        raise UninstantiatedCache()
+    return status

@@ -75,3 +75,12 @@ class RequiredAuthentication(AppException):
             message="Resource locked as only Authentication source",
             headers=headers,
         )
+
+
+class UninstantiatedCache(AppException):
+    def __init__(self, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=404,
+            message="Redis Cache has not initialised correctly",
+            headers=headers,
+        )

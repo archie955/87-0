@@ -1,36 +1,39 @@
+import json
 import logging
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from redis.asyncio import Redis
 
 from exceptions.app_exceptions import DataNotFoundError
-from models.models import Team
 from schemas import player_schemas, team_schemas
 
 logger = logging.getLogger(__name__)
 
 
-async def get(db: AsyncSession) -> team_schemas.Teams:
-    teams = (
-        (await db.execute(select(Team).options(selectinload(Team.players))))
-        .scalars()
-        .all()
-    )
+async def get(cache: Redis) -> team_schemas.Teams:
+    team_ids = await cache.get("team_ids")
+    if not team_ids:
+        raise DataNotFoundError("Teams")
 
-    if not teams:
-        raise DataNotFoundError(datatype="Teams")
+    team_ids = json.loads(team_ids)
+
+    if not isinstance(team_ids, list) and not isinstance(team_ids[0], int):
+        raise DataNotFoundError("Teams")
+
+    async with cache.pipeline(transaction=False) as pipe:
+        team_list = []
+        for id in team_ids:
+            pipe.get(f"team:{id}")
+        team_list = await pipe.execute()
 
     team_dict = {}
-
-    for t in teams:
-        team_players = [player_schemas.Player.model_validate(p) for p in t.players]
-        # pyrefly: ignore [bad-argument-type]
-        team = team_schemas.Team(id=t.id, name=t.name, players=team_players)
-        team_dict[t.id] = team
+    for t in team_list:
+        team = json.loads(t)
+        team_players = [player_schemas.Player.model_validate(p) for p in team.players]
+        team = team_schemas.Team(id=team.id, name=team.name, players=team_players)
+        team_dict[team.id] = team
 
     team_return = team_schemas.Teams.model_validate(team_dict)
 
-    logger.info("Successfully generated teams", extra={"no_of_teams": len(teams)})
+    logger.info("Successfully generated teams", extra={"no_of_teams": len(team_list)})
 
     return team_return
