@@ -9,13 +9,12 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ComponentProps, SubmitEvent } from "react";
+import type { ComponentProps, SubmitEvent } from "react";
 import { useUserActions } from "@/stores/userStore";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
 import { useChangeActions } from "@/stores/loginStore";
-import { RegisterUser } from "@/types/userTypes";
-import { Link } from "@mui/material";
+import type { RegisterUser } from "@/types/userTypes";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { create } = useUserActions();
@@ -67,9 +66,12 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <FieldDescription className="px-6 text-center">
+        Creating an account allows us to track your best game.
+      </FieldDescription>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">
-          <form className="p-6 md:p-8" onSubmit={handleRegister}>
+          <form className="p-6 md:p-8" onSubmit={(e) => void handleRegister(e)}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome!</h1>
@@ -138,23 +140,18 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
               </Field>
               <FieldDescription className="text-center">
                 Already have an account?{" "}
-                <Link
-                  component="button"
+                <button
+                  type="button"
                   onClick={changeLogin}
-                  underline="always"
-                  sx={{ ml: 1 }}
+                  className="ml-1 underline underline-offset-2"
                 >
                   Login
-                </Link>
+                </button>
               </FieldDescription>
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
     </div>
   );
 };

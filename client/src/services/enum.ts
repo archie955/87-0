@@ -11,7 +11,7 @@ export const lineupRoles = {
   awper: "awper",
   support: "support",
   flex: "flex",
-};
+} as const;
 
 export type Role = (typeof Roles)[keyof typeof Roles];
 export type LineupRole = (typeof lineupRoles)[keyof typeof lineupRoles];

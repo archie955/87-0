@@ -1,5 +1,5 @@
 import api from "@/services/api";
-import {
+import type {
   Credentials,
   UserReturned,
   TokenReturned,
@@ -10,7 +10,7 @@ import {
 const createAccount = async (
   credentials: RegisterUser,
 ): Promise<UserReturned> => {
-  const response = await api.post("/users", credentials);
+  const response = await api.post("/email", credentials);
   return response.data;
 };
 
@@ -19,7 +19,7 @@ const login = async (credentials: Credentials): Promise<TokenReturned> => {
   formData.append("username", credentials.username);
   formData.append("password", credentials.password);
 
-  const response = await api.post("/users/login", formData, {
+  const response = await api.post("/email/login", formData, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -31,12 +31,12 @@ const login = async (credentials: Credentials): Promise<TokenReturned> => {
 const update = async (
   updated_credentials: UpdatedUser,
 ): Promise<UserReturned> => {
-  const response = await api.put("/users", updated_credentials);
+  const response = await api.put("/email", updated_credentials);
   return response.data;
 };
 
 const deleteUser = async (): Promise<void> => {
-  await api.delete("/users");
+  await api.delete("/email");
 };
 
 export default { createAccount, login, update, deleteUser };

@@ -9,14 +9,13 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ComponentProps, SubmitEvent } from "react";
+import type { ComponentProps, SubmitEvent } from "react";
 import { useUserActions } from "@/stores/userStore";
 import { useNavigate } from "react-router-dom";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
-import { Credentials } from "@/types/userTypes";
+import type { Credentials } from "@/types/userTypes";
 import { useChangeActions } from "@/stores/loginStore";
-import { Link } from "@mui/material";
 
 const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { login } = useUserActions();
@@ -40,7 +39,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
       await login(credentials);
 
       setNotification("Successfully logged in", "success");
-      navigate("/");
+      void navigate("/");
     } catch {
       setNotification("Login Failed", "error");
     }
@@ -52,9 +51,12 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <FieldDescription className="px-6 text-center">
+        Logging into an account allows us to track your best game.
+      </FieldDescription>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">
-          <form className="p-6 md:p-8" onSubmit={handleLogin}>
+          <form className="p-6 md:p-8" onSubmit={(e) => void handleLogin(e)}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -74,12 +76,13 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
+                  <button
+                    type="button"
+                    onClick={handleClick}
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </button>
                 </div>
                 <Input id="password" {...password} required />
               </Field>
@@ -120,23 +123,18 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
               </Field>
               <FieldDescription className="text-center">
                 Don&apos;t have an account?{" "}
-                <Link
-                  component="button"
+                <button
+                  type="button"
                   onClick={changeLogin}
-                  underline="always"
-                  sx={{ ml: 1 }}
+                  className="ml-1 underline underline-offset-2"
                 >
                   Register
-                </Link>
+                </button>
               </FieldDescription>
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
     </div>
   );
 };

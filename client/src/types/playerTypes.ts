@@ -1,4 +1,4 @@
-import { Role } from "@/services/enum";
+import type { Role } from "@/services/enum";
 
 export interface Player {
   id: number;

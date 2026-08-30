@@ -1,16 +1,17 @@
 import { create } from "zustand";
-import { Player } from "@/types/playerTypes";
-import { Result } from "@/types/resultTypes";
-import { LineupRole, lineupRoles, Roles } from "@/services/enum";
+import type { Player } from "@/types/playerTypes";
+import type { Result } from "@/types/resultTypes";
+import { Roles } from "@/services/enum";
+import type { LineupRole } from "@/services/enum";
 import gameService from "@/services/game";
-import { Lineup } from "@/types/gameTypes";
+import type { Lineup } from "@/types/gameTypes";
 
 interface TeamActions {
   selectOpener: (player: Player) => void;
   selectCloser: (player: Player) => void;
   selectAwper: (player: Player) => void;
   selectSupport: (player: Player) => void;
-  selectIgl: (p: Pick) => void;
+  selectIgl: (p: LineupRole) => void;
   compatibility: (p: Player) => boolean;
   submit: (id: number) => Promise<Result | void>;
 }
@@ -23,14 +24,6 @@ interface TeamState {
   flex: Player | null;
   igl: number | null;
   actions: TeamActions;
-}
-
-export enum Pick {
-  opener = "opener",
-  closer = "closer",
-  awper = "awper",
-  support = "support",
-  flex = "flex",
 }
 
 const useTeamStore = create<TeamState>((set, get) => ({
@@ -90,7 +83,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
         return state;
       });
     },
-    selectIgl: (p: Pick): void => {
+    selectIgl: (p: LineupRole): void => {
       set((state) => {
         const player = state[p];
         if (player) {

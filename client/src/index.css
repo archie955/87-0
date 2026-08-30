@@ -124,10 +124,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply --font-ibm;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
@@ -138,6 +135,6 @@
   align-items: center;
   align-content: center;
   align-self: center;
-  max-width: 450;
+  max-width: 450px;
   backdrop-filter: blur(3px);
 }

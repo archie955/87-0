@@ -1,6 +1,6 @@
 import api from "@/services/api";
-import { Game, Lineup } from "@/types/gameTypes";
-import { Result } from "@/types/resultTypes";
+import type { Game, Lineup } from "@/types/gameTypes";
+import type { Result } from "@/types/resultTypes";
 
 const baseUrl = "/games";
 

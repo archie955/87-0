@@ -4,10 +4,8 @@ import {
   Gamepad,
   ChevronRight,
   ChevronsUpDown,
-  HelpCircle,
   LayoutDashboard,
   LogOut,
-  Settings,
   User,
   BookText,
 } from "lucide-react";
@@ -28,6 +26,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  DropdownMenuGroup,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -57,32 +56,26 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useLocation } from "react-router-dom";
-import { useEmail, useUsername } from "@/stores/userStore";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useEmail, useUsername, useUserActions } from "@/stores/userStore";
 
-// Base nav item - used by simple sidebars
 type NavItem = {
   label: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   href: string;
-  isActive?: boolean;
-  // Optional children for submenus (Sidebar3+)
   children?: NavItem[];
 };
 
-// Nav group with optional collapsible state
 type NavGroup = {
   title: string;
   items: NavItem[];
-  // Optional: default collapsed state (Sidebar2+)
   defaultOpen?: boolean;
 };
 
-// User data for footer (Sidebar6+)
 type UserData = {
   name: string;
   email: string;
-  avatar: string;
+  avatar?: string;
 };
 
 type Logo = {
@@ -90,32 +83,49 @@ type Logo = {
   description: string;
 };
 
-// Complete sidebar data structure
 type SidebarData = {
-  // Logo/branding (all sidebars)
   logo: Logo;
-  // Main navigation groups (all sidebars)
   navGroups: NavGroup[];
-  // Footer navigation group (all sidebars)
-  footerGroup: NavGroup;
-  // User data for user footer (Sidebar6+)
   user?: UserData;
-  // Workspaces for switcher (Sidebar7+)
-  workspaces?: Array<{
-    id: string;
-    name: string;
-    logo: string;
-    plan: string;
-  }>;
-  // Currently active workspace (Sidebar7+)
-  activeWorkspace?: string;
 };
 
-const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
+const BREADCRUMBS: Record<string, { parent: string; current: string }> = {
+  "/": { parent: "Overview", current: "Dashboard" },
+  "/about": { parent: "About", current: "Rules" },
+  "/login": { parent: "User", current: "Sign in" },
+  "/game": { parent: "Play", current: "Build" },
+  "/account": { parent: "User", current: "Account" },
+};
+
+const sidebarData: Omit<SidebarData, "user"> = {
+  logo: {
+    title: "CS-ACE",
+    description: "Build the best 5-stack",
+  },
+  navGroups: [
+    {
+      title: "Overview",
+      defaultOpen: true,
+      items: [{ label: "Dashboard", icon: LayoutDashboard, href: "/" }],
+    },
+    {
+      title: "About",
+      defaultOpen: true,
+      items: [{ label: "Rules", icon: BookText, href: "/about" }],
+    },
+    {
+      title: "Play",
+      defaultOpen: true,
+      items: [{ label: "Build", icon: Gamepad, href: "/game" }],
+    },
+  ],
+};
+
+const SidebarLogo = ({ logo }: { logo: Logo }) => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton size="lg">
+        <SidebarMenuButton size="lg" render={<Link to="/" />}>
           <div className="flex flex-col gap-0.5 leading-none">
             <span className="font-medium">{logo.title}</span>
             <span className="text-xs text-muted-foreground">
@@ -131,16 +141,15 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
 const NavMenuItem = ({ item }: { item: NavItem }) => {
   const Icon = item.icon;
   const hasChildren = item.children && item.children.length > 0;
-  const changeActive = (item: NavItem) => {
-    item.isActive = true;
-  };
+  const location = useLocation();
+  const isActive = location.pathname === item.href;
 
   if (!hasChildren) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
-          isActive={item.isActive}
-          render={<a href={item.href} onClick={() => changeActive(item)} />}
+          isActive={isActive}
+          render={<NavLink to={item.href} />}
         >
           <Icon className="size-4" />
           <span>{item.label}</span>
@@ -155,14 +164,7 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
       className="group/collapsible"
       render={<SidebarMenuItem />}
     >
-      <CollapsibleTrigger
-        render={
-          <SidebarMenuButton
-            isActive={item.isActive}
-            onClick={() => changeActive(item)}
-          />
-        }
-      >
+      <CollapsibleTrigger render={<SidebarMenuButton isActive={isActive} />}>
         <Icon className="size-4" />
         <span>{item.label}</span>
         <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -172,10 +174,8 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
           {item.children!.map((child) => (
             <SidebarMenuSubItem key={child.label}>
               <SidebarMenuSubButton
-                isActive={item.isActive}
-                render={
-                  <a href={child.href} onClick={() => changeActive(item)} />
-                }
+                isActive={location.pathname === child.href}
+                render={<NavLink to={child.href} />}
               >
                 {child.label}
               </SidebarMenuSubButton>
@@ -188,72 +188,87 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
 };
 
 const NavUser = ({ user }: { user: UserData }) => {
+  const navigate = useNavigate();
+  const { logout } = useUserActions();
+
+  const handleLogout = () => {
+    logout();
+    void navigate("/");
+  };
+
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              />
-            }
-          >
-            <Avatar className="size-8 rounded-lg">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">
-                {user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
-              <span className="truncate text-xs text-muted-foreground">
-                {user.email}
-              </span>
-            </div>
-            <ChevronsUpDown className="ml-auto size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side="bottom"
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="size-8 rounded-lg">
+        <DropdownMenuGroup>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                />
+              }
+            >
+              <Avatar className="size-8 rounded-lg">
+                {user.avatar && (
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
-                    {user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </span>
-                </div>
+                )}
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user.email}
+                </span>
               </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 size-4" />
-              Account
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut className="mr-2 size-4" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <ChevronsUpDown className="ml-auto size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--anchor-width) min-w-56 rounded-lg"
+              side="bottom"
+              align="end"
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="size-8 rounded-lg">
+                    {user.avatar && (
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                    )}
+                    <AvatarFallback className="rounded-lg">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link to="/account" />}>
+                <User className="mr-2 size-4" />
+                Account
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="mr-2 size-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </DropdownMenuGroup>
       </SidebarMenuItem>
     </SidebarMenu>
   );
@@ -263,16 +278,16 @@ const NoUser = () => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <SidebarMenuSubButton render={<a href="/login">Sign in</a>} />
-        </DropdownMenu>
+        <SidebarMenuButton render={<Link to="/login" />}>
+          <User className="size-4" />
+          <span>Sign in</span>
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );
 };
 
-interface AppSidebarProps {
-  props: React.ComponentProps<typeof Sidebar>;
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   logo: Logo;
   navGroups: NavGroup[];
   user: UserData | null;
@@ -308,95 +323,26 @@ const AppSidebar = ({ logo, navGroups, user, ...props }: AppSidebarProps) => {
   );
 };
 
-interface ApplicationShell1Props {
+interface AppShellProps {
   className?: string;
   children: React.ReactNode;
 }
 
-export function ApplicationShell1({
-  className,
-  children,
-}: ApplicationShell1Props) {
+export function AppShell({ className, children }: AppShellProps) {
   const location = useLocation().pathname;
-  const breadcrumb = {
+  const breadcrumb = BREADCRUMBS[location] ?? {
     parent: "Overview",
     current: "Dashboard",
   };
-  if (location === "/about") {
-    breadcrumb.parent = "About";
-    breadcrumb.current = "Rules";
-  } else if (location === "/login") {
-    breadcrumb.parent = "User";
-    breadcrumb.current = "Sign in";
-  } else if (location === "/game") {
-    breadcrumb.parent = "Play";
-    breadcrumb.current = "Build";
-  }
 
   const username = useUsername();
   const email = useEmail();
-  const avatar = "...";
   let user: UserData | null = null;
 
   if (username && email) {
-    user = {
-      name: username,
-      email: email,
-      avatar: avatar,
-    };
+    user = { name: username, email: email };
   }
 
-  const sidebarData: SidebarData = {
-    logo: {
-      title: "CS-ACE",
-      description: "Build the best 5-stack",
-    },
-    navGroups: [
-      {
-        title: "Overview",
-        defaultOpen: true,
-        items: [
-          {
-            label: "Dashboard",
-            icon: LayoutDashboard,
-            href: "/",
-            isActive: false,
-          },
-        ],
-      },
-      {
-        title: "About",
-        defaultOpen: true,
-        items: [
-          {
-            label: "Rules",
-            icon: BookText,
-            href: "/about",
-            isActive: false,
-          },
-        ],
-      },
-      {
-        title: "Play",
-        defaultOpen: true,
-        items: [
-          {
-            label: "Build",
-            icon: Gamepad,
-            href: "/game",
-            isActive: false,
-          },
-        ],
-      },
-    ],
-    footerGroup: {
-      title: "Support",
-      items: [
-        { label: "Help Center", icon: HelpCircle, href: "#" },
-        { label: "Settings", icon: Settings, href: "#" },
-      ],
-    },
-  };
   return (
     <SidebarProvider className={cn(className)}>
       <AppSidebar
@@ -411,13 +357,13 @@ export function ApplicationShell1({
             orientation="vertical"
             className="mr-2 hidden data-[orientation=vertical]:h-4 md:block"
           />
-          <a href="#" className="flex items-center gap-2 md:hidden">
+          <Link to="/" className="flex items-center gap-2 md:hidden">
             <span className="font-semibold">{sidebarData.logo.title}</span>
-          </a>
+          </Link>
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href={location}>
+                <BreadcrumbLink render={<Link to={location} />}>
                   {breadcrumb.parent}
                 </BreadcrumbLink>
               </BreadcrumbItem>

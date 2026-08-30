@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import gameService from "@/services/game";
-import { Game } from "@/types/gameTypes";
+import type { Game } from "@/types/gameTypes";
 
 export interface useGameResult {
   game: Game | undefined;

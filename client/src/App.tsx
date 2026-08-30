@@ -4,6 +4,8 @@ import ErrorBoundary from "@/ErrorBoundary";
 import Login from "@/pages/Login";
 import Home from "@/pages/Home";
 import Rules from "@/pages/Rules";
+import Account from "@/pages/Account";
+import RequireAuth from "@/layout/RequireAuth";
 import "@/index.css";
 import Notification from "@/components/Notification";
 import { Route, Routes } from "react-router-dom";
@@ -27,6 +29,14 @@ const App = () => {
           <Route path="/about" element={<Rules />} />
           <Route path="/login" element={<Login />} />
           <Route path="/game" element={<Game />} />
+          <Route
+            path="/account"
+            element={
+              <RequireAuth>
+                <Account />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </ErrorBoundary>
     </div>

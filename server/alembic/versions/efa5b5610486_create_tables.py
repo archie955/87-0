@@ -103,17 +103,12 @@ def upgrade() -> None:
     )
 
     op.create_table(
-        "Email",
+        "email",
         sa.Column(
             "id",
+            sa.Integer,
             primary_key=True,
             autoincrement=True,
-            nullable=False
-        ),
-        sa.Column(
-            "steam_id",
-            sa.String(100),
-            unique=True,
             nullable=False
         ),
         sa.Column(

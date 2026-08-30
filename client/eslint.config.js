@@ -3,31 +3,32 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
+import { defineConfig } from "eslint/config";
 
-export default [
+export default defineConfig([
   { ignores: ["build", "dist", "src/template"] },
-
-  ...tseslint.configs.recommended,
-
   {
     files: ["**/*.{ts,tsx}"],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+      reactHooks.configs.flat.recommended,
+    ],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: globals.browser,
       parserOptions: {
-        ecmaVersion: "latest",
         ecmaFeatures: { tsx: true, jsx: true },
-        sourceType: "module",
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     plugins: {
-      "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
     rules: {
-      ...js.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -36,18 +37,28 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "separate-type-imports" },
+      ],
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
       ],
-      "linebreak-style": ["error", "unix"],
-      quotes: ["error", "double"],
-      semi: ["error", "always"],
       eqeqeq: "error",
-      "no-trailing-spaces": "error",
-      "object-curly-spacing": ["error", "always"],
-      "arrow-spacing": ["error", { before: true, after: true }],
       "no-console": "off",
+    },
+  },
+
+  {
+    files: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 
@@ -57,4 +68,11 @@ export default [
       globals: globals.vitest,
     },
   },
-];
+
+  {
+    files: ["**/*.js"],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+
+  eslintConfigPrettier,
+]);

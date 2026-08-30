@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from database import init_db
+from database.init_db import init_db_wrapper
 from exceptions.app_exceptions import DataNotFoundError
 from models import models
 from schemas import player_schemas, team_schemas
@@ -23,7 +23,7 @@ async def initialise_db_and_cache(db: AsyncSession, cache: redis.Redis) -> None:
     )
 
     if not teams:
-        init_db.main()
+        await init_db_wrapper()
         teams = (
             (
                 await db.execute(

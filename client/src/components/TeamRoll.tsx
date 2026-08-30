@@ -1,4 +1,4 @@
-import { Team } from "@/types/teamTypes";
+import type { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
 
 const SLIDE_WIDTH = 120;

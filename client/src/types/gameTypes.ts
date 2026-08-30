@@ -1,4 +1,4 @@
-import { Player } from "@/types/playerTypes";
+import type { Player } from "@/types/playerTypes";
 
 export interface Game {
   id: number;

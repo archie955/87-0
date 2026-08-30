@@ -1,17 +1,17 @@
 import useGame from "@/hooks/useGame";
 import useTeams from "@/hooks/useTeams";
-import { Player } from "@/types/playerTypes";
-import { Teams, Team } from "@/types/teamTypes";
-import { LineupRole, Role, Roles } from "@/services/enum";
+import type { Player } from "@/types/playerTypes";
+import type { Team } from "@/types/teamTypes";
+import { lineupRoles, Roles } from "@/services/enum";
+import type { LineupRole } from "@/services/enum";
 import { useState } from "react";
-import useTeamStore, {
+import {
   useTeamActions,
   useOpener,
   useCloser,
   useAwper,
   useSupport,
   useFlex,
-  Pick,
 } from "@/stores/teamStore";
 import TeamRoll from "./TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
@@ -36,7 +36,7 @@ const TeamSelect = () => {
   const { startRoll, finishRoll, resetRoll, reroll } = useRollActions();
   const [slides, setSlides] = useState<Team[]>([]);
   const [team, setTeam] = useState<Team | null>(null);
-  const [igl, setIgl] = useState<Pick>(Pick.opener);
+  const [igl, setIgl] = useState<LineupRole>(lineupRoles.opener);
   const [rollId, setRollId] = useState(0);
   const opener = useOpener();
   const closer = useCloser();
@@ -157,13 +157,17 @@ const TeamSelect = () => {
     resetRoll();
   };
 
-  const handleSelectIgl = (p: Pick): (() => void) => {
+  const handleSelectIgl = (p: LineupRole): (() => void) => {
     return () => setIgl(p);
   };
 
   const handleSubmit = () => {
     selectIgl(igl);
-    submit(game.id);
+    // TODO: this swallows both success and failure silently today - nothing
+    // shows the score or an error. Flagged as part of the TeamSelect/TeamRoll
+    // pass rather than fixed here, since it needs a real result UI, not just
+    // a lint fix.
+    void submit(game.id);
   };
 
   return (
@@ -202,40 +206,46 @@ const TeamSelect = () => {
           <div>
             opener = {(opener && opener.name) || "None"}{" "}
             {opener &&
-              (igl === Pick.opener ? (
+              (igl === lineupRoles.opener ? (
                 "IGL"
               ) : (
-                <button onClick={handleSelectIgl(Pick.opener)}>Make IGL</button>
+                <button onClick={handleSelectIgl(lineupRoles.opener)}>
+                  Make IGL
+                </button>
               ))}
           </div>
 
           <div>
             closer = {(closer && closer.name) || "None"}{" "}
             {closer &&
-              (igl === Pick.closer ? (
+              (igl === lineupRoles.closer ? (
                 "IGL"
               ) : (
-                <button onClick={handleSelectIgl(Pick.closer)}>Make IGL</button>
+                <button onClick={handleSelectIgl(lineupRoles.closer)}>
+                  Make IGL
+                </button>
               ))}
           </div>
 
           <div>
             awper = {(awper && awper.name) || "None"}{" "}
             {awper &&
-              (igl === Pick.awper ? (
+              (igl === lineupRoles.awper ? (
                 "IGL"
               ) : (
-                <button onClick={handleSelectIgl(Pick.awper)}>Make IGL</button>
+                <button onClick={handleSelectIgl(lineupRoles.awper)}>
+                  Make IGL
+                </button>
               ))}
           </div>
 
           <div>
             support = {(support && support.name) || "None"}{" "}
             {support &&
-              (igl === Pick.support ? (
+              (igl === lineupRoles.support ? (
                 "IGL"
               ) : (
-                <button onClick={handleSelectIgl(Pick.support)}>
+                <button onClick={handleSelectIgl(lineupRoles.support)}>
                   Make IGL
                 </button>
               ))}
@@ -244,10 +254,12 @@ const TeamSelect = () => {
           <div>
             flex = {(flex && flex.name) || "None"}{" "}
             {flex &&
-              (igl === Pick.flex ? (
+              (igl === lineupRoles.flex ? (
                 "IGL"
               ) : (
-                <button onClick={handleSelectIgl(Pick.flex)}>Make IGL</button>
+                <button onClick={handleSelectIgl(lineupRoles.flex)}>
+                  Make IGL
+                </button>
               ))}
           </div>
         </div>

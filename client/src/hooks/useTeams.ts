@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import teamService from "@/services/teams";
-import { Teams } from "@/types/teamTypes";
+import type { Teams } from "@/types/teamTypes";
 
 interface useTeamsResult {
   teams: Teams | undefined;

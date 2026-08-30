@@ -4,7 +4,7 @@ import {
   useNotificationActions,
   useNotificationSeverity,
 } from "@/stores/notificationStore";
-import SnackBar from "@/components/ui/SnackBar";
+import { Toast } from "@/components/ui/toast";
 
 const Notification = () => {
   const open = useNotificationOpen();
@@ -12,17 +12,13 @@ const Notification = () => {
   const severity = useNotificationSeverity();
   const { manualClose } = useNotificationActions();
   if (!message) {
-    return;
+    return null;
   }
 
-  const handleClose = () => {
-    manualClose();
-  };
-
   return (
-    <SnackBar
+    <Toast
       open={open}
-      handleClose={handleClose}
+      onClose={manualClose}
       severity={severity}
       message={message}
     />

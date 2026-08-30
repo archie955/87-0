@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const DashboardContent = () => {
   return (
     <section className="min-h-screen overflow-hidden bg-linear-to-br dark:from-neutral-800 from-slate-50 to-blue-50 dark:to-neutral-950">
@@ -16,23 +18,31 @@ const DashboardContent = () => {
             CS-ACE is a game to build the best lineup you can out of a random
             selection of teams. The sidebar to the left is used to navigate the
             pages of this application. You can read the rules of the game at the{" "}
-            <a style={{ color: "blue" }} href="/about">
+            <Link
+              to="/about"
+              className="text-primary underline underline-offset-2 hover:no-underline"
+            >
               Rules
-            </a>{" "}
+            </Link>{" "}
             section, or dive straight into playing at{" "}
-            <a style={{ color: "blue" }} href="/game">
+            <Link
+              to="/game"
+              className="text-primary underline underline-offset-2 hover:no-underline"
+            >
               Build
-            </a>
+            </Link>
             .
           </p>
         </div>
         <div className="max-w-5xl mx-auto md:flex text-left gap-10">
           <p className="text-xl dark:text-neutral-400 text-neutral-600 mb:12 leading-relaxed">
-            You can create an account and sign in via direct email, steam, or
-            google, by following{" "}
-            <a style={{ color: "blue" }} href="/login">
+            You can create an account and sign in with email by following{" "}
+            <Link
+              to="/login"
+              className="text-primary underline underline-offset-2 hover:no-underline"
+            >
               Sign in
-            </a>{" "}
+            </Link>{" "}
             at the bottom left. Account creation is <b>NOT</b> necessary to play
             the game, but does save your scores so you can track your personal
             best across sessions. Functionality may be added later that requires

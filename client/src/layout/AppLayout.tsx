@@ -1,12 +1,12 @@
-import { ReactNode } from "react";
-import { ApplicationShell1 } from "@/components/application-shell1";
+import type { ReactNode } from "react";
+import { AppShell } from "@/components/app-shell";
 
 interface Props {
   children: ReactNode;
 }
 
 const AppLayout = ({ children }: Props) => {
-  return <ApplicationShell1>{children}</ApplicationShell1>;
+  return <AppShell>{children}</AppShell>;
 };
 
 export default AppLayout;

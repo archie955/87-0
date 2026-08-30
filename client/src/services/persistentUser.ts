@@ -1,4 +1,4 @@
-import { PersistentUser } from "@/types/userTypes";
+import type { PersistentUser } from "@/types/userTypes";
 
 const getUser = (): PersistentUser | null => {
   const token = window.localStorage.getItem("JSONUser");

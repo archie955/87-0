@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import loginService from "@/services/user";
 import persistentUserService from "@/services/persistentUser";
-import {
+import type {
   Credentials,
   PersistentUser,
   RegisterUser,
@@ -13,6 +13,7 @@ interface UserAction {
   login: (credentials: Credentials) => Promise<void>;
   logout: () => void;
   update: (updated_credentials: UpdatedUser) => Promise<void>;
+  delete: () => Promise<void>;
   init: () => void;
 }
 
@@ -102,6 +103,9 @@ export const useEmail = (): string | null =>
 
 export const useToken = (): string | null =>
   useUserStore((state) => state.token);
+
+export const useBestScore = (): number | null =>
+  useUserStore((state) => state.best_score);
 
 export const useUserActions = (): UserAction =>
   useUserStore((state) => state.actions);
