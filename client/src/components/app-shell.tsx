@@ -57,7 +57,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useEmail, useUsername, useUserActions } from "@/stores/userStore";
+import { useUsername, useUserActions, useDisplay } from "@/stores/userStore";
 
 type NavItem = {
   label: string;
@@ -73,8 +73,8 @@ type NavGroup = {
 };
 
 type UserData = {
-  name: string;
-  email: string;
+  username: string;
+  display: string;
   avatar?: string;
 };
 
@@ -196,7 +196,7 @@ const NavUser = ({ user }: { user: UserData }) => {
     void navigate("/");
   };
 
-  const initials = user.name
+  const initials = user.display
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -218,16 +218,16 @@ const NavUser = ({ user }: { user: UserData }) => {
             >
               <Avatar className="size-8 rounded-lg">
                 {user.avatar && (
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar} alt={user.display} />
                 )}
                 <AvatarFallback className="rounded-lg">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.display}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                  {user.username}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -242,16 +242,16 @@ const NavUser = ({ user }: { user: UserData }) => {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8 rounded-lg">
                     {user.avatar && (
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src={user.avatar} alt={user.display} />
                     )}
                     <AvatarFallback className="rounded-lg">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate font-medium">{user.display}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {user.email}
+                      {user.username}
                     </span>
                   </div>
                 </div>
@@ -336,11 +336,11 @@ export function AppShell({ className, children }: AppShellProps) {
   };
 
   const username = useUsername();
-  const email = useEmail();
+  const display = useDisplay();
   let user: UserData | null = null;
 
-  if (username && email) {
-    user = { name: username, email: email };
+  if (username && display) {
+    user = { display: display, username: username };
   }
 
   return (

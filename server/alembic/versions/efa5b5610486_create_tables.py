@@ -113,6 +113,12 @@ def upgrade() -> None:
             nullable=False
         ),
         sa.Column(
+            "email",
+            sa.String(200),
+            unique=True,
+            nullable=False
+        ),
+        sa.Column(
             "hashed_password",
             sa.String(200),
             unique=False,

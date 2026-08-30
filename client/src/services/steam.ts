@@ -1,8 +1,8 @@
 import api from "@/services/api";
-import type { TokenReturned } from "@/types/userTypes";
+import type { TokenReturned, Username } from "@/types/userTypes";
 
-const createAccount = async (): Promise<TokenReturned> => {
-  const response = await api.get("/steam");
+const createAccount = async (username: Username): Promise<TokenReturned> => {
+  const response = await api.post("/steam", username);
   return response.data;
 };
 

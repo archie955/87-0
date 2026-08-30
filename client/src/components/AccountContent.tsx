@@ -42,7 +42,6 @@ const AccountContent = () => {
   const navigate = useNavigate();
 
   const [newUsername, setNewUsername] = useState(username ?? "");
-  const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -56,14 +55,14 @@ const AccountContent = () => {
     setSaving(true);
 
     const payload: UpdatedUser = {
-      updated_password: newPassword,
+      updated_username: newUsername,
       password: currentPassword,
     };
 
     try {
       await update_email(payload);
       setNotification("Account updated", "success");
-      setNewPassword("");
+      setNewUsername("");
       setCurrentPassword("");
     } catch {
       setNotification(
@@ -139,23 +138,20 @@ const AccountContent = () => {
       <Card>
         <CardHeader>
           <CardTitle>Edit profile</CardTitle>
-          <CardDescription>
-            Update your password. Your current password confirms it&apos;s
-            really you.
-          </CardDescription>
+          <CardDescription>Update your username</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={(e) => void handleUpdate(e)}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="account-new-password">
-                  New password
+                  New username
                 </FieldLabel>
                 <Input
                   id="account-new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
                   required
                 />
                 <FieldDescription>

@@ -21,6 +21,7 @@ export interface SteamReturned {
 
 export interface UserReturned {
   id: number;
+  username: string;
   best_score: number | null;
   email_login: EmailReturned;
   steam_login: SteamReturned;
@@ -40,16 +41,22 @@ export interface UserInformation {
 }
 
 export interface PersistentUser {
+  display: string;
   username: string;
   token: string;
 }
 
 export interface RegisterUser {
   username: string;
+  email: string;
   password: string;
 }
 
 export interface UpdatedUser {
-  updated_password: string;
+  updated_username: string;
   password: string;
+}
+
+export interface Username {
+  username: string;
 }

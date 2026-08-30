@@ -19,6 +19,7 @@ import type { RegisterUser } from "@/types/userTypes";
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { create_email } = useUserActions();
   const email = useField("email");
+  const display = useField("text");
   const password = useField("password");
   const { changeLogin } = useChangeActions();
   const { setNotification } = useNotificationActions();
@@ -41,10 +42,11 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
     e.preventDefault();
 
     const credentials: RegisterUser = {
-      username: email.value,
+      username: display.value,
+      email: email.value,
       password: password.value,
     };
-    if (!validateInputs(credentials.username, credentials.password)) {
+    if (!validateInputs(credentials.email, credentials.password)) {
       return;
     }
 
@@ -77,6 +79,15 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                   Register an account
                 </p>
               </div>
+              <Field>
+                <FieldLabel htmlFor="display">Username</FieldLabel>
+                <Input
+                  id="display"
+                  {...display}
+                  placeholder="user@example.com"
+                  required
+                />
+              </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
