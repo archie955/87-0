@@ -10,22 +10,27 @@ from utils.config import SettingsDep
 router = APIRouter(prefix="/steam", tags=["Authentication"])
 
 
-@router.get("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
-def steam_register(request: Request):
+@router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
+async def steam_register(
+    request: Request, username: steam_schemas.SteamCreate, db: DBDep
+):
+    await steam_service.check_username(db=db, username=username)
     return steam_service.redirect(
-        return_url=str(request.url_for("steam_validate_register"))
+        return_url=f"{request.url_for('steam_validate_register')!s}/{username.username}"
     )
 
 
 @router.get(
-    "/validate",
+    "/validate/{username}",
     status_code=status.HTTP_200_OK,
     response_model=token_schemas.TokenOut,
 )
-async def steam_validate_register(request: Request, db: DBDep, settings: SettingsDep):
+async def steam_validate_register(
+    request: Request, username: str, db: DBDep, settings: SettingsDep
+):
     profile = await steam_service.validate_profile(request.query_params)
     return await steam_service.create_steam_login(
-        db=db, settings=settings, profile=profile
+        db=db, settings=settings, profile=profile, username=username
     )
 
 

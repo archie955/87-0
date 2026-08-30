@@ -1,5 +1,7 @@
 import { create } from "zustand";
+import emailService from "@/services/email";
 import loginService from "@/services/user";
+import steamService from "@/services/steam";
 import persistentUserService from "@/services/persistentUser";
 import type {
   Credentials,
@@ -9,17 +11,18 @@ import type {
 } from "@/types/userTypes";
 
 interface UserAction {
-  create: (credentials: RegisterUser) => Promise<void>;
-  login: (credentials: Credentials) => Promise<void>;
+  create_email: (credentials: RegisterUser) => Promise<void>;
+  create_steam: () => Promise<void>;
+  login_email: (credentials: Credentials) => Promise<void>;
+  login_steam: () => Promise<void>;
   logout: () => void;
-  update: (updated_credentials: UpdatedUser) => Promise<void>;
+  update_email: (updated_credentials: UpdatedUser) => Promise<void>;
   delete: () => Promise<void>;
   init: () => void;
 }
 
 interface UserState {
   username: string | null;
-  email: string | null;
   best_score: number | null;
   token: string | null;
   actions: UserAction;
@@ -27,20 +30,18 @@ interface UserState {
 
 const useUserStore = create<UserState>((set) => ({
   username: null,
-  email: null,
   best_score: null,
   token: null,
   actions: {
-    create: async (credentials: RegisterUser): Promise<void> => {
-      await loginService.createAccount(credentials);
+    create_email: async (credentials: RegisterUser): Promise<void> => {
+      await emailService.createAccount(credentials);
     },
 
-    login: async (credentials: Credentials): Promise<void> => {
-      const response = await loginService.login(credentials);
+    create_steam: async (): Promise<void> => {
+      const response = await steamService.createAccount();
 
       const user: PersistentUser = {
-        username: response.user.username,
-        email: response.user.email,
+        username: response.user.steam_login.profile_name,
         token: response.access_token,
       };
 
@@ -48,7 +49,40 @@ const useUserStore = create<UserState>((set) => ({
 
       set(() => ({
         username: user.username,
-        email: user.email,
+        best_score: response.user.best_score,
+        token: user.token,
+      }));
+    },
+
+    login_email: async (credentials: Credentials): Promise<void> => {
+      const response = await emailService.login(credentials);
+
+      const user: PersistentUser = {
+        username: response.user.email_login.email,
+        token: response.access_token,
+      };
+
+      persistentUserService.saveUser(user);
+
+      set(() => ({
+        username: user.username,
+        best_score: response.user.best_score,
+        token: user.token,
+      }));
+    },
+
+    login_steam: async (): Promise<void> => {
+      const response = await steamService.login();
+
+      const user: PersistentUser = {
+        username: response.user.steam_login.profile_name,
+        token: response.access_token,
+      };
+
+      persistentUserService.saveUser(user);
+
+      set(() => ({
+        username: user.username,
         best_score: response.user.best_score,
         token: user.token,
       }));
@@ -58,18 +92,16 @@ const useUserStore = create<UserState>((set) => ({
       persistentUserService.removeUser();
       set(() => ({
         username: null,
-        email: null,
         best_score: null,
         token: null,
       }));
     },
 
-    update: async (updated_credentials: UpdatedUser): Promise<void> => {
-      const user = await loginService.update(updated_credentials);
-      persistentUserService.updateUser(user.username, user.email);
+    update_email: async (updated_credentials: UpdatedUser): Promise<void> => {
+      const user = await emailService.update(updated_credentials);
+      persistentUserService.updateUser(user.email_login.email);
       set(() => ({
-        username: user.username,
-        email: user.email,
+        username: user.email_login.email,
       }));
     },
 
@@ -78,7 +110,6 @@ const useUserStore = create<UserState>((set) => ({
       persistentUserService.removeUser();
       set(() => ({
         username: null,
-        email: null,
         best_score: null,
         token: null,
       }));
@@ -98,14 +129,11 @@ export default useUserStore;
 export const useUsername = (): string | null =>
   useUserStore((state) => state.username);
 
-export const useEmail = (): string | null =>
-  useUserStore((state) => state.email);
+export const useBestScore = (): number | null =>
+  useUserStore((state) => state.best_score);
 
 export const useToken = (): string | null =>
   useUserStore((state) => state.token);
-
-export const useBestScore = (): number | null =>
-  useUserStore((state) => state.best_score);
 
 export const useUserActions = (): UserAction =>
   useUserStore((state) => state.actions);

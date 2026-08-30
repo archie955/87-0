@@ -31,6 +31,7 @@ def upgrade() -> None:
             autoincrement=True,
             nullable=False,
         ),
+        sa.Column("username", sa.String(100), unique=True, nullable=False),
         sa.Column("best_score", sa.DECIMAL(4, 2), nullable=True),
         sa.Column(
             "created_at",

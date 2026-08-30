@@ -17,9 +17,8 @@ import { useChangeActions } from "@/stores/loginStore";
 import type { RegisterUser } from "@/types/userTypes";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { create } = useUserActions();
+  const { create_email } = useUserActions();
   const email = useField("email");
-  const username = useField("text");
   const password = useField("password");
   const { changeLogin } = useChangeActions();
   const { setNotification } = useNotificationActions();
@@ -42,16 +41,15 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
     e.preventDefault();
 
     const credentials: RegisterUser = {
-      email: email.value,
-      username: username.value,
+      username: email.value,
       password: password.value,
     };
-    if (!validateInputs(credentials.email, credentials.password)) {
+    if (!validateInputs(credentials.username, credentials.password)) {
       return;
     }
 
     try {
-      await create(credentials);
+      await create_email(credentials);
 
       setNotification("Successfully registered user", "success");
       changeLogin();
@@ -85,15 +83,6 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                   id="email"
                   {...email}
                   placeholder="user@example.com"
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
-                <Input
-                  id="username"
-                  {...username}
-                  placeholder="username"
                   required
                 />
               </Field>

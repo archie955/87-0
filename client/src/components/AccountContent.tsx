@@ -31,24 +31,17 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useNotificationActions } from "@/stores/notificationStore";
-import {
-  useBestScore,
-  useEmail,
-  useUserActions,
-  useUsername,
-} from "@/stores/userStore";
+import { useBestScore, useUserActions, useUsername } from "@/stores/userStore";
 import type { UpdatedUser } from "@/types/userTypes";
 
 const AccountContent = () => {
   const username = useUsername();
-  const email = useEmail();
   const bestScore = useBestScore();
-  const { update, delete: deleteAccount, logout } = useUserActions();
+  const { update_email, delete: deleteAccount, logout } = useUserActions();
   const { setNotification } = useNotificationActions();
   const navigate = useNavigate();
 
   const [newUsername, setNewUsername] = useState(username ?? "");
-  const [newEmail, setNewEmail] = useState(email ?? "");
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -63,16 +56,12 @@ const AccountContent = () => {
     setSaving(true);
 
     const payload: UpdatedUser = {
-      updated_user: {
-        email: newEmail,
-        username: newUsername,
-        password: newPassword,
-      },
+      updated_password: newPassword,
       password: currentPassword,
     };
 
     try {
-      await update(payload);
+      await update_email(payload);
       setNotification("Account updated", "success");
       setNewPassword("");
       setCurrentPassword("");
@@ -123,7 +112,7 @@ const AccountContent = () => {
           </Avatar>
           <div>
             <CardTitle className="text-lg">{username ?? "Player"}</CardTitle>
-            <CardDescription>{email}</CardDescription>
+            <CardDescription>{username}</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -151,32 +140,13 @@ const AccountContent = () => {
         <CardHeader>
           <CardTitle>Edit profile</CardTitle>
           <CardDescription>
-            Update your username, email, or password. Your current password
-            confirms it&apos;s really you.
+            Update your password. Your current password confirms it&apos;s
+            really you.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={(e) => void handleUpdate(e)}>
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="account-username">Username</FieldLabel>
-                <Input
-                  id="account-username"
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="account-email">Email</FieldLabel>
-                <Input
-                  id="account-email"
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  required
-                />
-              </Field>
               <Field>
                 <FieldLabel htmlFor="account-new-password">
                   New password

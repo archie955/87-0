@@ -18,9 +18,9 @@ import type { Credentials } from "@/types/userTypes";
 import { useChangeActions } from "@/stores/loginStore";
 
 const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { login } = useUserActions();
+  const { login_email } = useUserActions();
   const navigate = useNavigate();
-  const username = useField("text");
+  const email = useField("email");
   const password = useField("password");
   const { setNotification } = useNotificationActions();
   const { changeLogin } = useChangeActions();
@@ -31,12 +31,12 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
     e.preventDefault();
 
     const credentials: Credentials = {
-      username: username.value,
+      username: email.value,
       password: password.value,
     };
 
     try {
-      await login(credentials);
+      await login_email(credentials);
 
       setNotification("Successfully logged in", "success");
       void navigate("/");
@@ -68,7 +68,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
-                  {...username}
+                  {...email}
                   placeholder="user@example.com"
                   required
                 />

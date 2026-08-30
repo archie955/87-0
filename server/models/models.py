@@ -17,6 +17,7 @@ roles = Enum(Roles, name="roles")
 
 
 class User(Base, Name, TimeStamps):
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     best_score: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
 
     steam_login: Mapped["Steam | None"] = relationship(

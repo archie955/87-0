@@ -23,6 +23,17 @@ from utils.config import Settings
 logger = logging.getLogger(__name__)
 
 
+async def check_username(db: AsyncSession, username: steam_schemas.SteamCreate) -> None:
+    existing_username = (
+        await db.execute(
+            select(models.User).where(models.User.username == username.username)
+        )
+    ).scalar_one_or_none()
+
+    if existing_username:
+        raise DataAlreadyExistsError(datatype="Username")
+
+
 def redirect(return_url: str) -> RedirectResponse:
     steam = SteamLogin(return_url)
 
@@ -42,7 +53,10 @@ async def validate_profile(query_params: QueryParams) -> steam_schemas.SteamProf
 
 
 async def create_steam_login(
-    db: AsyncSession, profile: steam_schemas.SteamProfile, settings: Settings
+    db: AsyncSession,
+    profile: steam_schemas.SteamProfile,
+    settings: Settings,
+    username: str,
 ):
     steam_login = (
         await db.execute(
@@ -56,6 +70,7 @@ async def create_steam_login(
         raise DataAlreadyExistsError(datatype="Steam Login")
 
     user = models.User(
+        username=username,
         best_score=0.0,
     )
 

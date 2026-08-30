@@ -1,3 +1,5 @@
+# pyrefly: ignore-errors [bad-argument-type]
+
 import asyncio
 import logging
 
@@ -26,6 +28,15 @@ logger = logging.getLogger(__name__)
 async def create_email(
     db: AsyncSession, email_user: email_schemas.EmailCreate
 ) -> email_schemas.EmailOut:
+    existing_username = (
+        await db.execute(
+            select(models.User).where(models.User.username == email_user.username)
+        )
+    ).scalar_one_or_none()
+
+    if existing_username:
+        raise DataAlreadyExistsError(datatype="Username")
+
     existing_user = (
         await db.execute(
             select(models.Email).where(
@@ -35,11 +46,11 @@ async def create_email(
     ).scalar_one_or_none()
 
     if existing_user:
-        raise DataAlreadyExistsError(datatype="User")
+        raise DataAlreadyExistsError(datatype="Email")
 
     hashed_pwd = await asyncio.to_thread(utils.hash, password=email_user.password)
 
-    user = models.User(best_score=0.0)
+    user = models.User(username=email_user.username, best_score=0.0)
     email_user = models.Email(
         email=email_user.email,
         hashed_password=hashed_pwd,
@@ -54,7 +65,14 @@ async def create_email(
 
     logger.info("User created", extra={"user_id": user.id})
 
-    return email_schemas.EmailOut.model_validate(email_user)
+    return email_schemas.EmailOut(
+        email=email_user.email,
+        username=user.username,
+        id=email_user.id,
+        user_id=user.id,
+        created_at=email_user.created_at,
+        updated_at=email_user.updated_at,
+    )
 
 
 async def add_email_login_to_preexisting_account(
@@ -105,7 +123,6 @@ async def login(
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=password,
-        # pyrefly: ignore [bad-argument-type]
         hashed_password=email_user.hashed_password,
     )
 
@@ -131,7 +148,6 @@ async def update(
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=updated.password,
-        # pyrefly: ignore [bad-argument-type]
         hashed_password=user.hashed_password,
     )
     if not verified:

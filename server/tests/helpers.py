@@ -9,6 +9,7 @@ class Helpers:
     @staticmethod
     async def register_user(client: AsyncClient) -> dict[str, str]:
         user = {
+            "username": "authuser",
             "email": "authuser@example.com",
             "password": "authpassword",
         }
@@ -17,6 +18,7 @@ class Helpers:
         assert response.status_code == 201
         data = response.json()
 
+        assert data["username"] == user["username"]
         assert data["email"] == user["email"]
         assert "id" in data
         assert "created_at" in data
@@ -26,6 +28,7 @@ class Helpers:
     @staticmethod
     async def full_login(client: AsyncClient) -> dict[str, str]:
         user = {
+            "username": "authuser",
             "email": "authuser@example.com",
             "password": "authpassword",
         }
@@ -61,15 +64,11 @@ class Helpers:
         client: AsyncClient, updated: dict[str, str], user: dict[str, str]
     ) -> dict[str, str]:
         response = await client.put(
-            url="/email",
+            url="/users",
             json=updated,
             headers={"Authorization": f"Bearer {user['access_token']}"},
         )
 
         assert response.status_code == 200
-        data = response.json()
 
-        assert "updated_password" in updated
-        assert "password" in updated
-
-        return data
+        return response.json()
