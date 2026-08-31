@@ -1,15 +1,13 @@
 import { useEffect } from "react";
 import { useUserActions } from "@/stores/userStore";
 import ErrorBoundary from "@/ErrorBoundary";
-import Login from "@/pages/Login";
-import Home from "@/pages/Home";
-import Rules from "@/pages/Rules";
-import Account from "@/pages/Account";
 import RequireAuth from "@/layout/RequireAuth";
 import "@/index.css";
 import Notification from "@/components/Notification";
 import { Route, Routes } from "react-router-dom";
-import Game from "./pages/Game";
+import AppLayout from "./layout/AppLayout";
+import { lazy, Suspense } from "react";
+import SuspenseOutlet from "@/layout/SuspenseOutlet";
 
 const App = () => {
   const { init } = useUserActions();
@@ -18,6 +16,12 @@ const App = () => {
     init();
   }, [init]);
 
+  const Login = lazy(() => import("@/pages/Login"))
+  const Home = lazy(() => import("@/pages/Home"))
+  const Rules = lazy(() => import("@/pages/Rules"))
+  const Account = lazy(() => import("@/pages/Account"))
+  const Game = lazy(() => import("@/pages/Game"))
+
   return (
     <div>
       <ErrorBoundary>
@@ -25,18 +29,22 @@ const App = () => {
       </ErrorBoundary>
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<Rules />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/game" element={<Game />} />
-          <Route
-            path="/account"
-            element={
-              <RequireAuth>
-                <Account />
-              </RequireAuth>
-            }
-          />
+          <Route element={<AppLayout />}>
+            <Route element={<SuspenseOutlet />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<Rules />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/game" element={<Game />} />
+              <Route
+                path="/account"
+                element={
+                  <RequireAuth>
+                    <Account />
+                  </RequireAuth>
+                }
+              />
+            </Route>
+          </Route>
         </Routes>
       </ErrorBoundary>
     </div>

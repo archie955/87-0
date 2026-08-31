@@ -1,11 +1,16 @@
-import AppLayout from "@/layout/AppLayout";
-import AuthCard from "@/components/AuthCard";
+import RegistrationForm from "@/components/RegistrationForm";
+import LoginForm from "@/components/LoginForm";
+import { useLogin } from "@/stores/loginStore";
+import { CardContent } from "@/components/ui/card";
 
 const Login = () => {
+  const login = useLogin();
   return (
-    <AppLayout>
-      <AuthCard />
-    </AppLayout>
+    <div className="card">
+      <CardContent className="max-w-fit">
+        {login ? <LoginForm /> : <RegistrationForm />}
+      </CardContent>
+    </div>
   );
 };
 

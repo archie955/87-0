@@ -1,12 +1,12 @@
-import type { ReactNode } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Outlet } from "react-router-dom";
 
-interface Props {
-  children: ReactNode;
-}
-
-const AppLayout = ({ children }: Props) => {
-  return <AppShell>{children}</AppShell>;
+const AppLayout = () => {
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  );
 };
 
 export default AppLayout;

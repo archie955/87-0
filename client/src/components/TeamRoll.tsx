@@ -68,6 +68,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         cancelAnimationFrame(animationRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
