@@ -1,4 +1,4 @@
-import useGame from "@/hooks/useGame";
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import useTeams from "@/hooks/useTeams";
 import type { Player } from "@/types/playerTypes";
 import type { Team } from "@/types/teamTypes";
@@ -12,18 +12,31 @@ import {
   useAwper,
   useSupport,
   useFlex,
+  useGame,
 } from "@/stores/teamStore";
 import TeamRoll from "./TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
 import { useNotificationActions } from "@/stores/notificationStore";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { type Result } from "@/types/resultTypes";
+import { Dialog } from "./ui/dialog";
 
 const WINNER_INDEX = 35;
 
 const TeamSelect = () => {
-  const { game, isPending: gamePending } = useGame();
+  const game = useGame();
+  const [result, setResult] = useState<Result>();
   const { teams, isPending: teamPending } = useTeams();
   const [teamId, setTeamId] = useState(1);
   const {
+    startGame,
+    finishGame,
     compatibility,
     selectOpener,
     selectCloser,
@@ -46,9 +59,14 @@ const TeamSelect = () => {
   const flex = useFlex();
   const { setNotification } = useNotificationActions();
 
-  if (teamPending || gamePending || !teams || !game) {
+  if (teamPending || !teams) {
     return <h1>Loading data...</h1>;
   }
+
+  const handleStartGame = async () => {
+    await startGame();
+    setResult(undefined);
+  };
 
   const getRandomInt = (max: number): number => {
     return 1 + Math.floor(Math.random() * max);
@@ -72,7 +90,10 @@ const TeamSelect = () => {
     return slides;
   };
 
-  const getTeamId = (turn: number): number => {
+  const getTeamId = (turn: number): number | void => {
+    if (!game) {
+      return;
+    }
     switch (turn) {
       case 1:
         return game.team_1_id;
@@ -96,6 +117,9 @@ const TeamSelect = () => {
 
   const prepareRoll = (turn: number) => {
     const selectedTeamId = getTeamId(turn);
+    if (!selectedTeamId) {
+      return;
+    }
     const selectedTeam = teams[selectedTeamId];
 
     const slides = makeSlides(selectedTeam);
@@ -167,23 +191,33 @@ const TeamSelect = () => {
     if (igl !== null) {
       selectIgl(igl);
     }
+    if (!game) {
+      return;
+    }
 
     try {
-      await submit(game.id);
+      const response = await submit(game.id);
+      setResult(response);
     } catch (e: unknown) {
       if (e instanceof Error) {
         setNotification(e.message, "error");
       }
+    } finally {
+      setSlides([]);
+      setIgl(null);
+      finishGame();
     }
   };
 
   return (
-    <div>
-      {status === "idle" && teamId <= 6 && (
-        <button onClick={startRolling}>Start</button>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      {result && <Dialog>Score is {result.score}</Dialog>}
+      {!game && <Button onClick={handleStartGame}>Start Game</Button>}
+      {game && status === "idle" && teamId <= 6 && (
+        <Button onClick={startRolling}>Roll</Button>
       )}
 
-      {slides.length > 0 && (
+      {game && slides.length > 0 && (
         <TeamRoll
           key={rollId}
           slides={slides}
@@ -192,89 +226,91 @@ const TeamSelect = () => {
         />
       )}
 
-      <div>
-        {status === "picking" &&
-          team &&
-          team.players.map((player) => (
-            <div key={player.id}>
-              <button
-                onClick={() => handleSelectPlayer(player)}
-                disabled={!compatibility(player)}
-              >
-                {player.name}
-              </button>
+      <Card>
+        <CardHeader className="flex-row items-center justify-ends gap-4">
+          <CardTitle className="text-lg">Choose your team</CardTitle>
+          <CardTitle className="text-lg">Test card description</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-4">
+            {status === "picking" &&
+              team &&
+              team.players.map((player) => (
+                <div key={player.id}>
+                  <Button
+                    onClick={() => handleSelectPlayer(player)}
+                    disabled={!compatibility(player)}
+                  >
+                    {player.name}
+                  </Button>
+                </div>
+              ))}
+            {status === "picking" && rerollStatus && teamId < 6 && (
+              <Button onClick={handleReroll}>Reroll</Button>
+            )}
+            <div>
+              <div>
+                opener = {(opener && opener.name) || "None"}{" "}
+                {opener &&
+                  (igl === lineupRoles.opener ? (
+                    "IGL"
+                  ) : (
+                    <Button onClick={handleSelectIgl(lineupRoles.opener)}>
+                      Make IGL
+                    </Button>
+                  ))}
+              </div>
+              <div>
+                closer = {(closer && closer.name) || "None"}{" "}
+                {closer &&
+                  (igl === lineupRoles.closer ? (
+                    "IGL"
+                  ) : (
+                    <Button onClick={handleSelectIgl(lineupRoles.closer)}>
+                      Make IGL
+                    </Button>
+                  ))}
+              </div>
+              <div>
+                awper = {(awper && awper.name) || "None"}{" "}
+                {awper &&
+                  (igl === lineupRoles.awper ? (
+                    "IGL"
+                  ) : (
+                    <Button onClick={handleSelectIgl(lineupRoles.awper)}>
+                      Make IGL
+                    </Button>
+                  ))}
+              </div>
+              <div>
+                support = {(support && support.name) || "None"}{" "}
+                {support &&
+                  (igl === lineupRoles.support ? (
+                    "IGL"
+                  ) : (
+                    <Button onClick={handleSelectIgl(lineupRoles.support)}>
+                      Make IGL
+                    </Button>
+                  ))}
+              </div>
+              <div>
+                flex = {(flex && flex.name) || "None"}{" "}
+                {flex &&
+                  (igl === lineupRoles.flex ? (
+                    "IGL"
+                  ) : (
+                    <Button onClick={handleSelectIgl(lineupRoles.flex)}>
+                      Make IGL
+                    </Button>
+                  ))}
+              </div>
             </div>
-          ))}
-
-        {status === "picking" && rerollStatus && teamId < 6 && (
-          <button onClick={handleReroll}>Reroll</button>
-        )}
-        <div>
-          <div>
-            opener = {(opener && opener.name) || "None"}{" "}
-            {opener &&
-              (igl === lineupRoles.opener ? (
-                "IGL"
-              ) : (
-                <button onClick={handleSelectIgl(lineupRoles.opener)}>
-                  Make IGL
-                </button>
-              ))}
+            {opener && closer && awper && support && flex && (
+              <Button onClick={handleSubmit}>Submit</Button>
+            )}
           </div>
-
-          <div>
-            closer = {(closer && closer.name) || "None"}{" "}
-            {closer &&
-              (igl === lineupRoles.closer ? (
-                "IGL"
-              ) : (
-                <button onClick={handleSelectIgl(lineupRoles.closer)}>
-                  Make IGL
-                </button>
-              ))}
-          </div>
-
-          <div>
-            awper = {(awper && awper.name) || "None"}{" "}
-            {awper &&
-              (igl === lineupRoles.awper ? (
-                "IGL"
-              ) : (
-                <button onClick={handleSelectIgl(lineupRoles.awper)}>
-                  Make IGL
-                </button>
-              ))}
-          </div>
-
-          <div>
-            support = {(support && support.name) || "None"}{" "}
-            {support &&
-              (igl === lineupRoles.support ? (
-                "IGL"
-              ) : (
-                <button onClick={handleSelectIgl(lineupRoles.support)}>
-                  Make IGL
-                </button>
-              ))}
-          </div>
-
-          <div>
-            flex = {(flex && flex.name) || "None"}{" "}
-            {flex &&
-              (igl === lineupRoles.flex ? (
-                "IGL"
-              ) : (
-                <button onClick={handleSelectIgl(lineupRoles.flex)}>
-                  Make IGL
-                </button>
-              ))}
-          </div>
-        </div>
-        {opener && closer && awper && support && flex && (
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          <button onClick={handleSubmit}>Submit</button>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import AppLayout from "@/layout/AppLayout";
-import AuthCard from "@/components/auth-card";
+import AuthCard from "@/components/AuthCard";
 
 const Login = () => {
   return (

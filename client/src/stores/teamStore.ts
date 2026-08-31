@@ -4,19 +4,22 @@ import type { Result } from "@/types/resultTypes";
 import { Roles } from "@/services/enum";
 import type { LineupRole } from "@/services/enum";
 import gameService from "@/services/game";
-import type { Lineup } from "@/types/gameTypes";
+import type { Lineup, Game } from "@/types/gameTypes";
 
 interface TeamActions {
+  startGame: () => Promise<void>;
+  finishGame: () => void;
   selectOpener: (player: Player) => void;
   selectCloser: (player: Player) => void;
   selectAwper: (player: Player) => void;
   selectSupport: (player: Player) => void;
   selectIgl: (p: LineupRole) => void;
   compatibility: (p: Player) => boolean;
-  submit: (id: string) => Promise<Result | Error>;
+  submit: (id: string) => Promise<Result>;
 }
 
 interface TeamState {
+  game: Game | null;
   opener: Player | null;
   closer: Player | null;
   awper: Player | null;
@@ -27,6 +30,7 @@ interface TeamState {
 }
 
 const useTeamStore = create<TeamState>((set, get) => ({
+  game: null,
   opener: null,
   closer: null,
   awper: null,
@@ -34,6 +38,23 @@ const useTeamStore = create<TeamState>((set, get) => ({
   flex: null,
   igl: null,
   actions: {
+    startGame: async () => {
+      const game = await gameService.getGame();
+      set(() => ({
+        game: game,
+      }));
+    },
+    finishGame: () => {
+      set(() => ({
+        game: null,
+        opener: null,
+        closer: null,
+        awper: null,
+        support: null,
+        flex: null,
+        igl: null,
+      }));
+    },
     selectOpener: (player: Player) => {
       set((state) => {
         if (player.role !== Roles.OPENER) {
@@ -123,7 +144,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
       }
       return false;
     },
-    submit: async (id: string): Promise<Result | Error> => {
+    submit: async (id: string): Promise<Result> => {
       const player_1 = get().opener;
       const player_2 = get().closer;
       const player_3 = get().awper;
@@ -138,7 +159,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
         !player_5 ||
         !igl
       ) {
-        return new Error("Select an IGL");
+        throw new Error("Select an IGL");
       }
       const lineup: Lineup = {
         game_id: id,
@@ -156,6 +177,8 @@ const useTeamStore = create<TeamState>((set, get) => ({
 }));
 
 export default useTeamStore;
+
+export const useGame = (): Game | null => useTeamStore((state) => state.game);
 
 export const useOpener = (): Player | null =>
   useTeamStore((state) => state.opener);
