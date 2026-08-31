@@ -1,5 +1,6 @@
 # pyrefly: ignore-errors [bad-argument-type]
 
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,9 +9,11 @@ from exceptions.app_exceptions import (
     DataNotFoundError,
     InvalidGameLineup,
 )
+from models import models
 from models.enums import Roles
 from models.models import Player
 from schemas import active_game_schemas
+from services.helpers import safe_commit
 
 MAX_DOUBLE_PLAYER = 2
 TEAM_SIZE = 5
@@ -133,3 +136,18 @@ async def evaluation_base(
     score = eval_lineup(game_list)
 
     return active_game_schemas.GameEvaluation(score=score, best=False)
+
+
+async def update_user_game(
+    db: AsyncSession, user: models.User, score: float, cache: Redis, id: str
+):
+    best = False
+    if user.best_score is None or user.best_score < score:
+        user.best_score = score
+        best = True
+
+    await cache.delete(id)
+
+    await safe_commit(db=db, datatype="Best Score")
+
+    return best

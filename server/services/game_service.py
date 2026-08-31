@@ -44,10 +44,10 @@ async def create_game(cache: redis.Redis) -> active_game_schemas.ActiveGame:
     return active_game
 
 
-async def evaluate_user_game(
+async def game_evaluation(
     game: active_game_schemas.GameResult,
     active_game: active_game_schemas.ActiveGame,
-    user: User,
+    user: User | None,
     db: AsyncSession,
     cache: redis.Redis,
 ) -> active_game_schemas.GameEvaluation:
@@ -55,25 +55,14 @@ async def evaluate_user_game(
         game=game, active_game=active_game, db=db
     )
 
-    if user.best_score is None or user.best_score < game_evaluation.score:
-        user.best_score = game_evaluation.score
-        game_evaluation.best = True
-
-    await cache.delete(active_game.id)
-
-    return game_evaluation
-
-
-async def evaluate_game(
-    game: active_game_schemas.GameResult,
-    active_game: active_game_schemas.ActiveGame,
-    db: AsyncSession,
-    cache: redis.Redis,
-) -> active_game_schemas.GameEvaluation:
-    game_evaluation = await game_helpers.evaluation_base(
-        game=game, active_game=active_game, db=db
-    )
-
-    await cache.delete(active_game.id)
+    if user:
+        best = await game_helpers.update_user_game(
+            db=db,
+            user=user,
+            score=game_evaluation.score,
+            cache=cache,
+            id=active_game.id,
+        )
+        game_evaluation.best = best
 
     return game_evaluation

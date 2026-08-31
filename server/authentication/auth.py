@@ -15,9 +15,11 @@ from utils.config import Settings, SettingsDep
 
 CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Bearer"})
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/email/login")
+optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/email/login", auto_error=False)
 
 BearerDep = Annotated[str, Depends(oauth2_scheme)]
+OptionalBearerDep = Annotated[str | None, Depends(optional_oauth2_scheme)]
 
 
 def create_access_token(data: dict, settings: Settings) -> str:
@@ -70,4 +72,24 @@ async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -
     return user
 
 
+async def get_current_user_or_null(
+    token: OptionalBearerDep, db: DBDep, settings: SettingsDep
+) -> User | None:
+    if not token:
+        return None
+    user_id_token = verify_access_token(token=token, settings=settings)
+
+    return (
+        await db.execute(
+            select(User)
+            .where(User.id == int(user_id_token.id))
+            .options(
+                selectinload(User.steam_login),
+                selectinload(User.email_login),
+            )
+        )
+    ).scalar_one_or_none()
+
+
 UserDep = Annotated[User, Depends(get_current_user)]
+NullableUserDep = Annotated[User | None, Depends(get_current_user_or_null)]

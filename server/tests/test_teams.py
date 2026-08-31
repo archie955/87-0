@@ -11,13 +11,16 @@ async def test_fetch_teams(auth_client_seed):
     keys = data.keys()
     teams = [data[key] for key in keys]
 
-    assert len(teams) == 2
-    names = {teams[0]["name"], teams[1]["name"]}
+    assert len(teams) == 3
+    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
     assert "Vitality" in names
     assert "Falcons" in names
+    assert "Spirit" in names
 
     team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
+    team = teams[2] if teams[2]["name"] == "Falcons" else team
+
     player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
 
     assert "players" in team
@@ -42,13 +45,16 @@ async def test_fetch_teams_no_auth(auth_client_seed):
     keys = data.keys()
     teams = [data[key] for key in keys]
 
-    assert len(teams) == 2
-    names = {teams[0]["name"], teams[1]["name"]}
+    assert len(teams) == 3
+    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
     assert "Vitality" in names
     assert "Falcons" in names
+    assert "Spirit" in names
 
     team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
+    team = teams[2] if teams[2]["name"] == "Falcons" else team
+
     player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
 
     assert "players" in team
@@ -70,13 +76,16 @@ async def test_fetch_teams_no_user(client, auth_client_seed):
     keys = data.keys()
     teams = [data[key] for key in keys]
 
-    assert len(teams) == 2
-    names = {teams[0]["name"], teams[1]["name"]}
+    assert len(teams) == 3
+    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
     assert "Vitality" in names
     assert "Falcons" in names
+    assert "Spirit" in names
 
     team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
+    team = teams[2] if teams[2]["name"] == "Falcons" else team
+
     player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
 
     assert "players" in team
