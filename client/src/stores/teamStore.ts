@@ -13,7 +13,7 @@ interface TeamActions {
   selectSupport: (player: Player) => void;
   selectIgl: (p: LineupRole) => void;
   compatibility: (p: Player) => boolean;
-  submit: (id: number) => Promise<Result | void>;
+  submit: (id: string) => Promise<Result | Error>;
 }
 
 interface TeamState {
@@ -123,7 +123,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
       }
       return false;
     },
-    submit: async (id: number): Promise<Result | void> => {
+    submit: async (id: string): Promise<Result | Error> => {
       const player_1 = get().opener;
       const player_2 = get().closer;
       const player_3 = get().awper;
@@ -138,7 +138,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
         !player_5 ||
         !igl
       ) {
-        return;
+        return new Error("Select an IGL");
       }
       const lineup: Lineup = {
         game_id: id,

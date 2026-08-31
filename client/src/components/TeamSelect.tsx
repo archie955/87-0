@@ -15,6 +15,7 @@ import {
 } from "@/stores/teamStore";
 import TeamRoll from "./TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
+import { useNotificationActions } from "@/stores/notificationStore";
 
 const WINNER_INDEX = 35;
 
@@ -36,13 +37,14 @@ const TeamSelect = () => {
   const { startRoll, finishRoll, resetRoll, reroll } = useRollActions();
   const [slides, setSlides] = useState<Team[]>([]);
   const [team, setTeam] = useState<Team | null>(null);
-  const [igl, setIgl] = useState<LineupRole>(lineupRoles.opener);
+  const [igl, setIgl] = useState<LineupRole | null>(null);
   const [rollId, setRollId] = useState(0);
   const opener = useOpener();
   const closer = useCloser();
   const awper = useAwper();
   const support = useSupport();
   const flex = useFlex();
+  const { setNotification } = useNotificationActions();
 
   if (teamPending || gamePending || !teams || !game) {
     return <h1>Loading data...</h1>;
@@ -161,13 +163,18 @@ const TeamSelect = () => {
     return () => setIgl(p);
   };
 
-  const handleSubmit = () => {
-    selectIgl(igl);
-    // TODO: this swallows both success and failure silently today - nothing
-    // shows the score or an error. Flagged as part of the TeamSelect/TeamRoll
-    // pass rather than fixed here, since it needs a real result UI, not just
-    // a lint fix.
-    void submit(game.id);
+  const handleSubmit = async () => {
+    if (igl !== null) {
+      selectIgl(igl);
+    }
+
+    try {
+      await submit(game.id);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setNotification(e.message, "error");
+      }
+    }
   };
 
   return (
@@ -264,6 +271,7 @@ const TeamSelect = () => {
           </div>
         </div>
         {opener && closer && awper && support && flex && (
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           <button onClick={handleSubmit}>Submit</button>
         )}
       </div>

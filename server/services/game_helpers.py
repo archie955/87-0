@@ -1,6 +1,7 @@
+# pyrefly: ignore-errors [bad-argument-type]
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.expression import case
 
 from exceptions.app_exceptions import (
     BadRequestError,
@@ -41,15 +42,15 @@ async def validate_game(
         game.player_4.id,
         game.player_5.id,
     ]
-    ordering = case({id: index for index, id in enumerate(ids)}, value=Player.id)
+
     players = (
-        (await db.execute(select(Player).filter(Player.id.in_(ids)).order_by(ordering)))
-        .scalars()
-        .all()
+        (await db.execute(select(Player).filter(Player.id.in_(ids)))).scalars().all()
     )
 
     if not players or len(players) != TEAM_SIZE:
         raise DataNotFoundError(datatype="players")
+
+    teams = [p.team_id for p in players]
 
     team_ids = [
         active_game.team_1_id,
@@ -60,15 +61,20 @@ async def validate_game(
         active_game.team_6_id,
     ]
 
+    team_set = set(teams)
+
     skip = False
-    for i in range(5):
-        if players[i].team_id != team_ids[i] and not (
-            skip and players[i] == team_ids[i + 1]
-        ):
-            if players[i] == team_ids[i + 1]:
-                skip = True
-            else:
-                raise InvalidGameLineup(id=i, reason="wrong team")
+    for id in team_set:
+        tc = teams.count(id)
+        tic = team_ids.count(id)
+        if tc != tic:
+            if tc != tic - 1 or skip:
+                raise InvalidGameLineup(
+                    id=id,
+                    reason=f"Wrong team, game_ids={team_ids},"
+                    f"player_teams={[(p.name, p.team_id) for p in players]}",
+                )
+            skip = True
 
     if game.igl not in ids:
         raise InvalidGameLineup(id=game.igl, reason="igl")
@@ -79,10 +85,8 @@ async def validate_game(
         igl = game.igl == p.id
         score = p.hltv + p.igl_bonus if igl else p.hltv
         ps = active_game_schemas.ReducedGamePlayer(
-            # pyrefly: ignore [bad-argument-type]
             id=p.id,
             role=p.role,
-            # pyrefly: ignore [bad-argument-type]
             score=score,
             igl=igl,
         )

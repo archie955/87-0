@@ -1,7 +1,7 @@
 import type { Player } from "@/types/playerTypes";
 
 export interface Game {
-  id: number;
+  id: string;
   team_1_id: number;
   team_2_id: number;
   team_3_id: number;
@@ -11,7 +11,7 @@ export interface Game {
 }
 
 export interface Lineup {
-  game_id: number;
+  game_id: string;
   player_1: Player;
   player_2: Player;
   player_3: Player;
