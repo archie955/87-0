@@ -16,7 +16,9 @@ async def steam_register(
 ):
     await steam_service.check_username(db=db, username=username)
     return steam_service.redirect(
-        return_url=f"{request.url_for('steam_validate_register')!s}/{username.username}"
+        return_url=str(
+            request.url_for("steam_validate_register", username=username.username)
+        )
     )
 
 
