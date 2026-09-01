@@ -37,7 +37,8 @@ async def validate_game(
 
     Explicitly, this checks that the 5 players exist in the database first. Then,
     It checks that the players are selected from the teams generated in the order
-    generated. It then checks that there is one and only one igl listed."""
+    generated. It then checks that there is one and only one igl listed.
+    """
     ids = [
         game.player_1.id,
         game.player_2.id,

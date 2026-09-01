@@ -201,6 +201,7 @@ ignore = [
     "multi-line-summary-second-line",
     "missing-trailing-comma",
     "logging-f-string",
+    "missing-blank-line-after-summary",
 ]
 preview = true
 fixable = ["ALL"]
@@ -213,6 +214,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "**/tests/*.py" = [
     "assert",
     "magic-value-comparison",
+    "D",
 ]
 
 

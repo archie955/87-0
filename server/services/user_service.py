@@ -1,3 +1,5 @@
+"""Provide service functions for users routers."""
+
 import asyncio
 import logging
 
@@ -16,7 +18,21 @@ from utils import utils
 logger = logging.getLogger(__name__)
 
 
-async def delete(db: AsyncSession, user: User):
+async def delete(db: AsyncSession, user: User) -> None:
+    """Delete the provided user.
+
+    Parameters
+    ----------
+    db : sqlalchemy.ext.asyncio.AsyncSession
+        database session
+    user : models.User
+        SQLAlchemy model for User table
+
+    Returns
+    -------
+    None
+
+    """
     await db.delete(user)
     await safe_commit_delete(db, datatype="User")
 
@@ -26,6 +42,23 @@ async def delete(db: AsyncSession, user: User):
 async def update(
     db: AsyncSession, user: User, updated: user_schemas.UserUpdate
 ) -> user_schemas.UserOut:
+    """Update user username.
+
+    Parameters
+    ----------
+    db : sqlalchemy.ext.asyncio.AsyncSession
+        database session
+    user : models.User
+        SQLAlchemy model for User table
+    updated : user_schemas.UserUpdate
+        payload for user update
+
+    Returns
+    -------
+    user_schemas.UserOut
+        User output details
+
+    """
     email = user.email_login
 
     if not email:

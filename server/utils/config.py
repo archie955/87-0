@@ -1,3 +1,9 @@
+"""Initialise settings from environment file.
+
+Use Last Recently Used Cache to provide settings without
+reinitialisation every time. Provide dependency injection.
+"""
+
 from functools import lru_cache
 from typing import Annotated
 
@@ -6,6 +12,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """:class:`Settings`.
+    Inherits from :class:`pydantic_settings.BaseSettings`.
+    """
+
     secret_key: str
     postgres_hostname: str
     postgres_port: int
@@ -27,6 +37,10 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings():
+    """Return instance of :class:`Settings`.
+    Decorated by LRU Cache so same instance
+    used everywhere.
+    """
     return Settings()
 
 
