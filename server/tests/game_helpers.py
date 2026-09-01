@@ -42,7 +42,7 @@ async def play_game_switch_team(auth_client_seed):
                 players.append(p)
                 break
 
-    id = {(1, 2, 3)} - {(game["team_5_id"], game["team_6_id"])}
+    id = {[1, 2, 3]} - {(game["team_5_id"], game["team_6_id"])}
     id = str(id.pop())
 
     last = teams[id]["players"][-1]
