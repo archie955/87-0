@@ -9,11 +9,10 @@ from sqlalchemy import text
 
 from cache.init_cache import initialise_db_and_cache
 from cache.redis import RedisDep, create_redis
-from database.database import AsyncSessionLocal, DBDep, engine
+from database.database import AsyncSessionLocal, DBDep
 from exceptions.app_exceptions import AppException, UninstantiatedCache
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from models.models import Base
 from routers import email, game, steam, teams, user
 from utils.config import get_settings
 
@@ -21,9 +20,6 @@ from utils.config import get_settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
     app.state.redis = create_redis()
 

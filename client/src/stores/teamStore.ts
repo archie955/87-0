@@ -56,86 +56,78 @@ const useTeamStore = create<TeamState>((set, get) => ({
       }));
     },
     selectOpener: (player: Player) => {
-      set((state) => {
-        if (player.role !== Roles.OPENER) {
-          return state;
-        } else if (!state.opener) {
-          state.opener = player;
-        } else if (!state.flex) {
-          state.flex = player;
-        }
-        return state;
-      });
+      if (player.role !== Roles.OPENER) {
+        return;
+      } else if (!get().opener) {
+        set(() => ({ opener: player }));
+      } else if (!get().flex) {
+        set(() => ({ flex: player }));
+      }
     },
     selectCloser: (player: Player) => {
-      set((state) => {
-        if (player.role !== Roles.CLOSER) {
-          return state;
-        } else if (!state.closer) {
-          state.closer = player;
-        } else if (!state.flex) {
-          state.flex = player;
-        }
-        return state;
-      });
+      if (player.role !== Roles.CLOSER) {
+        return;
+      } else if (!get().closer) {
+        set(() => ({ closer: player }));
+      } else if (!get().flex) {
+        set(() => ({ flex: player }));
+      }
     },
     selectAwper: (player: Player) => {
-      console.log("Chose awper");
-      set((state) => {
-        if (player.role !== Roles.AWPER) {
-          return state;
-        } else if (!state.awper) {
-          state.awper = player;
-        } else if (!state.flex) {
-          state.flex = player;
-        }
-        return state;
-      });
+      if (player.role !== Roles.AWPER) {
+        return;
+      } else if (!get().awper) {
+        set(() => ({ awper: player }));
+      } else if (!get().flex) {
+        set(() => ({ flex: player }));
+      }
     },
     selectSupport: (player: Player): void => {
-      set((state) => {
-        if (player.role !== Roles.SUPPORT) {
-          return state;
-        } else if (!state.support) {
-          state.support = player;
-        } else if (!state.flex) {
-          state.flex = player;
-        }
-        return state;
-      });
+      if (player.role !== Roles.SUPPORT) {
+        return;
+      } else if (!get().support) {
+        set(() => ({ support: player }));
+      } else if (!get().flex) {
+        set(() => ({ flex: player }));
+      }
     },
     selectIgl: (p: LineupRole): void => {
-      set((state) => {
-        const player = state[p];
-        if (player) {
-          state.igl = player.id;
-        }
-        return state;
-      });
+      const player = get()[p];
+      if (player) {
+        set(() => ({ igl: player.id }));
+      }
     },
     compatibility: (p: Player): boolean => {
       switch (p.role) {
         case Roles.AWPER:
           if (!get().awper) {
             return true;
+          } else if (get().awper?.name === p.name) {
+            return false;
           }
           break;
 
         case Roles.OPENER:
           if (!get().opener) {
             return true;
+          } else if (get().opener?.name === p.name) {
+            return false;
           }
           break;
 
         case Roles.CLOSER:
           if (!get().closer) {
             return true;
+          } else if (get().closer?.name === p.name) {
+            return false;
           }
           break;
 
         case Roles.SUPPORT:
           if (!get().support) {
             return true;
+          } else if (get().support?.name === p.name) {
+            return false;
           }
           break;
       }

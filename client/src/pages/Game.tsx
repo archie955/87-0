@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type Result } from "@/types/resultTypes";
 import { Dialog } from "@/components/ui/dialog";
+import PlayerCard from "@/components/PlayerCard";
 
 const WINNER_INDEX = 35;
 
@@ -232,12 +233,11 @@ const Game = () => {
               team &&
               team.players.map((player) => (
                 <div key={player.id}>
-                  <Button
-                    onClick={() => handleSelectPlayer(player)}
-                    disabled={!compatibility(player)}
-                  >
-                    {player.name}
-                  </Button>
+                  <PlayerCard
+                    player={player}
+                    selected={!compatibility(player)}
+                    onSelect={() => handleSelectPlayer(player)}
+                  />
                 </div>
               ))}
             {status === "picking" && rerollStatus && teamId < 6 && (

@@ -32,6 +32,7 @@ const useRollStore = create<RollStore>((set, get) => ({
     resetRoll: () =>
       set(() => ({
         status: "idle",
+        rerollStatus: true,
       })),
 
     reroll: () => {

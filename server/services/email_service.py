@@ -3,12 +3,13 @@
 import asyncio
 import logging
 
+from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from authentication.auth import create_access_token
+from authentication.auth import create_access_token, create_refresh_token
 from exceptions.app_exceptions import (
     BadRequestError,
     DataAlreadyExistsError,
@@ -105,7 +106,7 @@ async def add_email_login_to_preexisting_account(
 
 async def login(
     db: AsyncSession, settings: Settings, email: EmailStr, password: str
-) -> token_schemas.TokenOut:
+) -> JSONResponse:
     email_user = (
         await db.execute(
             select(models.Email)
@@ -133,13 +134,34 @@ async def login(
 
     logger.info("User logged in", extra={"user_id": email_user.user_id})
 
+    access_token = create_access_token(data=user_data, settings=settings)
+    refresh_token = create_refresh_token(data=user_data, settings=settings)
+
+    refresh_model = models.RefreshToken(
+        token=refresh_token.token, expires_at=refresh_token.expiry, user=email_user.user
+    )
+
+    db.add(refresh_model)
+
     user = email_user.user
 
-    return token_schemas.TokenOut(
-        user=user_schemas.UserOut.model_validate(user),
-        access_token=create_access_token(data=user_data, settings=settings),
-        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
+    response = JSONResponse(
+        content=token_schemas.TokenOut(
+            user=user_schemas.UserOut.model_validate(user),
+            access_token=access_token,
+            token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
+        )
     )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token.token,
+        httponly=True,
+        secure=settings.prod == "prod",
+        samesite="strict" if settings.prod == "prod" else "lax",
+    )
+
+    return response
 
 
 async def update(

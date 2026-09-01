@@ -13,7 +13,8 @@ from models.models import User
 from schemas import token_schemas
 from utils.config import Settings, SettingsDep
 
-CREDENTIALS_EXCEPTION = InvalidCredentialsError(headers={"WWW-Authenticate": "Bearer"})
+CREDENTIALS_EXCEPTION = InvalidCredentialsError()
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/email/login")
 optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/email/login", auto_error=False)
@@ -31,10 +32,24 @@ def create_access_token(data: dict, settings: Settings) -> str:
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
+def create_refresh_token(data: dict, settings: Settings) -> token_schemas.RefreshToken:
+    to_encode = data.copy()
+
+    expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
+    to_encode.update({"exp": expire, "type": "refresh"})
+
+    return token_schemas.RefreshToken(
+        token=jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm),
+        expiry=expire,
+    )
+
+
 def decode_token(token: str, settings: Settings) -> dict[str, Any]:
     try:
         return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     except jwt.exceptions.InvalidTokenError as e:
+        raise CREDENTIALS_EXCEPTION from e
+    except jwt.exceptions.ExpiredSignatureError as e:
         raise CREDENTIALS_EXCEPTION from e
 
 
@@ -50,6 +65,22 @@ def verify_access_token(token: str, settings: Settings) -> token_schemas.TokenDa
         raise CREDENTIALS_EXCEPTION
 
     return token_schemas.TokenData(id=user_id)
+
+
+def verify_refresh_token(
+    token: str, settings: Settings
+) -> token_schemas.RefreshTokenData:
+    payload = decode_token(token, settings)
+
+    if payload.get("type") != "refresh":
+        raise CREDENTIALS_EXCEPTION
+
+    user_id = payload.get("sub")
+
+    if user_id is None:
+        raise CREDENTIALS_EXCEPTION
+
+    return token_schemas.RefreshTokenData(id=user_id)
 
 
 async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -> User:

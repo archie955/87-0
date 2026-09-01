@@ -54,6 +54,13 @@ async def validate_game(
     if not players or len(players) != TEAM_SIZE:
         raise DataNotFoundError(datatype="players")
 
+    for i in range(len(ids) - 1):
+        for j in range(i + 1, len(ids)):
+            if ids[i] == ids[j]:
+                raise InvalidGameLineup(
+                    id=ids[i], reason="Duplicate players in lineup"
+                )
+
     teams = [p.team_id for p in players]
 
     team_ids = [

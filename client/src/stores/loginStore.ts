@@ -11,14 +11,12 @@ interface LoginState {
   actions: LoginActions;
 }
 
-const useLoginStore = create<LoginState>((set) => ({
+const useLoginStore = create<LoginState>((set, get) => ({
   show: false,
   login: true,
   actions: {
-    changeLogin: () =>
-      set((state) => ({ login: !state.login, show: state.show })),
-    changeShow: () =>
-      set((state) => ({ show: !state.show, login: state.login })),
+    changeLogin: () => set(() => ({ login: !get().login })),
+    changeShow: () => set(() => ({ show: !get().show })),
   },
 }));
 

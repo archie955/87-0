@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy import (
     DECIMAL,
+    DateTime,
     Enum,
     ForeignKey,
     Index,
@@ -32,6 +35,10 @@ class User(Base, Name, TimeStamps):
         uselist=False,
         cascade="all, delete-orphan",
         lazy="selectin",
+    )
+
+    refresh: Mapped["RefreshToken | None"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     # google_login: Mapped["Google"] = relationship(back_populates="user")
@@ -101,3 +108,17 @@ class Player(Base, Name, TimeStamps):
     win_teammates: Mapped[int] = mapped_column(Integer, nullable=False)
 
     team: Mapped["Team"] = relationship(back_populates="players")
+
+
+class RefreshToken(Base, Name):
+    token: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True, nullable=False
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+    user: Mapped["User"] = relationship(back_populates="refresh")
