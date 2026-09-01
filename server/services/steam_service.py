@@ -23,11 +23,9 @@ from utils.config import Settings
 logger = logging.getLogger(__name__)
 
 
-async def check_username(db: AsyncSession, username: steam_schemas.SteamCreate) -> None:
+async def check_username(db: AsyncSession, username: str) -> None:
     existing_username = (
-        await db.execute(
-            select(models.User).where(models.User.username == username.username)
-        )
+        await db.execute(select(models.User).where(models.User.username == username))
     ).scalar_one_or_none()
 
     if existing_username:
@@ -82,14 +80,16 @@ async def create_steam_login(
         user=user,
     )
 
-    db.add(user)
     db.add(steam_login)
 
     await safe_commit_add(db=db, datatype="User")
 
-    await db.refresh(steam_login)
+    user = (
+        await db.execute(select(models.User).where(models.User.username == username))
+    ).scalar_one_or_none()
 
-    user = steam_login.user
+    if not user:
+        raise DataNotFoundError(datatype="User")
 
     user_data = {"sub": str(user.id)}
 

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request, status
+from typing import Annotated
+
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
 from authentication.auth import UserDep
@@ -9,16 +11,14 @@ from utils.config import SettingsDep
 
 router = APIRouter(prefix="/steam", tags=["Authentication"])
 
+FormDep = Annotated[str, Form]
+
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
-async def steam_register(
-    request: Request, username: steam_schemas.SteamCreate, db: DBDep
-):
+async def steam_register(request: Request, db: DBDep, username: FormDep):
     await steam_service.check_username(db=db, username=username)
     return steam_service.redirect(
-        return_url=str(
-            request.url_for("steam_validate_register", username=username.username)
-        )
+        return_url=str(request.url_for("steam_validate_register", username=username))
     )
 
 

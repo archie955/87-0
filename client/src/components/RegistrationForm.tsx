@@ -14,10 +14,10 @@ import { useUserActions } from "@/stores/userStore";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
 import { useChangeActions } from "@/stores/loginStore";
-import type { RegisterUser, Username } from "@/types/userTypes";
+import type { RegisterUser } from "@/types/userTypes";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { create_email, create_steam } = useUserActions();
+  const { create_email } = useUserActions();
   const email = useField("email");
   const display = useField("text");
   const steamDisplay = useField("text");
@@ -55,25 +55,6 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
       await create_email(credentials);
 
       setNotification("Successfully registered user", "success");
-      changeLogin();
-    } catch {
-      setNotification("Register Failed", "error");
-    }
-  };
-
-  const handleSteamRegister = async (
-    e: SubmitEvent<HTMLFormElement>,
-  ): Promise<void> => {
-    e.preventDefault();
-
-    const username: Username = {
-      username: steamDisplay.value,
-    };
-
-    try {
-      await create_steam(username);
-
-      setNotification("Successfully registered with Steam", "success");
       changeLogin();
     } catch {
       setNotification("Register Failed", "error");
@@ -126,7 +107,8 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
           </form>
           <form
             className="p-6 md:p-8 grid grid-cols-1 gap-4"
-            onSubmit={(e) => void handleSteamRegister(e)}
+            action="/api/steam"
+            method="POST"
           >
             <FieldGroup>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -136,6 +118,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                 <FieldLabel htmlFor="steamDisplay">Display Name</FieldLabel>
                 <Input
                   id="steamDisplay"
+                  name="username"
                   {...steamDisplay}
                   placeholder="steam display name"
                   required

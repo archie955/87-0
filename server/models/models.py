@@ -21,11 +21,17 @@ class User(Base, Name, TimeStamps):
     best_score: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
 
     steam_login: Mapped["Steam | None"] = relationship(
-        back_populates="user", uselist=False, cascade="all, delete-orphan"
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     email_login: Mapped["Email | None"] = relationship(
-        back_populates="user", uselist=False, cascade="all, delete-orphan"
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     # google_login: Mapped["Google"] = relationship(back_populates="user")
