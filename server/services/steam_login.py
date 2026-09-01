@@ -122,7 +122,7 @@ class SteamValidator:
             raise InvalidCredentialsError()
 
         identity = data.get("openid.identity")
-        claimed_id = data.get("openid,claimed_id")
+        claimed_id = data.get("openid.claimed_id")
 
         if identity != claimed_id:
             raise InvalidCredentialsError()
