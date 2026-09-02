@@ -87,4 +87,6 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_DB: ${{ secrets.REDIS_DB }}
+          PORT: ${{ secrets.DEV }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_DEV_URL }}
         run: uv run pytest
