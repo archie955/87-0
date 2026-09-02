@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     """
 
     secret_key: str
-    refresh_secret_key: str
     postgres_hostname: str
     postgres_port: int
     postgres_password: str
@@ -32,6 +31,7 @@ class Settings(BaseSettings):
     redis_port: int
     redis_db: int
     prod: str
+    frontend_url: str
 
     model_config = SettingsConfigDict(
         env_file=".env.dev", case_sensitive=False, extra="ignore"

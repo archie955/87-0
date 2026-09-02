@@ -10,4 +10,9 @@ const updateUser = async (updated: UpdatedUser): Promise<UserReturned> => {
   return response.data;
 };
 
-export default { deleteUser, updateUser };
+const getUser = async (): Promise<UserReturned> => {
+  const response = await api.get("/users");
+  return response.data;
+}
+
+export default { deleteUser, updateUser, getUser };

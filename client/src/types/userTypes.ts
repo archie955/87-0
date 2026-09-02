@@ -41,9 +41,8 @@ export interface UserInformation {
 }
 
 export interface PersistentUser {
-  display: string;
   username: string;
-  token: string;
+  authname: string;
 }
 
 export interface RegisterUser {

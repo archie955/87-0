@@ -5,8 +5,12 @@ from pydantic import BaseModel
 from schemas.user_schemas import UserOut
 
 
-class TokenData(BaseModel):
+class AccessTokenData(BaseModel):
     id: str
+
+
+class RefreshTokenData(AccessTokenData):
+    jti: str
 
 
 class TokenOut(BaseModel):
@@ -15,10 +19,12 @@ class TokenOut(BaseModel):
     token_type: str
 
 
-class RefreshTokenData(TokenData):
-    pass
-
-
 class RefreshToken(BaseModel):
     token: str
-    expiry: datetime
+    jti: str
+    expires_at: datetime
+
+
+class Tokens(BaseModel):
+    access_token: str
+    refresh_token: str

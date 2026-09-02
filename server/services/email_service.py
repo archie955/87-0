@@ -1,9 +1,6 @@
-# pyrefly: ignore-errors [bad-argument-type]
-
 import asyncio
 import logging
 
-from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,15 +8,12 @@ from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token, create_refresh_token
 from exceptions.app_exceptions import (
-    BadRequestError,
     DataAlreadyExistsError,
-    DataNotFoundError,
     InvalidCredentialsError,
-    RequiredAuthentication,
 )
 from models import models
-from schemas import email_schemas, token_schemas, user_schemas
-from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
+from schemas import email_schemas, token_schemas
+from services.helpers import safe_commit
 from utils import utils
 from utils.config import Settings
 
@@ -27,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 async def create_email(
-    db: AsyncSession, email_user: email_schemas.EmailCreate
-) -> email_schemas.EmailOut:
+    db: AsyncSession, email_user: email_schemas.EmailCreate, settings: Settings
+) -> token_schemas.Tokens:
     existing_username = (
         await db.execute(
             select(models.User).where(models.User.username == email_user.username)
@@ -62,59 +56,38 @@ async def create_email(
     db.add(email_user)
 
     await safe_commit(db=db, datatype="User")
-    await db.refresh(email_user)
+    await db.refresh(user)
 
-    logger.info("User created", extra={"user_id": user.id})
+    user_data = {"sub": str(user.id)}
 
-    return email_schemas.EmailOut(
-        email=email_user.email,
-        username=user.username,
-        id=email_user.id,
-        user_id=user.id,
-        created_at=email_user.created_at,
-        updated_at=email_user.updated_at,
-    )
+    token = create_refresh_token(data=user_data, settings=settings)
 
-
-async def add_email_login_to_preexisting_account(
-    db: AsyncSession, email_profile: email_schemas.EmailCreate, user: models.User
-) -> email_schemas.EmailOut:
-    if user.email_login:
-        raise DataAlreadyExistsError(datatype="Email Login")
-
-    if not user.steam_login:
-        raise BadRequestError(message="Account not authenticated")
-
-    hashed_pwd = await asyncio.to_thread(utils.hash, email_profile.password)
-
-    email_login = models.Email(
-        email=email_profile.email,
-        hashed_password=hashed_pwd,
+    refresh = models.RefreshToken(
+        token=await asyncio.to_thread(utils.hash, password=token.token),
+        expires_at=token.expires_at,
+        jti=token.jti,
         user=user,
     )
 
-    db.add(email_login)
+    db.add(refresh)
+    await safe_commit(db=db, datatype="Refresh Token")
 
-    await safe_commit_add(db=db, datatype="User")
+    logger.info("User created", extra={"user_id": user.id})
 
-    await db.refresh(email_login)
-
-    logger.info("Added email login", extra={"user_id": str(user.id)})
-
-    return email_schemas.EmailOut.model_validate(email_login)
+    return token_schemas.Tokens(
+        access_token=create_access_token(data=user_data, settings=settings),
+        refresh_token=token.token,
+    )
 
 
 async def login(
     db: AsyncSession, settings: Settings, email: EmailStr, password: str
-) -> JSONResponse:
+) -> token_schemas.Tokens:
     email_user = (
         await db.execute(
             select(models.Email)
             .where(models.Email.email == email)
-            .options(
-                selectinload(models.Email.user).selectinload(models.User.email_login),
-                selectinload(models.Email.user).selectinload(models.User.steam_login),
-            )
+            .options(selectinload(models.Email.user))
         )
     ).scalar_one_or_none()
 
@@ -124,6 +97,7 @@ async def login(
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=password,
+        # pyrefly: ignore [bad-argument-type]
         hashed_password=email_user.hashed_password,
     )
 
@@ -132,73 +106,21 @@ async def login(
 
     user_data = {"sub": str(email_user.user_id)}
 
+    token = create_refresh_token(data=user_data, settings=settings)
+
+    refresh = models.RefreshToken(
+        token=await asyncio.to_thread(utils.hash, password=token.token),
+        expires_at=token.expires_at,
+        jti=token.jti,
+        user=email_user.user,
+    )
+
+    db.add(refresh)
+    await safe_commit(db=db, datatype="Refresh Token")
+
     logger.info("User logged in", extra={"user_id": email_user.user_id})
 
-    access_token = create_access_token(data=user_data, settings=settings)
-    refresh_token = create_refresh_token(data=user_data, settings=settings)
-
-    refresh_model = models.RefreshToken(
-        token=refresh_token.token, expires_at=refresh_token.expiry, user=email_user.user
+    return token_schemas.Tokens(
+        access_token=create_access_token(data=user_data, settings=settings),
+        refresh_token=token.token,
     )
-
-    db.add(refresh_model)
-
-    user = email_user.user
-
-    response = JSONResponse(
-        content=token_schemas.TokenOut(
-            user=user_schemas.UserOut.model_validate(user),
-            access_token=access_token,
-            token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
-        )
-    )
-
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token.token,
-        httponly=True,
-        secure=settings.prod == "prod",
-        samesite="strict" if settings.prod == "prod" else "lax",
-    )
-
-    return response
-
-
-async def update(
-    db: AsyncSession, user: models.Email, updated: email_schemas.EmailUpdate
-) -> email_schemas.EmailOut:
-    verified = await asyncio.to_thread(
-        utils.verify,
-        plain_password=updated.password,
-        hashed_password=user.hashed_password,
-    )
-    if not verified:
-        raise InvalidCredentialsError()
-
-    user.hashed_password = await asyncio.to_thread(
-        utils.hash, password=updated.updated_password
-    )
-
-    await safe_commit(db=db, datatype="Email password")
-    await db.refresh(user)
-
-    logger.info("Email login updated", extra={"user_id": user.user_id})
-
-    return email_schemas.EmailOut.model_validate(user)
-
-
-async def delete(db: AsyncSession, user: models.User) -> None:
-    if not user.email_login:
-        raise DataNotFoundError(datatype="Email Login")
-
-    if not user.steam_login:
-        raise RequiredAuthentication()
-
-    email_user = user.email_login
-
-    await db.delete(email_user)
-    await safe_commit_delete(db, datatype="Email Login")
-
-    logger.info("email User deleted", extra={"email_user_id": email_user.id})
-
-    logger.info("Associated user remains", extra={"user_id": user.id})

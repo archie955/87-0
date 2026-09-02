@@ -1,8 +1,9 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 
 import jwt
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security.oauth2 import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -36,11 +37,13 @@ def create_refresh_token(data: dict, settings: Settings) -> token_schemas.Refres
     to_encode = data.copy()
 
     expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
-    to_encode.update({"exp": expire, "type": "refresh"})
+    jti = str(uuid.uuid4())
+    to_encode.update({"exp": expire, "type": "refresh", "jti": jti})
 
     return token_schemas.RefreshToken(
         token=jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm),
-        expiry=expire,
+        jti=jti,
+        expires_at=expire,
     )
 
 
@@ -49,11 +52,11 @@ def decode_token(token: str, settings: Settings) -> dict[str, Any]:
         return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     except jwt.exceptions.InvalidTokenError as e:
         raise CREDENTIALS_EXCEPTION from e
-    except jwt.exceptions.ExpiredSignatureError as e:
-        raise CREDENTIALS_EXCEPTION from e
 
 
-def verify_access_token(token: str, settings: Settings) -> token_schemas.TokenData:
+def verify_access_token(
+    token: str, settings: Settings
+) -> token_schemas.AccessTokenData:
     payload = decode_token(token, settings)
 
     if payload.get("type") != "access":
@@ -64,7 +67,7 @@ def verify_access_token(token: str, settings: Settings) -> token_schemas.TokenDa
     if user_id is None:
         raise CREDENTIALS_EXCEPTION
 
-    return token_schemas.TokenData(id=user_id)
+    return token_schemas.AccessTokenData(id=user_id)
 
 
 def verify_refresh_token(
@@ -76,15 +79,20 @@ def verify_refresh_token(
         raise CREDENTIALS_EXCEPTION
 
     user_id = payload.get("sub")
+    jti = payload.get("jti")
 
-    if user_id is None:
+    if user_id is None or jti is None:
         raise CREDENTIALS_EXCEPTION
 
-    return token_schemas.RefreshTokenData(id=user_id)
+    return token_schemas.RefreshTokenData(id=user_id, jti=jti)
 
 
-async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -> User:
-    user_id_token = verify_access_token(token=token, settings=settings)
+async def get_current_user(request: Request, db: DBDep, settings: SettingsDep) -> User:
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        raise CREDENTIALS_EXCEPTION
+
+    user_id_token = verify_access_token(token=access_token, settings=settings)
 
     user = (
         await db.execute(
@@ -104,13 +112,15 @@ async def get_current_user(token: BearerDep, db: DBDep, settings: SettingsDep) -
 
 
 async def get_current_user_or_null(
-    token: OptionalBearerDep, db: DBDep, settings: SettingsDep
+    request: Request, db: DBDep, settings: SettingsDep
 ) -> User | None:
-    if not token:
+    access_token = request.cookies.get("access_token")
+    if not access_token:
         return None
-    user_id_token = verify_access_token(token=token, settings=settings)
 
-    return (
+    user_id_token = verify_access_token(token=access_token, settings=settings)
+
+    user = (
         await db.execute(
             select(User)
             .where(User.id == int(user_id_token.id))
@@ -120,6 +130,11 @@ async def get_current_user_or_null(
             )
         )
     ).scalar_one_or_none()
+
+    if not user:
+        raise CREDENTIALS_EXCEPTION
+
+    return user
 
 
 UserDep = Annotated[User, Depends(get_current_user)]

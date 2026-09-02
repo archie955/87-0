@@ -2,31 +2,26 @@ import api from "@/services/api";
 import type {
   Credentials,
   UserReturned,
-  TokenReturned,
   RegisterUser,
   UpdatedUser,
-  EmailReturned,
 } from "@/types/userTypes";
 
 const createAccount = async (
   credentials: RegisterUser,
-): Promise<EmailReturned> => {
-  const response = await api.post("/email", credentials);
-  return response.data;
+): Promise<void> => {
+  await api.post("/email", credentials);
 };
 
-const login = async (credentials: Credentials): Promise<TokenReturned> => {
+const login = async (credentials: Credentials): Promise<void> => {
   const formData = new URLSearchParams();
   formData.append("username", credentials.username);
   formData.append("password", credentials.password);
 
-  const response = await api.post("/email/login", formData, {
+  await api.post("/email/login", formData, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
-
-  return response.data;
 };
 
 const update = async (

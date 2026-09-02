@@ -2,6 +2,7 @@ import { create } from "zustand";
 import emailService from "@/services/email";
 import loginService from "@/services/user";
 import persistentUserService from "@/services/persistentUser";
+import userService from "@/services/user";
 import type {
   Credentials,
   PersistentUser,
@@ -34,25 +35,35 @@ const useUserStore = create<UserState>((set) => ({
   actions: {
     create_email: async (credentials: RegisterUser): Promise<void> => {
       await emailService.createAccount(credentials);
-    },
-
-    login_email: async (credentials: Credentials): Promise<void> => {
-      const response = await emailService.login(credentials);
-
+      const response = await userService.getUser();
       const user: PersistentUser = {
-        username: response.user.email_login.email,
-        display: response.user.username,
-        token: response.access_token,
+        username: response.username,
+        authname: response.email_login.email,
       };
 
       persistentUserService.saveUser(user);
 
       set(() => ({
         username: user.username,
-        display: user.display,
-        best_score: response.user.best_score,
-        token: user.token,
-      }));
+        authname: user.authname,
+      }))
+    },
+
+    login_email: async (credentials: Credentials): Promise<void> => {
+      await emailService.login(credentials);
+      const response = await userService.getUser();
+
+      const user: PersistentUser = {
+        username: response.username,
+        authname: response.email_login.email,
+      };
+
+      persistentUserService.saveUser(user);
+
+      set(() => ({
+        username: user.username,
+        authname: user.authname,
+      }))
     },
 
     logout: (): void => {

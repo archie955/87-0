@@ -1,4 +1,5 @@
 # pyrefly: ignore-errors[bad-argument-type]
+import asyncio
 import logging
 
 from fastapi.datastructures import QueryParams
@@ -7,17 +8,17 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from authentication.auth import create_access_token
+from authentication.auth import create_access_token, create_refresh_token
 from exceptions.app_exceptions import (
-    BadRequestError,
     DataAlreadyExistsError,
     DataNotFoundError,
     InvalidCredentialsError,
 )
 from models import models
 from schemas import steam_schemas, token_schemas
-from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
+from services.helpers import safe_commit, safe_commit_add
 from services.steam_login import SteamLogin, SteamValidator
+from utils import utils
 from utils.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -93,12 +94,23 @@ async def create_steam_login(
 
     user_data = {"sub": str(user.id)}
 
+    token = create_refresh_token(data=user_data, settings=settings)
+
+    refresh = models.RefreshToken(
+        token=await asyncio.to_thread(utils.hash, password=token.token),
+        expires_at=token.expires_at,
+        jti=token.jti,
+        user=user,
+    )
+
+    db.add(refresh)
+    await safe_commit(db=db, datatype="Refresh Token")
+
     logger.info("User logged in", extra={"user_id": str(user.id)})
 
-    return token_schemas.TokenOut(
-        user=user,
+    return token_schemas.Tokens(
         access_token=create_access_token(data=user_data, settings=settings),
-        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
+        refresh_token=token.token,
     )
 
 
@@ -109,7 +121,9 @@ async def update_steam_login(
         await db.execute(
             select(models.Steam)
             .where(models.Steam.steam_id == profile.steam_id)
-            .options(selectinload(models.Steam.user))
+            .options(
+                selectinload(models.Steam.user).selectinload(models.User.steam_login)
+            )
         )
     ).scalar_one_or_none()
 
@@ -124,61 +138,23 @@ async def update_steam_login(
 
     await safe_commit(db=db, datatype="User")
 
-    await db.refresh(steam_login)
-
     user_data = {"sub": str(user.id)}
+
+    token = create_refresh_token(data=user_data, settings=settings)
+
+    refresh = models.RefreshToken(
+        token=await asyncio.to_thread(utils.hash, password=token.token),
+        expires_at=token.expires_at,
+        jti=token.jti,
+        user=user,
+    )
+
+    db.add(refresh)
+    await safe_commit(db=db, datatype="Refresh Token")
 
     logger.info("User logged in", extra={"user_id": str(user.id)})
 
-    return token_schemas.TokenOut(
-        user=user,
+    return token_schemas.Tokens(
         access_token=create_access_token(data=user_data, settings=settings),
-        token_type="bearer",  # ruff: ignore[hardcoded-password-func-arg]
+        refresh_token=token.token,
     )
-
-
-async def add_steam_login_to_preexisting_account(
-    db: AsyncSession, profile: steam_schemas.SteamProfile, user: models.User
-) -> steam_schemas.SteamOut:
-    if user.steam_login:
-        raise DataAlreadyExistsError(datatype="Steam Login")
-
-    if not user.email_login:
-        raise BadRequestError(message="Account not authenticated")
-
-    steam_login = models.Steam(
-        profile_name=profile.profile_name,
-        url=profile.url,
-        avatar=profile.avatar,
-        steam_id=profile.steam_id,
-        user=user,
-    )
-
-    db.add(steam_login)
-
-    await safe_commit_add(db=db, datatype="User")
-
-    await db.refresh(steam_login)
-
-    logger.info("Added steam login", extra={"user_id": str(user.id)})
-
-    return steam_schemas.SteamOut.model_validate(steam_login)
-
-
-async def delete(db: AsyncSession, user: models.User) -> None:
-    if not user.email_login:
-        raise BadRequestError(
-            message="Cannot delete only authentication method for account"
-        )
-
-    if not user.steam_login:
-        raise DataNotFoundError(datatype="Steam Login")
-
-    steam_user = user.steam_login
-
-    await db.delete(steam_user)
-    await safe_commit_delete(db, datatype="Steam Login")
-
-    logger.info("Steam User deleted", extra={"steam_user_id": steam_user.id})
-
-    logger.info("Associated user remains", extra={"user_id": user.id})
