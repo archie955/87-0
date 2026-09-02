@@ -45,6 +45,8 @@ async def test_play_game_user(auth_client_seed):
 async def test_play_game(auth_client_seed):
     jsn = await play_game(auth_client_seed)
 
+    auth_client_seed.client.cookies.clear()
+
     response = await auth_client_seed.noauth_post(f"/games/{jsn['game_id']}", json=jsn)
 
     assert response.status_code == 200

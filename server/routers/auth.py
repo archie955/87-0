@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import UTC, datetime
 
@@ -17,7 +16,6 @@ from models import models
 from schemas import token_schemas
 from services import auth_service
 from services.helpers import safe_commit
-from utils import utils
 from utils.config import SettingsDep
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -25,7 +23,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 logger = logging.getLogger(__name__)
 
 
-@router.get("", status_code=status.HTTP_201_CREATED, response_model=Response)
+@router.post("/refresh", status_code=status.HTTP_200_OK, response_model=Response)
 async def refresh(request: Request, db: DBDep, settings: SettingsDep):
     refresh_token = request.cookies.get("refresh_token")
 
@@ -45,21 +43,15 @@ async def refresh(request: Request, db: DBDep, settings: SettingsDep):
     if not user:
         raise DataNotFoundError(datatype="User")
 
-    db_tokens = user.refresh
-    old_token = None
+    old_token = user.refresh
 
-    for t in db_tokens:
-        if t.jti != token.jti:
-            if t.expires_at < datetime.now(tz=UTC):
-                await db.delete(t)
-        else:
-            old_token = t
-
-    if not old_token:
+    if not old_token or not old_token.jti == token.jti:
         raise InvalidCredentialsError()
 
     if old_token.expires_at < datetime.now(tz=UTC):
         raise InvalidCredentialsError()
+
+    await db.delete(old_token)
 
     user_data = {"sub": str(user.id)}
 
@@ -68,7 +60,6 @@ async def refresh(request: Request, db: DBDep, settings: SettingsDep):
     new_refresh = create_refresh_token(data=user_data, settings=settings)
 
     refresh = models.RefreshToken(
-        token=await asyncio.to_thread(utils.hash, password=new_refresh.token),
         expires_at=new_refresh.expires_at,
         jti=new_refresh.jti,
         user=user,
@@ -77,7 +68,7 @@ async def refresh(request: Request, db: DBDep, settings: SettingsDep):
     db.add(refresh)
     await safe_commit(db=db, datatype="Refresh Token")
 
-    response = Response(status_code=status.HTTP_201_CREATED)
+    response = Response(status_code=status.HTTP_200_OK)
 
     tokens = token_schemas.Tokens(
         access_token=new_access_token,

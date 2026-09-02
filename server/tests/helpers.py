@@ -1,4 +1,6 @@
-from httpx import AsyncClient
+from typing import Any
+
+from httpx import AsyncClient, Cookies
 
 SQLALCHEMY_DATABASE_URL = (
     "postgresql+psycopg://postgres:postgres@localhost:5433/test_db"
@@ -16,10 +18,24 @@ class Helpers:
         response = await client.post(url="/email", json=user)
 
         assert response.status_code == 201
+
+        access_token, refresh_token = (
+            response.cookies.get("access_token"),
+            response.cookies.get("refresh_token"),
+        )
+
+        assert access_token
+        assert refresh_token
+
+        cookies = Cookies(
+            {"access_token": access_token, "refresh_token": refresh_token}
+        )
+
+        response = await client.get(url="/users", cookies=cookies)
         data = response.json()
 
         assert data["username"] == user["username"]
-        assert data["email"] == user["email"]
+        assert data["email_login"]["email"] == user["email"]
         assert "id" in data
         assert "created_at" in data
         assert "updated_at" in data
@@ -32,41 +48,59 @@ class Helpers:
             "email": "authuser@example.com",
             "password": "authpassword",
         }
-        user_payload = await client.post(url="/email", json=user)
+        response = await client.post(url="/email", json=user)
 
-        assert user_payload.status_code == 201
+        assert response.status_code == 201
 
-        response = await client.post(
-            url="/email/login",
-            data={"username": user["email"], "password": user["password"]},
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        access_token, refresh_token = (
+            response.cookies.get("access_token"),
+            response.cookies.get("refresh_token"),
         )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "access_token" in data
+        assert access_token
+        assert refresh_token
 
-        # ruff: ignore[hardcoded-password-string]
-        assert data["token_type"] == "bearer"
-        user["access_token"] = data["access_token"]
+        cookies = Cookies(
+            {"access_token": access_token, "refresh_token": refresh_token}
+        )
+
+        user["access_token"] = access_token
+        user["refresh_token"] = refresh_token
+
+        response = await client.get(url="/users", cookies=cookies)
+        data = response.json()
+
+        assert data["username"] == user["username"]
+        assert data["email_login"]["email"] == user["email"]
+        assert "id" in data
+        assert "created_at" in data
+        assert "updated_at" in data
+
         return user
 
     @staticmethod
-    def auth_headers(user: dict[str, str], expired: bool) -> dict[str, str]:
-        token = user["access_token"]
+    def auth_headers(user: dict[str, str], expired: bool) -> Cookies:
+        access_token = user["access_token"]
+        refresh_token = user["refresh_token"]
         if expired:
             # ruff: ignore[hardcoded-password-string]
-            token = "expired_token"
-        return {"Authorization": f"Bearer {token}"}
+            access_token = "expired_token"
+        return Cookies({"access_token": access_token, "refresh_token": refresh_token})
 
     @staticmethod
     async def update_user(
-        client: AsyncClient, updated: dict[str, str], user: dict[str, str]
+        client: AsyncClient, updated: dict[str, str], user: dict[str, Any]
     ) -> dict[str, str]:
+        cookies = Cookies(
+            {
+                "access_token": user["access_token"],
+                "refresh_token": user["refresh_token"],
+            }
+        )
         response = await client.put(
             url="/users",
             json=updated,
-            headers={"Authorization": f"Bearer {user['access_token']}"},
+            cookies=cookies,
         )
 
         assert response.status_code == 200

@@ -22,7 +22,7 @@ async def steam_register(request: Request, db: DBDep, username: FormDep):
 
 @router.get(
     "/validate/{username}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_303_SEE_OTHER,
     response_class=RedirectResponse,
 )
 async def steam_validate_register(
@@ -35,7 +35,7 @@ async def steam_validate_register(
     )
 
     response = RedirectResponse(
-        url=settings.frontend_url, status_code=status.HTTP_201_CREATED
+        url=settings.frontend_url, status_code=status.HTTP_303_SEE_OTHER
     )
 
     return auth_service.set_cookie_headers(
@@ -54,7 +54,7 @@ def steam_login(request: Request):
 
 @router.get(
     "/login/validate",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_303_SEE_OTHER,
     response_class=RedirectResponse,
 )
 async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDep):
@@ -65,7 +65,7 @@ async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDe
     )
 
     response = RedirectResponse(
-        url=settings.frontend_url, status_code=status.HTTP_201_CREATED
+        url=settings.frontend_url, status_code=status.HTTP_303_SEE_OTHER
     )
 
     return auth_service.set_cookie_headers(

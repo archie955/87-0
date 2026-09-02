@@ -13,7 +13,7 @@ from exceptions.app_exceptions import (
 )
 from models import models
 from schemas import email_schemas, token_schemas
-from services.helpers import safe_commit
+from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from utils import utils
 from utils.config import Settings
 
@@ -63,7 +63,6 @@ async def create_email(
     token = create_refresh_token(data=user_data, settings=settings)
 
     refresh = models.RefreshToken(
-        token=await asyncio.to_thread(utils.hash, password=token.token),
         expires_at=token.expires_at,
         jti=token.jti,
         user=user,
@@ -106,17 +105,27 @@ async def login(
 
     user_data = {"sub": str(email_user.user_id)}
 
+    refresh = (
+        await db.execute(
+            select(models.RefreshToken).where(
+                models.RefreshToken.user_id == email_user.user_id
+            )
+        )
+    ).scalar_one_or_none()
+    if refresh:
+        await db.delete(refresh)
+        await safe_commit_delete(db=db, datatype="Refresh Token")
+
     token = create_refresh_token(data=user_data, settings=settings)
 
     refresh = models.RefreshToken(
-        token=await asyncio.to_thread(utils.hash, password=token.token),
         expires_at=token.expires_at,
         jti=token.jti,
         user=email_user.user,
     )
 
     db.add(refresh)
-    await safe_commit(db=db, datatype="Refresh Token")
+    await safe_commit_add(db=db, datatype="Refresh Token")
 
     logger.info("User logged in", extra={"user_id": email_user.user_id})
 

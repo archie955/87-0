@@ -7,7 +7,6 @@ on:
       - ".github/workflows/ci_backend.yml"
     branches-ignore:
       - main
-      - client # halt for now
   pull_request:
     branches-ignore:
       - main

@@ -1,5 +1,4 @@
 # pyrefly: ignore-errors[bad-argument-type]
-import asyncio
 import logging
 
 from fastapi.datastructures import QueryParams
@@ -16,9 +15,8 @@ from exceptions.app_exceptions import (
 )
 from models import models
 from schemas import steam_schemas, token_schemas
-from services.helpers import safe_commit, safe_commit_add
+from services.helpers import safe_commit, safe_commit_add, safe_commit_delete
 from services.steam_login import SteamLogin, SteamValidator
-from utils import utils
 from utils.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -97,7 +95,6 @@ async def create_steam_login(
     token = create_refresh_token(data=user_data, settings=settings)
 
     refresh = models.RefreshToken(
-        token=await asyncio.to_thread(utils.hash, password=token.token),
         expires_at=token.expires_at,
         jti=token.jti,
         user=user,
@@ -140,17 +137,25 @@ async def update_steam_login(
 
     user_data = {"sub": str(user.id)}
 
+    refresh = (
+        await db.execute(
+            select(models.RefreshToken).where(models.RefreshToken.user_id == user.id)
+        )
+    ).scalar_one_or_none()
+    if refresh:
+        await db.delete(refresh)
+        await safe_commit_delete(db=db, datatype="Refresh Token")
+
     token = create_refresh_token(data=user_data, settings=settings)
 
     refresh = models.RefreshToken(
-        token=await asyncio.to_thread(utils.hash, password=token.token),
         expires_at=token.expires_at,
         jti=token.jti,
         user=user,
     )
 
     db.add(refresh)
-    await safe_commit(db=db, datatype="Refresh Token")
+    await safe_commit_add(db=db, datatype="Refresh Token")
 
     logger.info("User logged in", extra={"user_id": str(user.id)})
 

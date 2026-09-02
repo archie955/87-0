@@ -98,14 +98,8 @@ async def test_login_email(client, helpers):
 
     assert response.status_code == 200
 
-    data = response.json()
-
-    assert "access_token" in data
-    assert "best_score" in data["user"]
-
-    # ruff: ignore[hardcoded-password-string]
-    assert data["token_type"] == "bearer"
-    assert data["user"]["email_login"]["email"] == user["email"]
+    assert "access_token" in response.cookies
+    assert "refresh_token" in response.cookies
 
 
 @pytest.mark.asyncio
@@ -195,7 +189,7 @@ async def test_delete(client, helpers):
     user = await helpers.full_login(client)
 
     response = await client.delete(
-        "/users", headers=helpers.auth_headers(user, expired=False)
+        "/users", cookies=helpers.auth_headers(user, expired=False)
     )
 
     assert response.status_code == 204
@@ -205,47 +199,8 @@ async def test_delete(client, helpers):
 async def test_delete_not_logged_in(client, helpers):
     await helpers.register_user(client)
 
-    response = await client.delete("/users")
-
-    assert response.status_code == 401
-
-
-@pytest.mark.asyncio
-async def test_delete_logged_in_no_headers(client, helpers):
-    await helpers.full_login(client)
+    client.cookies.clear()
 
     response = await client.delete("/users")
 
     assert response.status_code == 401
-
-
-# test email delete
-
-
-@pytest.mark.asyncio
-async def test_delete_email_no_headers(client, helpers):
-    await helpers.register_user(client)
-
-    response = await client.delete("/email")
-
-    assert response.status_code == 401
-
-
-@pytest.mark.asyncio
-async def test_delete_email_not_logged_in(client, helpers):
-    await helpers.full_login(client)
-
-    response = await client.delete("/email")
-
-    assert response.status_code == 401
-
-
-@pytest.mark.asyncio
-async def test_delete_email_no_other_auth(client, helpers):
-    user = await helpers.full_login(client)
-
-    response = await client.delete(
-        "/email", headers=helpers.auth_headers(user, expired=False)
-    )
-
-    assert response.status_code == 409

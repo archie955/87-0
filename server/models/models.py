@@ -37,8 +37,8 @@ class User(Base, Name, TimeStamps):
         lazy="selectin",
     )
 
-    refresh: Mapped[list["RefreshToken"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+    refresh: Mapped["RefreshToken | None"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     # google_login: Mapped["Google"] = relationship(back_populates="user")
@@ -110,11 +110,9 @@ class Player(Base, Name, TimeStamps):
     team: Mapped["Team"] = relationship(back_populates="players")
 
 
-class RefreshToken(Base, Name):
-    token: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
-
+class RefreshToken(Base, Name, TimeStamps):
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True, nullable=False
     )
 
     jti: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)

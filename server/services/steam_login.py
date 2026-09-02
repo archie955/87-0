@@ -66,7 +66,6 @@ class SteamLogin:
         return RedirectResponse(
             url=self.__create_url(),
             status_code=status.HTTP_303_SEE_OTHER,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
 
 

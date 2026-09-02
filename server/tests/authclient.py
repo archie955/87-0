@@ -2,7 +2,7 @@ import json
 from typing import Any
 
 import redis.asyncio as redis
-from httpx import AsyncClient, Response
+from httpx import AsyncClient, Cookies, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -29,17 +29,20 @@ class AuthClient:
         self.cache = cache
         self.user = user
 
-    def auth_headers(self, expired: bool) -> dict[str, str]:
-        token = self.user["access_token"]
+    def auth_headers(self, expired: bool) -> Cookies:
+        access_token = self.user["access_token"]
+        refresh_token = self.user["refresh_token"]
         if expired:
             # ruff: ignore[hardcoded-password-string]
-            token = "expired_token"
-        return {"Authorization": f"Bearer {token}"}
+            access_token = "expired_token"
+        return Cookies({"access_token": access_token, "refresh_token": refresh_token})
 
     async def request(self, method: str, url: str, **kwargs: Any) -> Response:
         headers: dict[str, str] = kwargs.pop("headers", {})
-        headers.update(self.auth_headers(expired=False))
-        return await self.client.request(method, url, headers=headers, **kwargs)
+        cookies = self.auth_headers(expired=False)
+        return await self.client.request(
+            method, url, headers=headers, cookies=cookies, **kwargs
+        )
 
     async def get(self, url: str, **kwargs: Any) -> Response:
         return await self.request(method="GET", url=url, **kwargs)
