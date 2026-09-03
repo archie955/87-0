@@ -23,8 +23,8 @@ export interface UserReturned {
   id: number;
   username: string;
   best_score: number | null;
-  email_login: EmailReturned;
-  steam_login: SteamReturned;
+  email_login: EmailReturned | null;
+  steam_login: SteamReturned | null;
   created_at: string;
   updated_at: string;
 }

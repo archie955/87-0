@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     redis_port: int
     redis_db: int
     prod: str
-    frontend_url: str
+    frontend_auth_url: str
 
     model_config = SettingsConfigDict(
         env_file=".env.dev", case_sensitive=False, extra="ignore"

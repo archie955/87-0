@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
+from fastapi.responses import RedirectResponse
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 from database.database import DBDep
@@ -25,7 +26,9 @@ async def email_create(
         db=db, email_user=email_user, settings=settings
     )
 
-    response = Response(status_code=status.HTTP_201_CREATED)
+    response = RedirectResponse(
+        url=settings.frontend_auth_url, status_code=status.HTTP_201_CREATED
+    )
 
     return auth_service.set_cookie_headers(
         response=response, tokens=tokens, settings=settings
@@ -41,7 +44,9 @@ async def email_login(email_credentials: AuthDep, db: DBDep, settings: SettingsD
         password=email_credentials.password,
     )
 
-    response = Response(status_code=status.HTTP_200_OK)
+    response = RedirectResponse(
+        url=settings.frontend_auth_url, status_code=status.HTTP_200_OK
+    )
 
     return auth_service.set_cookie_headers(
         response=response, tokens=tokens, settings=settings
