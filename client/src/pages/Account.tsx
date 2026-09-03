@@ -31,26 +31,30 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useNotificationActions } from "@/stores/notificationStore";
-import { useBestScore, useUserActions, useUsername } from "@/stores/userStore";
+import useUser from "@/hooks/useUser";
+import Loading from "@/components/Loading";
 import type { UpdatedUser } from "@/types/userTypes";
 
 const Account = () => {
-  const username = useUsername();
-  const bestScore = useBestScore();
-  const { update_email, delete: deleteAccount, logout } = useUserActions();
+  const { user, isPending, delete_user, update_user } = useUser();
   const { setNotification } = useNotificationActions();
   const navigate = useNavigate();
 
-  const [newUsername, setNewUsername] = useState(username ?? "");
+  const [newUsername, setNewUsername] = useState(user ? user.username ?? "" : "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const initials = (username ?? "?").slice(0, 2).toUpperCase();
+  if (!user || isPending) {
+    return <Loading />;
+  }
 
-  const handleUpdate = async (
+  const initials = (user.username ?? "?").slice(0, 2).toUpperCase();
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleUpdate = (
     e: SubmitEvent<HTMLFormElement>,
-  ): Promise<void> => {
+  ): void => {
     e.preventDefault();
     setSaving(true);
 
@@ -60,7 +64,8 @@ const Account = () => {
     };
 
     try {
-      await update_email(payload);
+      // eslint-disable-next-line @typescript-eslint/await-thenable, @typescript-eslint/no-unsafe-call
+      update_user(payload);
       setNotification("Account updated", "success");
       setNewUsername("");
       setCurrentPassword("");
@@ -77,10 +82,9 @@ const Account = () => {
   const handleDelete = async (): Promise<void> => {
     setDeleting(true);
     try {
-      await deleteAccount();
-      logout();
+      delete_user();
       setNotification("Your account has been deleted", "success");
-      void navigate("/");
+      await navigate("/");
     } catch {
       setNotification(
         "Couldn't delete your account, please try again",
@@ -90,10 +94,11 @@ const Account = () => {
     }
   };
 
-  const handleLogout = () => {
+  /* const handleLogout = () => {
     logout();
     void navigate("/");
   };
+  */
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -110,8 +115,10 @@ const Account = () => {
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <div>
-            <CardTitle className="text-lg">{username ?? "Player"}</CardTitle>
-            <CardDescription>{username}</CardDescription>
+            <CardTitle className="text-lg">
+              {user.username ?? "Player"}
+            </CardTitle>
+            <CardDescription>{user.username}</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -119,8 +126,10 @@ const Account = () => {
             <Trophy className="size-5 shrink-0 text-muted-foreground" />
             <div>
               <p className="text-sm text-muted-foreground">Best lineup score</p>
-              {bestScore !== null ? (
-                <p className="text-xl font-semibold">{bestScore.toFixed(2)}</p>
+              {user.best_score !== null ? (
+                <p className="text-xl font-semibold">
+                  {user.best_score.toFixed(2)}
+                </p>
               ) : (
                 <p className="text-sm">
                   No score on record right now.{" "}
@@ -141,7 +150,7 @@ const Account = () => {
           <CardDescription>Update your username</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleUpdate(e)}>
+          <form onSubmit={(e) => handleUpdate(e)}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="account-new-password">
@@ -189,7 +198,7 @@ const Account = () => {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button variant="outline" onClick={handleLogout}>
+          <Button variant="outline" onClick={() => console.log("handleLogout")}>
             Sign out
           </Button>
         </CardFooter>

@@ -10,15 +10,17 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { ComponentProps, SubmitEvent } from "react";
-import { useUserActions } from "@/stores/userStore";
 import { useNavigate } from "react-router-dom";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
 import type { Credentials } from "@/types/userTypes";
 import { useChangeActions } from "@/stores/loginStore";
+import useUser from "@/hooks/useUser";
+import { useAuthenticatedActions } from "@/stores/authenticatedStore";
 
 const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { login_email } = useUserActions();
+  const { login_email } = useUser();
+  const { setAuthentication } = useAuthenticatedActions();
   const navigate = useNavigate();
   const email = useField("email");
   const password = useField("password");
@@ -36,10 +38,11 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
     };
 
     try {
-      await login_email(credentials);
+      login_email(credentials);
+      setAuthentication();
 
       setNotification("Successfully logged in", "success");
-      void navigate("/");
+      await navigate("/");
     } catch {
       setNotification("Login Failed", "error");
     }

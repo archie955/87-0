@@ -6,9 +6,7 @@ import type {
   UpdatedUser,
 } from "@/types/userTypes";
 
-const createAccount = async (
-  credentials: RegisterUser,
-): Promise<void> => {
+const createAccount = async (credentials: RegisterUser): Promise<void> => {
   await api.post("/email", credentials);
 };
 

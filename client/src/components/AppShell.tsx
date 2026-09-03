@@ -5,7 +5,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   LayoutDashboard,
-  LogOut,
+  // LogOut,
   User,
   BookText,
 } from "lucide-react";
@@ -56,8 +56,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useUsername, useUserActions, useDisplay } from "@/stores/userStore";
+import { Link, NavLink, useLocation /* useNavigate */ } from "react-router-dom";
+import useUser from "@/hooks/useUser";
 
 type NavItem = {
   label: string;
@@ -74,7 +74,7 @@ type NavGroup = {
 
 type UserData = {
   username: string;
-  display: string;
+  authname: string;
   avatar?: string;
 };
 
@@ -187,16 +187,26 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
   );
 };
 
-const NavUser = ({ user }: { user: UserData }) => {
-  const navigate = useNavigate();
-  const { logout } = useUserActions();
+interface AvatarType {
+  avatar?: string;
+}
 
-  const handleLogout = () => {
-    logout();
-    void navigate("/");
-  };
+const NavUser = ({ avatar }: AvatarType) => {
+  // const navigate = useNavigate();
+  const { user, isPending } = useUser();
 
-  const initials = user.display
+  if (!user || isPending) {
+    return <NoUser />;
+  }
+
+  let authname = "?";
+  if (user.email_login) {
+    authname = user.email_login.email;
+  } else if (user.steam_login) {
+    authname = user.steam_login.profile_name;
+  }
+
+  const initials = user.username
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -217,17 +227,15 @@ const NavUser = ({ user }: { user: UserData }) => {
               }
             >
               <Avatar className="size-8 rounded-lg">
-                {user.avatar && (
-                  <AvatarImage src={user.avatar} alt={user.display} />
-                )}
+                {avatar && <AvatarImage src={avatar} alt={user.username} />}
                 <AvatarFallback className="rounded-lg">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.display}</span>
+                <span className="truncate font-medium">{user.username}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.username}
+                  {authname}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -241,17 +249,17 @@ const NavUser = ({ user }: { user: UserData }) => {
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8 rounded-lg">
-                    {user.avatar && (
-                      <AvatarImage src={user.avatar} alt={user.display} />
-                    )}
+                    {avatar && <AvatarImage src={avatar} alt={user.username} />}
                     <AvatarFallback className="rounded-lg">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.display}</span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate font-medium">
                       {user.username}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {authname}
                     </span>
                   </div>
                 </div>
@@ -262,10 +270,6 @@ const NavUser = ({ user }: { user: UserData }) => {
                 Account
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-                <LogOut className="mr-2 size-4" />
-                Log out
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </DropdownMenuGroup>
@@ -290,10 +294,9 @@ const NoUser = () => {
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   logo: Logo;
   navGroups: NavGroup[];
-  user: UserData | null;
 }
 
-const AppSidebar = ({ logo, navGroups, user, ...props }: AppSidebarProps) => {
+const AppSidebar = ({ logo, navGroups, ...props }: AppSidebarProps) => {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -316,7 +319,7 @@ const AppSidebar = ({ logo, navGroups, user, ...props }: AppSidebarProps) => {
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        {(user && <NavUser user={user} />) || <NoUser />}
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
@@ -335,21 +338,9 @@ export function AppShell({ className, children }: AppShellProps) {
     current: "Dashboard",
   };
 
-  const username = useUsername();
-  const display = useDisplay();
-  let user: UserData | null = null;
-
-  if (username && display) {
-    user = { display: display, username: username };
-  }
-
   return (
     <SidebarProvider className={cn(className)}>
-      <AppSidebar
-        logo={sidebarData.logo}
-        user={user}
-        navGroups={sidebarData.navGroups}
-      />
+      <AppSidebar logo={sidebarData.logo} navGroups={sidebarData.navGroups} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

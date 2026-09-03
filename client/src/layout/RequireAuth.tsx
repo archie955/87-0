@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useToken } from "@/stores/userStore";
+import { useAuthenticated } from "@/stores/authenticatedStore";
 
 interface Props {
   children: ReactNode;
 }
 
 const RequireAuth = ({ children }: Props) => {
-  const token = useToken();
+  const authenticated = useAuthenticated();
   const location = useLocation();
 
-  if (!token) {
+  if (!authenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 

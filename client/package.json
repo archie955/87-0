@@ -9,9 +9,10 @@
     "lint": "eslint .",
     "fix": "eslint . --fix && npx prettier . --write",
     "preview": "vite preview",
-    "tsc": "tsc",
+    "tsc": "tsc -b",
     "type-check": "tsc --noEmit true",
-    "build-dev": "npm run build && npm run dev"
+    "build-dev": "npm run build && npm run dev",
+    "prettier": "npx prettier . --write"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -1,5 +1,12 @@
-import type { AxiosInstance } from "axios";
-import axios from "axios";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from "axios";
+
+interface RetryConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const api: AxiosInstance = axios.create({
   baseURL: "/api",
@@ -7,27 +14,35 @@ const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.response.use(
-  (res) => {
-    return res;
-  },
-  async (err) => {
-    const originalConfig = err.config;
+  (res) => res,
+  async (err: AxiosError) => {
+    if (!err.config) {
+      return Promise.reject(err);
+    }
 
-    if (err.response) {
-      if (err.response.status === 401 && !originalConfig._retry) {
-        originalConfig._retry = true;
+    const originalConfig = err.config as RetryConfig;
 
-        try {
-          await api.post("/auth/refresh");
-          return api(originalConfig);
-        } catch (error) {
-          return Promise.reject(error);
+    if (
+      err.response?.status === 401 &&
+      !originalConfig._retry &&
+      originalConfig.url !== "/auth/refresh"
+    ) {
+      originalConfig._retry = true;
+
+      try {
+        await api.post("/auth/refresh");
+        return api(originalConfig);
+      } catch (refreshError) {
+        if (refreshError instanceof AxiosError) {
+          return Promise.reject(refreshError);
+        } else {
+          throw new AxiosError("Unexpected error whilst refreshing");
         }
       }
     }
 
     return Promise.reject(err);
-  }
-)
+  },
+);
 
 export default api;

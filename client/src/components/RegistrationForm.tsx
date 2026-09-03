@@ -10,14 +10,18 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { ComponentProps, SubmitEvent } from "react";
-import { useUserActions } from "@/stores/userStore";
 import useField from "@/hooks/useField";
 import { useNotificationActions } from "@/stores/notificationStore";
 import { useChangeActions } from "@/stores/loginStore";
 import type { RegisterUser } from "@/types/userTypes";
+import useUser from "@/hooks/useUser";
+import { useAuthenticatedActions } from "@/stores/authenticatedStore";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
-  const { create_email } = useUserActions();
+  const { create_email } = useUser();
+  const navigate = useNavigate();
+  const { setAuthentication } = useAuthenticatedActions();
   const email = useField("email");
   const display = useField("text");
   const steamDisplay = useField("text");
@@ -52,10 +56,11 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
     }
 
     try {
-      await create_email(credentials);
+      create_email(credentials);
+      setAuthentication();
 
       setNotification("Successfully registered user", "success");
-      changeLogin();
+      await navigate("/");
     } catch {
       setNotification("Register Failed", "error");
     }
