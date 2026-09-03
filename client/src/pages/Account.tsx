@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { useState } from "react";
 import type { SubmitEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -40,7 +41,9 @@ const Account = () => {
   const { setNotification } = useNotificationActions();
   const navigate = useNavigate();
 
-  const [newUsername, setNewUsername] = useState(user ? user.username ?? "" : "");
+  const [newUsername, setNewUsername] = useState(
+    user ? (user.username ?? "") : "",
+  );
   const [currentPassword, setCurrentPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -51,10 +54,9 @@ const Account = () => {
 
   const initials = (user.username ?? "?").slice(0, 2).toUpperCase();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleUpdate = (
+  const handleUpdate = async (
     e: SubmitEvent<HTMLFormElement>,
-  ): void => {
+  ): Promise<void> => {
     e.preventDefault();
     setSaving(true);
 
@@ -64,14 +66,13 @@ const Account = () => {
     };
 
     try {
-      // eslint-disable-next-line @typescript-eslint/await-thenable, @typescript-eslint/no-unsafe-call
-      update_user(payload);
+      await update_user(payload);
       setNotification("Account updated", "success");
       setNewUsername("");
       setCurrentPassword("");
     } catch {
       setNotification(
-        "Couldn't save changes - check your current password, and that you've changed at least one field",
+        "Couldn't save changes - check your current password, and that you've added a new username",
         "error",
       );
     } finally {
@@ -82,7 +83,7 @@ const Account = () => {
   const handleDelete = async (): Promise<void> => {
     setDeleting(true);
     try {
-      delete_user();
+      await delete_user();
       setNotification("Your account has been deleted", "success");
       await navigate("/");
     } catch {

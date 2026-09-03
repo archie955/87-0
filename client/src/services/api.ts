@@ -8,6 +8,21 @@ interface RetryConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+let refreshPromise: Promise<void> | null = null;
+
+const refreshAccessToken = async () => {
+  if (!refreshPromise) {
+    refreshPromise = api
+      .post("/auth.refresh")
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+};
+
 const api: AxiosInstance = axios.create({
   baseURL: "/api",
   withCredentials: true,
@@ -30,7 +45,7 @@ api.interceptors.response.use(
       originalConfig._retry = true;
 
       try {
-        await api.post("/auth/refresh");
+        await refreshAccessToken();
         return api(originalConfig);
       } catch (refreshError) {
         if (refreshError instanceof AxiosError) {

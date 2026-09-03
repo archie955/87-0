@@ -1,8 +1,5 @@
 import api from "@/services/api";
-import type {
-  UpdatedUser,
-  UserReturned,
-} from "@/types/userTypes";
+import type { UpdatedUser, UserReturned } from "@/types/userTypes";
 
 const deleteUser = async (): Promise<void> => {
   await api.delete("/users");

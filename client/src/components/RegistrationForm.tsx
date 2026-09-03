@@ -15,13 +15,11 @@ import { useNotificationActions } from "@/stores/notificationStore";
 import { useChangeActions } from "@/stores/loginStore";
 import type { RegisterUser } from "@/types/userTypes";
 import useUser from "@/hooks/useUser";
-import { useAuthenticatedActions } from "@/stores/authenticatedStore";
 import { useNavigate } from "react-router-dom";
 
 const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { create_email } = useUser();
   const navigate = useNavigate();
-  const { setAuthentication } = useAuthenticatedActions();
   const email = useField("email");
   const display = useField("text");
   const steamDisplay = useField("text");
@@ -56,8 +54,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
     }
 
     try {
-      create_email(credentials);
-      setAuthentication();
+      await create_email(credentials);
 
       setNotification("Successfully registered user", "success");
       await navigate("/");

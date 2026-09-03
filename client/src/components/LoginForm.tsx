@@ -16,11 +16,9 @@ import { useNotificationActions } from "@/stores/notificationStore";
 import type { Credentials } from "@/types/userTypes";
 import { useChangeActions } from "@/stores/loginStore";
 import useUser from "@/hooks/useUser";
-import { useAuthenticatedActions } from "@/stores/authenticatedStore";
 
 const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { login_email } = useUser();
-  const { setAuthentication } = useAuthenticatedActions();
   const navigate = useNavigate();
   const email = useField("email");
   const password = useField("password");
@@ -38,8 +36,7 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
     };
 
     try {
-      login_email(credentials);
-      setAuthentication();
+      await login_email(credentials);
 
       setNotification("Successfully logged in", "success");
       await navigate("/");

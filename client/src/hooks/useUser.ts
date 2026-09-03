@@ -7,28 +7,25 @@ import type {
   UpdatedUser,
   UserReturned,
 } from "@/types/userTypes";
-import { useAuthenticated } from "@/stores/authenticatedStore";
 
 interface useUserOutput {
   user: UserReturned | null;
   isPending: boolean;
-  create_email: (credentials: RegisterUser) => void;
-  login_email: (credentials: Credentials) => void;
-  delete_user: () => void;
-  update_user: (updated_credentials: UpdatedUser) => void;
+  isError: boolean;
+  create_email: (credentials: RegisterUser) => Promise<void>;
+  login_email: (credentials: Credentials) => Promise<void>;
+  delete_user: () => Promise<void>;
+  update_user: (updated_credentials: UpdatedUser) => Promise<void>;
 }
 
 const useUser = (): useUserOutput => {
-  const authenticated = useAuthenticated();
   const queryClient = useQueryClient();
 
   const result = useQuery({
-    queryKey: ["User"],
+    queryKey: ["user"],
     queryFn: () => userService.getUser(),
     refetchOnWindowFocus: false,
-    enabled: authenticated,
-    retry: authenticated,
-    initialData: null,
+    retry: false,
   });
 
   const createEmailMutation = useMutation({
@@ -56,9 +53,9 @@ const useUser = (): useUserOutput => {
     },
   });
 
-  const emailUpdateMutation = useMutation({
+  const updateUserMutation = useMutation({
     mutationFn: async (updated_credentials: UpdatedUser) => {
-      await emailService.update(updated_credentials);
+      await userService.updateUser(updated_credentials);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["User"] });
@@ -66,15 +63,21 @@ const useUser = (): useUserOutput => {
   });
 
   return {
-    user: result.data,
+    user: result.data ?? null,
+
     isPending: result.isPending,
-    create_email: (credentials: RegisterUser): void =>
-      createEmailMutation.mutate(credentials),
-    login_email: (credentials: Credentials): void =>
-      loginEmailMutation.mutate(credentials),
-    delete_user: (): void => deleteUserMutation.mutate(),
-    update_user: (updated_credentials: UpdatedUser): void => 
-      emailUpdateMutation.mutate(updated_credentials),
+    isError: result.isError,
+
+    create_email: (credentials: RegisterUser): Promise<void> =>
+      createEmailMutation.mutateAsync(credentials),
+
+    login_email: (credentials: Credentials): Promise<void> =>
+      loginEmailMutation.mutateAsync(credentials),
+
+    delete_user: (): Promise<void> => deleteUserMutation.mutateAsync(),
+
+    update_user: (updated_credentials: UpdatedUser): Promise<void> =>
+      updateUserMutation.mutateAsync(updated_credentials),
   };
 };
 

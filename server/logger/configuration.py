@@ -6,3 +6,5 @@ def configure_logging() -> None:
         level=logging.INFO,
         format=("%(asctime)s | %(levelname)s | %(name)s | %(message)s"),
     )
+    uvicorn_logger = logging.getLogger("uvicorn.error")
+    uvicorn_logger.propagate = False
