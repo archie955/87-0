@@ -16,6 +16,7 @@ interface useUserOutput {
   login_email: (credentials: Credentials) => Promise<void>;
   delete_user: () => Promise<void>;
   update_user: (updated_credentials: UpdatedUser) => Promise<void>;
+  logout: () => void;
 }
 
 const useUser = (): useUserOutput => {
@@ -32,7 +33,7 @@ const useUser = (): useUserOutput => {
     mutationFn: async (credentials: RegisterUser) =>
       await emailService.createAccount(credentials),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["User"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
@@ -40,7 +41,7 @@ const useUser = (): useUserOutput => {
     mutationFn: async (credentials: Credentials) =>
       await emailService.login(credentials),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["User"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
@@ -49,7 +50,7 @@ const useUser = (): useUserOutput => {
       await userService.deleteUser();
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["User"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
@@ -58,9 +59,13 @@ const useUser = (): useUserOutput => {
       await userService.updateUser(updated_credentials);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["User"] });
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
+
+  const logoutUser = () => {
+    queryClient.setQueryData(["user"], null);
+  };
 
   return {
     user: result.data ?? null,
@@ -78,6 +83,8 @@ const useUser = (): useUserOutput => {
 
     update_user: (updated_credentials: UpdatedUser): Promise<void> =>
       updateUserMutation.mutateAsync(updated_credentials),
+
+    logout: (): void => logoutUser(),
   };
 };
 

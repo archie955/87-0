@@ -12,7 +12,6 @@ import {
   useAwper,
   useSupport,
   useFlex,
-  useGame,
 } from "@/stores/teamStore";
 import TeamRoll from "@/components/TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
@@ -22,16 +21,16 @@ import { Button } from "@/components/ui/button";
 import { type Result } from "@/types/resultTypes";
 import { Dialog } from "@/components/ui/dialog";
 import PlayerCard from "@/components/PlayerCard";
+import useGame from "@/hooks/useGame";
 
 const WINNER_INDEX = 35;
 
 const Game = () => {
-  const game = useGame();
+  const { game, isPending: gamePending, submitGame, restart } = useGame();
   const [result, setResult] = useState<Result>();
   const { teams, isPending: teamPending } = useTeams();
   const [teamId, setTeamId] = useState(1);
   const {
-    startGame,
     finishGame,
     compatibility,
     selectOpener,
@@ -39,7 +38,7 @@ const Game = () => {
     selectAwper,
     selectSupport,
     selectIgl,
-    submit,
+    createLineup,
   } = useTeamActions();
   const rerollStatus = useRerollStatus();
   const status = useStatus();
@@ -55,14 +54,9 @@ const Game = () => {
   const flex = useFlex();
   const { setNotification } = useNotificationActions();
 
-  if (teamPending || !teams) {
+  if (teamPending || !teams || gamePending || !game) {
     return <h1>Loading data...</h1>;
   }
-
-  const handleStartGame = async () => {
-    await startGame();
-    setResult(undefined);
-  };
 
   const getRandomInt = (max: number): number => {
     return 1 + Math.floor(Math.random() * max);
@@ -111,7 +105,7 @@ const Game = () => {
     }
   };
 
-  const prepareRoll = (turn: number) => {
+  const prepareRoll = (turn: number): void => {
     const selectedTeamId = getTeamId(turn);
     if (!selectedTeamId) {
       return;
@@ -125,7 +119,7 @@ const Game = () => {
     setRollId((current) => current + 1);
   };
 
-  const startRolling = () => {
+  const startRolling = (): void => {
     if (status !== "idle") {
       return;
     }
@@ -134,7 +128,7 @@ const Game = () => {
     startRoll();
   };
 
-  const handleReroll = () => {
+  const handleReroll = (): void => {
     if (status !== "picking" || !rerollStatus) {
       return;
     }
@@ -191,8 +185,10 @@ const Game = () => {
       return;
     }
 
+    const lineup = createLineup(game.id);
+
     try {
-      const response = await submit(game.id);
+      const response = await submitGame(lineup);
       setResult(response);
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -205,10 +201,27 @@ const Game = () => {
     }
   };
 
+  const handleRestart = async (): Promise<void> => {
+    if (!result) {
+      return;
+    }
+
+    try {
+      await restart();
+      setResult(undefined);
+    } catch (error) {
+      if (error instanceof Error) {
+        setNotification(error.message, "error");
+      } else {
+        setNotification("Error starting new game", "error");
+      }
+    }
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       {result && <Dialog>Score is {result.score}</Dialog>}
-      {!game && <Button onClick={handleStartGame}>Start Game</Button>}
+      {result && <Button onClick={handleRestart}>Start New Game</Button>}
       {game && status === "idle" && teamId <= 6 && (
         <Button onClick={startRolling}>Roll</Button>
       )}

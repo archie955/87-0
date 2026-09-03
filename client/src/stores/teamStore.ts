@@ -1,13 +1,10 @@
 import { create } from "zustand";
 import type { Player } from "@/types/playerTypes";
-import type { Result } from "@/types/resultTypes";
 import { Roles } from "@/services/enum";
 import type { LineupRole } from "@/services/enum";
-import gameService from "@/services/game";
-import type { Lineup, Game } from "@/types/gameTypes";
+import type { Lineup } from "@/types/gameTypes";
 
 interface TeamActions {
-  startGame: () => Promise<void>;
   finishGame: () => void;
   selectOpener: (player: Player) => void;
   selectCloser: (player: Player) => void;
@@ -15,11 +12,10 @@ interface TeamActions {
   selectSupport: (player: Player) => void;
   selectIgl: (p: LineupRole) => void;
   compatibility: (p: Player) => boolean;
-  submit: (id: string) => Promise<Result>;
+  createLineup: (id: string) => Lineup;
 }
 
 interface TeamState {
-  game: Game | null;
   opener: Player | null;
   closer: Player | null;
   awper: Player | null;
@@ -30,7 +26,6 @@ interface TeamState {
 }
 
 const useTeamStore = create<TeamState>((set, get) => ({
-  game: null,
   opener: null,
   closer: null,
   awper: null,
@@ -38,15 +33,8 @@ const useTeamStore = create<TeamState>((set, get) => ({
   flex: null,
   igl: null,
   actions: {
-    startGame: async () => {
-      const game = await gameService.getGame();
-      set(() => ({
-        game: game,
-      }));
-    },
     finishGame: () => {
       set(() => ({
-        game: null,
         opener: null,
         closer: null,
         awper: null,
@@ -136,7 +124,7 @@ const useTeamStore = create<TeamState>((set, get) => ({
       }
       return false;
     },
-    submit: async (id: string): Promise<Result> => {
+    createLineup: (id: string): Lineup => {
       const player_1 = get().opener;
       const player_2 = get().closer;
       const player_3 = get().awper;
@@ -162,15 +150,12 @@ const useTeamStore = create<TeamState>((set, get) => ({
         player_5: player_5,
         igl: igl,
       };
-      const response = await gameService.submitGame(lineup);
-      return response;
+      return lineup;
     },
   },
 }));
 
 export default useTeamStore;
-
-export const useGame = (): Game | null => useTeamStore((state) => state.game);
 
 export const useOpener = (): Player | null =>
   useTeamStore((state) => state.opener);

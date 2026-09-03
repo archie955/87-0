@@ -37,7 +37,7 @@ import Loading from "@/components/Loading";
 import type { UpdatedUser } from "@/types/userTypes";
 
 const Account = () => {
-  const { user, isPending, delete_user, update_user } = useUser();
+  const { user, isPending, delete_user, update_user, logout } = useUser();
   const { setNotification } = useNotificationActions();
   const navigate = useNavigate();
 
@@ -95,11 +95,10 @@ const Account = () => {
     }
   };
 
-  /* const handleLogout = () => {
+  const handleLogout = () => {
     logout();
     void navigate("/");
   };
-  */
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -199,7 +198,7 @@ const Account = () => {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button variant="outline" onClick={() => console.log("handleLogout")}>
+          <Button variant="outline" onClick={handleLogout}>
             Sign out
           </Button>
         </CardFooter>
