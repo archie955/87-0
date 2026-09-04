@@ -17,7 +17,7 @@ def hash(password: str) -> str:
     password : str
         Unicode password
 
-    Returns
+    Returns:
     -------
     str
         Hashed password
@@ -36,7 +36,7 @@ def verify(plain_password: str, hashed_password: str) -> bool:
     hashed_password : str
         Hashed password
 
-    Returns
+    Returns:
     -------
     bool
         Whether the plain password transforms into

@@ -28,7 +28,7 @@ async def delete(db: AsyncSession, user: User) -> None:
     user : models.User
         SQLAlchemy model for User table
 
-    Returns
+    Returns:
     -------
     None
 
@@ -53,7 +53,7 @@ async def update(
     updated : user_schemas.UserUpdate
         payload for user update
 
-    Returns
+    Returns:
     -------
     user_schemas.UserOut
         User output details
