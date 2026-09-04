@@ -1,5 +1,6 @@
 import type { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
+import { teamToImg } from "@/lib/utils";
 
 const SLIDE_WIDTH = 120;
 const START_SPEED = 7000;
@@ -83,9 +84,12 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
           <div
             key={`${index}-${index}`}
             className="flex h-32 shrink-0 items-center justify-center border"
-            style={{ width: SLIDE_WIDTH }}
+            style={{ width: SLIDE_WIDTH, backgroundColor: "black" }}
           >
-            {slide.name} {index}
+            <img
+              style={{ backgroundColor: "black" }}
+              src={teamToImg(slide.name)}
+            />
           </div>
         ))}
       </div>
