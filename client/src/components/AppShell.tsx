@@ -5,7 +5,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   LayoutDashboard,
-  // LogOut,
+  LogOut,
   User,
   BookText,
 } from "lucide-react";
@@ -56,7 +56,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Link, NavLink, useLocation /* useNavigate */ } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import useUser from "@/hooks/useUser";
 
 type NavItem = {
@@ -192,12 +192,17 @@ interface AvatarType {
 }
 
 const NavUser = ({ avatar }: AvatarType) => {
-  // const navigate = useNavigate();
-  const { user, isPending } = useUser();
+  const navigate = useNavigate();
+  const { user, isPending, logout } = useUser();
 
   if (!user || isPending) {
     return <NoUser />;
   }
+
+  const handleLogout = async () => {
+    logout();
+    await navigate("/");
+  };
 
   let authname = "?";
   if (user.email_login) {
@@ -270,6 +275,10 @@ const NavUser = ({ avatar }: AvatarType) => {
                 Account
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="mr-2 size-4" />
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </DropdownMenuGroup>

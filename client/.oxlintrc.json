@@ -55,7 +55,16 @@
         "src/components/ui/**/*.{ts,tsx}"
       ],
       "rules": {
-        "react/only-export-components": "off"
+        "react/only-export-components": "off",
+      }
+    },
+    {
+      "files": [
+        "tests",
+        "testSetup.ts"
+      ],
+      "rules": {
+        "vitest/require-mock-type-parameters": "off",
       }
     }
   ]
