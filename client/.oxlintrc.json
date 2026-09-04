@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  "env": {
+    "browser": true
+  },
+
+  "ignorePatterns": [
+    "build",
+    "dist",
+    "src/template"
+  ],
+
+  "options": {
+    "typeAware": true
+  },
+
+  "plugins": [
+    "eslint",
+    "typescript",
+    "react",
+    "vitest",
+  ],
+
+  "rules": {
+    "eslint/eqeqeq": "error",
+    "eslint/no-console": "off",
+
+    "typescript/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "fixStyle": "separate-type-imports"
+      }
+    ],
+
+    "typescript/no-unsafe-assignment": "warn",
+    "typescript/no-unsafe-member-access": "warn",
+    "typescript/no-unsafe-return": "warn",
+    "typescript/no-unsafe-argument": "warn",
+    "typescript/no-unsafe-call": "warn",
+  },
+
+  "overrides": [
+    {
+      "files": [
+        "src/components/ui/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    }
+  ]
+}
