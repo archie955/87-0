@@ -25,6 +25,7 @@
   "rules": {
     "eslint/eqeqeq": "error",
     "eslint/no-console": "off",
+    "eslint/no-irregular-whitespace": "warn",
 
     "typescript/no-unused-vars": [
       "warn",

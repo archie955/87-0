@@ -220,6 +220,12 @@ const Game = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">Build your lineup</h1>
+        <p className="text-sm text-muted-foreground">
+          Roll teams, pick 5 players, choose an IGL, submit to score.
+        </p>
+      </div>
       {result && <Dialog>Score is {result.score}</Dialog>}
       {result && <Button onClick={handleRestart}>Start New Game</Button>}
       {game && status === "idle" && teamId <= 6 && (

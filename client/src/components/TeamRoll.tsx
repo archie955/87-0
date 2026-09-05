@@ -1,6 +1,6 @@
 import type { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
-import { teamToImg } from "@/lib/utils";
+import { cn, teamToImg } from "@/lib/utils";
 
 const SLIDE_WIDTH = 120;
 const START_SPEED = 7000;
@@ -73,7 +73,10 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
   }, []);
 
   return (
-    <div className="w-[600px] overflow-hidden">
+    <div className="relative w-full overflow-hidden">
+      <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-primary" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
       <div
         className="flex"
         style={{
@@ -83,12 +86,16 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         {slides.map((slide, index) => (
           <div
             key={`${index}-${index}`}
-            className="flex h-32 shrink-0 items-center justify-center border"
-            style={{ width: SLIDE_WIDTH, backgroundColor: "black" }}
+            className={cn(
+              "flex h-32 shrink-0 items-center justify-center border-x border-border bg-card px-4",
+              index === winnerIndex && "bg-primary/5",
+            )}
+            style={{ width: SLIDE_WIDTH, backgroundColor: "gray" }}
           >
             <img
-              style={{ backgroundColor: "black" }}
               src={teamToImg(slide.name)}
+              alt={slide.name}
+              className="max-h-24 w-full object-contain"
             />
           </div>
         ))}
