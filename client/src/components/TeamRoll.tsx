@@ -18,7 +18,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
   const animationRef = useRef<number | null>(null);
   const completedRef = useRef(false);
 
-  const targetPosition = SLIDE_WIDTH * (winnerIndex - 2);
+  const targetPosition = SLIDE_WIDTH * (winnerIndex - 2.3);
 
   useEffect(() => {
     let previousTime: number | null = null;
@@ -69,14 +69,18 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onComplete, targetPosition, winnerIndex]);
 
   return (
     <div className="relative w-full overflow-hidden">
-      <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-primary" />
+      {/* Centre marker */}
+      <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-secondary" />
+
+      {/* Edge fades */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
+
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
+
       <div
         className="flex"
         style={{
@@ -85,12 +89,12 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
       >
         {slides.map((slide, index) => (
           <div
-            key={`${index}-${index}`}
+            key={index}
             className={cn(
               "flex h-32 shrink-0 items-center justify-center border-x border-border bg-card px-4",
               index === winnerIndex && "bg-primary/5",
             )}
-            style={{ width: SLIDE_WIDTH, backgroundColor: "gray" }}
+            style={{ width: SLIDE_WIDTH, backgroundColor: "oklch(0.269 0 0)" }}
           >
             <img
               src={teamToImg(slide.name)}

@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import useTeams from "@/hooks/useTeams";
+
+import { useMemo, useState } from "react";
 import type { Player } from "@/types/playerTypes";
 import type { Team } from "@/types/teamTypes";
-import { lineupRoles, Roles } from "@/services/enum";
+import type { Result } from "@/types/resultTypes";
 import type { LineupRole } from "@/services/enum";
-import { useState } from "react";
+import { lineupRoles, Roles } from "@/services/enum";
+import useTeams from "@/hooks/useTeams";
+import useGame from "@/hooks/useGame";
 import {
   useTeamActions,
   useOpener,
@@ -13,23 +16,38 @@ import {
   useSupport,
   useFlex,
 } from "@/stores/teamStore";
-import TeamRoll from "@/components/TeamRoll";
 import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
 import { useNotificationActions } from "@/stores/notificationStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import LineupProgress from "@/components/LineupProgress";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { type Result } from "@/types/resultTypes";
-import { Dialog } from "@/components/ui/dialog";
-import PlayerCard from "@/components/PlayerCard";
-import useGame from "@/hooks/useGame";
+import LineupSlots from "@/components/LineupSlots";
+import IglSelector from "@/components/IglSelector";
+import GameStage from "@/components/GameStage";
+import GameResultDialog from "@/components/GameResultDialog";
 
 const WINNER_INDEX = 35;
 
 const Game = () => {
   const { game, isPending: gamePending, submitGame, restart } = useGame();
-  const [result, setResult] = useState<Result>();
+
   const { teams, isPending: teamPending } = useTeams();
+
   const [teamId, setTeamId] = useState(1);
+
+  const [selections, setSelections] = useState<string[]>(["", "", "", "", ""]);
+
+  const [rerollIndex, setRerollIndex] = useState<number | null>(null);
+
+  const [result, setResult] = useState<Result | null>(null);
+  const [slides, setSlides] = useState<Team[]>([]);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [igl, setIgl] = useState<LineupRole | null>(null);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const [rollId, setRollId] = useState(0);
+
   const {
     finishGame,
     compatibility,
@@ -40,18 +58,37 @@ const Game = () => {
     selectIgl,
     createLineup,
   } = useTeamActions();
-  const rerollStatus = useRerollStatus();
+
   const status = useStatus();
+  const rerollStatus = useRerollStatus();
+
   const { startRoll, finishRoll, resetRoll, reroll } = useRollActions();
-  const [slides, setSlides] = useState<Team[]>([]);
-  const [team, setTeam] = useState<Team | null>(null);
-  const [igl, setIgl] = useState<LineupRole | null>(null);
-  const [rollId, setRollId] = useState(0);
+
   const opener = useOpener();
   const closer = useCloser();
   const awper = useAwper();
   const support = useSupport();
   const flex = useFlex();
+
+  const slots = useMemo<Record<LineupRole, Player | null>>(
+    () => ({
+      [lineupRoles.opener]: opener,
+      [lineupRoles.closer]: closer,
+      [lineupRoles.awper]: awper,
+      [lineupRoles.support]: support,
+      [lineupRoles.flex]: flex,
+    }),
+    [opener, closer, awper, support, flex],
+  );
+
+  const iglCandidates = useMemo(
+    () =>
+      (Object.entries(slots) as [LineupRole, Player | null][])
+        .filter(([, p]) => p !== null)
+        .map(([role, player]) => ({ role, player: player! })),
+    [slots],
+  );
+
   const { setNotification } = useNotificationActions();
 
   if (teamPending || !teams || gamePending || !game) {
@@ -62,7 +99,7 @@ const Game = () => {
     return 1 + Math.floor(Math.random() * max);
   };
 
-  const makeSlides = (team: Team): Team[] => {
+  const makeSlides = (winningTeam: Team): Team[] => {
     const slides: Team[] = [];
     const numberOfTeams = Object.keys(teams).length;
 
@@ -71,7 +108,8 @@ const Game = () => {
       slides.push(teams[randomId]);
     }
 
-    slides.push(team);
+    slides.push(winningTeam);
+
     for (let i = 0; i < 4; i++) {
       const randomId = getRandomInt(numberOfTeams);
       slides.push(teams[randomId]);
@@ -81,9 +119,6 @@ const Game = () => {
   };
 
   const getTeamId = (turn: number): number | void => {
-    if (!game) {
-      return;
-    }
     switch (turn) {
       case 1:
         return game.team_1_id;
@@ -100,27 +135,40 @@ const Game = () => {
       case 5:
         return game.team_5_id;
 
-      default:
+      case 6:
         return game.team_6_id;
+
+      default:
+        return;
     }
   };
 
   const prepareRoll = (turn: number): void => {
     const selectedTeamId = getTeamId(turn);
+
     if (!selectedTeamId) {
       return;
     }
+
     const selectedTeam = teams[selectedTeamId];
 
-    const slides = makeSlides(selectedTeam);
+    if (!selectedTeam) {
+      return;
+    }
+
+    const newSlides = makeSlides(selectedTeam);
 
     setTeam(selectedTeam);
-    setSlides(slides);
+    setSlides(newSlides);
     setRollId((current) => current + 1);
   };
 
   const startRolling = (): void => {
     if (status !== "idle") {
+      return;
+    }
+
+    if (teamId > 6) {
       return;
     }
 
@@ -133,23 +181,41 @@ const Game = () => {
       return;
     }
 
-    const nextTeamId = teamId + 1;
-
-    if (nextTeamId > 6) {
+    if (teamId >= 6) {
       return;
     }
 
+    if (!team) {
+      return;
+    }
+
+    const currentIndex = teamId - 1;
+
+    setSelections((previous) => {
+      const next = [...previous];
+
+      next[currentIndex] = team.name;
+      next.push("");
+
+      return next;
+    });
+
+    setRerollIndex(currentIndex);
+
+    const nextTeamId = teamId + 1;
+
     setTeamId(nextTeamId);
+
     prepareRoll(nextTeamId);
 
     reroll();
   };
 
-  const handleRollComplete = () => {
+  const handleRollComplete = (): void => {
     finishRoll();
   };
 
-  const handleSelectPlayer = (player: Player) => {
+  const handleSelectPlayer = (player: Player): void => {
     switch (player.role) {
       case Roles.AWPER:
         selectAwper(player);
@@ -168,36 +234,51 @@ const Game = () => {
         break;
     }
 
+    if (team) {
+      const selectedIndex = teamId - 1;
+
+      setSelections((previous) => {
+        const next = [...previous];
+
+        next[selectedIndex] = team.name;
+
+        return next;
+      });
+    }
+
     setTeam(null);
+
     setTeamId((current) => current + 1);
+
     resetRoll();
   };
 
-  const handleSelectIgl = (p: LineupRole): (() => void) => {
-    return () => setIgl(p);
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (igl !== null) {
       selectIgl(igl);
     }
+
     if (!game) {
       return;
     }
+
+    setSubmitting(true);
 
     const lineup = createLineup(game.id);
 
     try {
       const response = await submitGame(lineup);
+
       setResult(response);
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        setNotification(e.message, "error");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setNotification(error.message, "error");
       }
     } finally {
       setSlides([]);
       setIgl(null);
       finishGame();
+      setSubmitting(false);
     }
   };
 
@@ -208,8 +289,9 @@ const Game = () => {
 
     try {
       await restart();
-      setResult(undefined);
-    } catch (error) {
+
+      setResult(null);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         setNotification(error.message, "error");
       } else {
@@ -218,113 +300,74 @@ const Game = () => {
     }
   };
 
+  const currentProgressIndex = teamId - 1;
+
+  const progressSelections =
+    rerollIndex === null ? selections.slice(0, 5) : selections;
+
+  const showIglSelector =
+    (teamId === 5 && rerollStatus) || (teamId === 6 && rerollStatus);
+
+  const canSubmit = showIglSelector && !result && !submitting;
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">Build your lineup</h1>
+
         <p className="text-sm text-muted-foreground">
           Roll teams, pick 5 players, choose an IGL, submit to score.
         </p>
       </div>
-      {result && <Dialog>Score is {result.score}</Dialog>}
-      {result && <Button onClick={handleRestart}>Start New Game</Button>}
-      {game && status === "idle" && teamId <= 6 && (
-        <Button onClick={startRolling}>Roll</Button>
-      )}
 
-      {game && slides.length > 0 && (
-        <TeamRoll
-          key={rollId}
-          slides={slides}
-          winnerIndex={WINNER_INDEX}
-          onComplete={handleRollComplete}
+      <LineupProgress
+        selections={progressSelections}
+        current={currentProgressIndex}
+        reroll={rerollIndex}
+      />
+
+      <LineupSlots slots={slots} />
+
+      <Card>
+        <CardContent className="p-6">
+          <GameStage
+            status={status}
+            team={team}
+            slides={slides}
+            rollId={rollId}
+            winnerIndex={WINNER_INDEX}
+            pickNumber={teamId}
+            maxPickNumber={selections.length}
+            canReroll={rerollStatus && teamId < 6}
+            canPick={compatibility}
+            onRoll={startRolling}
+            onRollComplete={handleRollComplete}
+            onPick={handleSelectPlayer}
+            onReroll={handleReroll}
+          />
+        </CardContent>
+      </Card>
+
+      {showIglSelector && (
+        <IglSelector
+          candidates={iglCandidates}
+          selected={igl}
+          onSelect={setIgl}
         />
       )}
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-ends gap-4">
-          <CardTitle className="text-lg">Choose your team</CardTitle>
-          <CardTitle className="text-lg">Test card description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-4">
-            {status === "picking" &&
-              team &&
-              team.players.map((player) => (
-                <div key={player.id}>
-                  <PlayerCard
-                    player={player}
-                    selected={!compatibility(player)}
-                    onSelect={() => handleSelectPlayer(player)}
-                  />
-                </div>
-              ))}
-            {status === "picking" && rerollStatus && teamId < 6 && (
-              <Button onClick={handleReroll}>Reroll</Button>
-            )}
-            <div>
-              <div>
-                opener = {(opener && opener.name) || "None"}{" "}
-                {opener &&
-                  (igl === lineupRoles.opener ? (
-                    "IGL"
-                  ) : (
-                    <Button onClick={handleSelectIgl(lineupRoles.opener)}>
-                      Make IGL
-                    </Button>
-                  ))}
-              </div>
-              <div>
-                closer = {(closer && closer.name) || "None"}{" "}
-                {closer &&
-                  (igl === lineupRoles.closer ? (
-                    "IGL"
-                  ) : (
-                    <Button onClick={handleSelectIgl(lineupRoles.closer)}>
-                      Make IGL
-                    </Button>
-                  ))}
-              </div>
-              <div>
-                awper = {(awper && awper.name) || "None"}{" "}
-                {awper &&
-                  (igl === lineupRoles.awper ? (
-                    "IGL"
-                  ) : (
-                    <Button onClick={handleSelectIgl(lineupRoles.awper)}>
-                      Make IGL
-                    </Button>
-                  ))}
-              </div>
-              <div>
-                support = {(support && support.name) || "None"}{" "}
-                {support &&
-                  (igl === lineupRoles.support ? (
-                    "IGL"
-                  ) : (
-                    <Button onClick={handleSelectIgl(lineupRoles.support)}>
-                      Make IGL
-                    </Button>
-                  ))}
-              </div>
-              <div>
-                flex = {(flex && flex.name) || "None"}{" "}
-                {flex &&
-                  (igl === lineupRoles.flex ? (
-                    "IGL"
-                  ) : (
-                    <Button onClick={handleSelectIgl(lineupRoles.flex)}>
-                      Make IGL
-                    </Button>
-                  ))}
-              </div>
-            </div>
-            {opener && closer && awper && support && flex && (
-              <Button onClick={handleSubmit}>Submit</Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {canSubmit && (
+        <Button
+          onClick={handleSubmit}
+          size="lg"
+          className="w-full"
+          disabled={submitting}
+        >
+          {submitting ? "Submitting…" : "Submit lineup"}
+        </Button>
+      )}
+
+      <GameResultDialog result={result} onRestart={handleRestart} />
     </div>
   );
 };
