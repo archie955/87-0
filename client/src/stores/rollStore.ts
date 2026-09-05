@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface RollActions {
   startRoll: () => void;
   finishRoll: () => void;
-  resetRoll: () => void;
+  reset: () => void;
   reroll: () => void;
 }
 
@@ -18,31 +18,30 @@ type RollStore = {
 const useRollStore = create<RollStore>((set, get) => ({
   status: "idle",
   rerollStatus: true,
+
   actions: {
-    startRoll: () =>
-      set(() => ({
-        status: "rolling",
-      })),
+    startRoll: () => {
+      set({ status: "rolling" });
+    },
 
-    finishRoll: () =>
-      set(() => ({
-        status: "picking",
-      })),
+    finishRoll: () => {
+      set({ status: "picking" });
+    },
 
-    resetRoll: () =>
-      set(() => ({
+    reset: () => {
+      set({
         status: "idle",
         rerollStatus: true,
-      })),
+      });
+    },
 
     reroll: () => {
-      if (!get().rerollStatus) {
-        return;
-      }
-      set(() => ({
+      if (!get().rerollStatus) return;
+
+      set({
         status: "rolling",
         rerollStatus: false,
-      }));
+      });
     },
   },
 }));
@@ -55,3 +54,5 @@ export const useRerollStatus = (): boolean =>
 
 export const useRollActions = (): RollActions =>
   useRollStore((state) => state.actions);
+
+export default useRollStore;

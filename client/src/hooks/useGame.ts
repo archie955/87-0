@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import gameService from "@/services/game";
 import type { Game, Lineup } from "@/types/gameTypes";
 import type { Result } from "@/types/resultTypes";
 
-interface useGameOutput {
+interface UseGameOutput {
   game: Game | null;
   isPending: boolean;
   isError: boolean;
@@ -11,35 +12,33 @@ interface useGameOutput {
   restart: () => Promise<void>;
 }
 
-const useGame = (): useGameOutput => {
+const useGame = (): UseGameOutput => {
   const queryClient = useQueryClient();
 
-  const result = useQuery({
+  const gameQuery = useQuery({
     queryKey: ["game"],
-    queryFn: () => gameService.getGame(),
+    queryFn: gameService.getGame,
     refetchOnWindowFocus: false,
     retry: false,
   });
 
-  const submitGameMutation = useMutation({
-    mutationFn: async (lineup: Lineup): Promise<Result> =>
-      await gameService.submitGame(lineup),
+  const submitMutation = useMutation({
+    mutationFn: gameService.submitGame,
   });
 
-  const restartGame = async (): Promise<void> => {
-    await queryClient.invalidateQueries({ queryKey: ["game"] });
+  const restart = async (): Promise<void> => {
+    await queryClient.refetchQueries({
+      queryKey: ["game"],
+      type: "active",
+    });
   };
 
   return {
-    game: result.data ?? null,
-
-    isPending: result.isPending,
-    isError: result.isError,
-
-    submitGame: (lineup: Lineup): Promise<Result> =>
-      submitGameMutation.mutateAsync(lineup),
-
-    restart: (): Promise<void> => restartGame(),
+    game: gameQuery.data ?? null,
+    isPending: gameQuery.isPending,
+    isError: gameQuery.isError,
+    submitGame: submitMutation.mutateAsync,
+    restart,
   };
 };
 

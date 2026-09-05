@@ -5,14 +5,13 @@ import type { LineupRole } from "@/services/enum";
 import type { Lineup } from "@/types/gameTypes";
 
 interface TeamActions {
-  finishGame: () => void;
+  reset: () => void;
   selectOpener: (player: Player) => void;
   selectCloser: (player: Player) => void;
   selectAwper: (player: Player) => void;
   selectSupport: (player: Player) => void;
-  selectIgl: (p: LineupRole) => void;
   compatibility: (p: Player) => boolean;
-  createLineup: (id: string) => Lineup;
+  createLineup: (gameId: string, iglRole: LineupRole) => Lineup;
 }
 
 interface TeamState {
@@ -21,7 +20,6 @@ interface TeamState {
   awper: Player | null;
   support: Player | null;
   flex: Player | null;
-  igl: number | null;
   actions: TeamActions;
 }
 
@@ -31,18 +29,17 @@ const useTeamStore = create<TeamState>((set, get) => ({
   awper: null,
   support: null,
   flex: null,
-  igl: null,
+
   actions: {
-    finishGame: () => {
-      set(() => ({
+    reset: () =>
+      set({
         opener: null,
         closer: null,
         awper: null,
         support: null,
         flex: null,
-        igl: null,
-      }));
-    },
+      }),
+
     selectOpener: (player: Player) => {
       if (player.role !== Roles.OPENER) {
         return;
@@ -79,78 +76,63 @@ const useTeamStore = create<TeamState>((set, get) => ({
         set(() => ({ flex: player }));
       }
     },
-    selectIgl: (p: LineupRole): void => {
-      const player = get()[p];
-      if (player) {
-        set(() => ({ igl: player.id }));
-      }
-    },
-    compatibility: (p: Player): boolean => {
-      switch (p.role) {
+
+    compatibility: (player) => {
+      const state = get();
+
+      switch (player.role) {
         case Roles.AWPER:
-          if (!get().awper) {
-            return true;
-          } else if (get().awper?.name === p.name) {
-            return false;
-          }
+          if (!state.awper) return true;
+          if (state.awper.name === player.name) return false;
           break;
 
         case Roles.OPENER:
-          if (!get().opener) {
-            return true;
-          } else if (get().opener?.name === p.name) {
-            return false;
-          }
+          if (!state.opener) return true;
+          if (state.opener.name === player.name) return false;
           break;
 
         case Roles.CLOSER:
-          if (!get().closer) {
-            return true;
-          } else if (get().closer?.name === p.name) {
-            return false;
-          }
+          if (!state.closer) return true;
+          if (state.closer.name === player.name) return false;
           break;
 
         case Roles.SUPPORT:
-          if (!get().support) {
-            return true;
-          } else if (get().support?.name === p.name) {
-            return false;
-          }
+          if (!state.support) return true;
+          if (state.support.name === player.name) return false;
           break;
       }
-      if (!get().flex) {
-        return true;
-      }
-      return false;
+
+      return !state.flex;
     },
-    createLineup: (id: string): Lineup => {
-      const player_1 = get().opener;
-      const player_2 = get().closer;
-      const player_3 = get().awper;
-      const player_4 = get().support;
-      const player_5 = get().flex;
-      const igl = get().igl;
-      if (
-        !player_1 ||
-        !player_2 ||
-        !player_3 ||
-        !player_4 ||
-        !player_5 ||
-        !igl
-      ) {
+
+    createLineup: (gameId, iglRole) => {
+      const state = get();
+
+      const player_1 = state.opener;
+      const player_2 = state.closer;
+      const player_3 = state.awper;
+      const player_4 = state.support;
+      const player_5 = state.flex;
+
+      const iglPlayer = state[iglRole];
+
+      if (!player_1 || !player_2 || !player_3 || !player_4 || !player_5) {
+        throw new Error("Lineup is incomplete");
+      }
+
+      if (!iglPlayer) {
         throw new Error("Select an IGL");
       }
-      const lineup: Lineup = {
-        game_id: id,
-        player_1: player_1,
-        player_2: player_2,
-        player_3: player_3,
-        player_4: player_4,
-        player_5: player_5,
-        igl: igl,
+
+      return {
+        game_id: gameId,
+        player_1,
+        player_2,
+        player_3,
+        player_4,
+        player_5,
+        igl: iglPlayer.id,
       };
-      return lineup;
     },
   },
 }));
