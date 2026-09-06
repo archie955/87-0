@@ -24,6 +24,3 @@ src/template
 *.njsproj
 *.sln
 *.sw?
-
-src/components/trials
-src/pages/AltGame.tsx

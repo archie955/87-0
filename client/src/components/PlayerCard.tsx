@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Check, User } from "lucide-react";
 import type { Player } from "@/types/playerTypes";
 import { cn } from "@/lib/utils";
+import { useRules } from "@/stores/ruleStore";
 
 const ROLE_COLOR: Record<string, string> = {
   Opener: "oklch(0.72 0.18 145)", // green
@@ -18,6 +19,7 @@ type PlayerPickCardProps = {
 
 const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
   const colour = ROLE_COLOR[player.role] ?? "var(--primary)";
+  const rules = useRules();
 
   return (
     <motion.button
@@ -55,7 +57,7 @@ const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
       <div className="flex items-baseline gap-1 rounded-md bg-muted px-2.5 py-1">
         <span className="text-xs text-muted-foreground">HLTV</span>
         <span className="text-sm font-bold tabular-nums">
-          {player.hltv.toFixed(2)}
+          {rules === "easy" && player.hltv.toFixed(2)}
         </span>
       </div>
 

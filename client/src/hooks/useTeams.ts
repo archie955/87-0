@@ -2,21 +2,28 @@ import { useQuery } from "@tanstack/react-query";
 import teamService from "@/services/teams";
 import type { Teams } from "@/types/teamTypes";
 
-interface useTeamsResult {
-  teams: Teams | undefined;
-  isPending: boolean;
+interface UseTeamsResult {
+  teams: Teams | null;
+  isLoading: boolean;
+  isError: boolean;
+  retry: () => void;
 }
 
-const useTeams = (): useTeamsResult => {
-  const result = useQuery({
+const useTeams = (): UseTeamsResult => {
+  const teamsQuery = useQuery({
     queryKey: ["teams"],
     queryFn: teamService.getTeams,
     refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   return {
-    teams: result.data,
-    isPending: result.isPending,
+    teams: teamsQuery.data ?? null,
+    isLoading: teamsQuery.isLoading,
+    isError: teamsQuery.isError,
+    retry: () => {
+      void teamsQuery.refetch();
+    },
   };
 };
 

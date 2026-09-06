@@ -42,7 +42,6 @@ const GameStage = ({
 }: GameStageProps) => {
   return (
     <div className="relative min-h-[420px]">
-      {"Stage Test"}
       <AnimatePresence mode="wait">
         {status === "idle" && (
           <motion.div

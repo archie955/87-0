@@ -10,18 +10,28 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { Result } from "@/types/resultTypes";
+import { useNavigate } from "react-router-dom";
 
 type GameResultDialogProps = {
   result: Result | null;
   onRestart: () => void;
+  isRestarting?: boolean;
 };
 
-const GameResultDialog = ({ result, onRestart }: GameResultDialogProps) => {
+const GameResultDialog = ({
+  result,
+  onRestart,
+  isRestarting = false,
+}: GameResultDialogProps) => {
   const open = result !== null;
+  const navigate = useNavigate();
+
+  const homeNavigation = async () => {
+    await navigate("/");
+  };
 
   return (
     <Dialog open={open}>
-      {"Test"}
       <DialogContent showCloseButton={false} className="sm:max-w-sm">
         <DialogHeader className="items-center text-center sm:text-center">
           <motion.div
@@ -61,9 +71,22 @@ const GameResultDialog = ({ result, onRestart }: GameResultDialogProps) => {
         </motion.div>
 
         <DialogFooter className="sm:justify-center">
-          <Button onClick={onRestart} className="w-full sm:w-auto">
+          <Button
+            onClick={onRestart}
+            className="w-full sm:w-auto"
+            disabled={isRestarting}
+          >
             <RefreshCw className="mr-2 size-4" />
             Start new game
+          </Button>
+        </DialogFooter>
+        <DialogFooter className="sm:justify-center">
+          <Button
+            onClick={homeNavigation}
+            className="w-full sm:w-auto"
+            disabled={isRestarting}
+          >
+            Go to Dashboard
           </Button>
         </DialogFooter>
       </DialogContent>

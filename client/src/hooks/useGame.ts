@@ -1,24 +1,28 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import gameService from "@/services/game";
 import type { Game, Lineup } from "@/types/gameTypes";
 import type { Result } from "@/types/resultTypes";
+import { getErrorMessage } from "@/lib/errors";
 
 interface UseGameOutput {
   game: Game | null;
-  isPending: boolean;
+  isLoading: boolean;
   isError: boolean;
-  submitGame: (lineup: Lineup) => Promise<Result>;
-  restart: () => Promise<void>;
+  /** True while a background refetch (i.e. starting a new game) is in flight. */
+  isStartingNewGame: boolean;
+  /** Fetches a brand new active game, replacing whatever is currently active. */
+  startNewGame: () => Promise<void>;
+  submitLineup: (lineup: Lineup) => Promise<Result>;
+  isSubmitting: boolean;
 }
 
 const useGame = (): UseGameOutput => {
-  const queryClient = useQueryClient();
-
   const gameQuery = useQuery({
     queryKey: ["game"],
     queryFn: gameService.getGame,
     refetchOnWindowFocus: false,
+    staleTime: Infinity,
     retry: false,
   });
 
@@ -26,19 +30,24 @@ const useGame = (): UseGameOutput => {
     mutationFn: gameService.submitGame,
   });
 
-  const restart = async (): Promise<void> => {
-    await queryClient.refetchQueries({
-      queryKey: ["game"],
-      type: "active",
-    });
+  const startNewGame = async (): Promise<void> => {
+    const result = await gameQuery.refetch();
+
+    if (result.isError) {
+      throw new Error(
+        getErrorMessage(result.error, "Unable to start a new game"),
+      );
+    }
   };
 
   return {
     game: gameQuery.data ?? null,
-    isPending: gameQuery.isPending,
+    isLoading: gameQuery.isLoading,
     isError: gameQuery.isError,
-    submitGame: submitMutation.mutateAsync,
-    restart,
+    isStartingNewGame: gameQuery.isFetching,
+    startNewGame,
+    submitLineup: submitMutation.mutateAsync,
+    isSubmitting: submitMutation.isPending,
   };
 };
 

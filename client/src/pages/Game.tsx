@@ -1,25 +1,12 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-
-import { useMemo, useState } from "react";
-import type { Player } from "@/types/playerTypes";
+import { useState } from "react";
 import type { Team } from "@/types/teamTypes";
 import type { Result } from "@/types/resultTypes";
-import type { LineupRole } from "@/services/enum";
-import { lineupRoles, Roles } from "@/services/enum";
 
 import useTeams from "@/hooks/useTeams";
 import useGame from "@/hooks/useGame";
-
-import {
-  useTeamActions,
-  useOpener,
-  useCloser,
-  useAwper,
-  useSupport,
-  useFlex,
-} from "@/stores/teamStore";
-
-import { useStatus, useRerollStatus, useRollActions } from "@/stores/rollStore";
+import useLineupBuilder from "@/hooks/useLineupBuilder";
+import { createLineupPayload, PICK_COUNT } from "@/lib/lineupBuilder";
+import { getErrorMessage } from "@/lib/errors";
 
 import { useNotificationActions } from "@/stores/notificationStore";
 
@@ -30,349 +17,227 @@ import LineupSlots from "@/components/LineupSlots";
 import IglSelector from "@/components/IglSelector";
 import GameStage from "@/components/GameStage";
 import GameResultDialog from "@/components/GameResultDialog";
+import Loading from "@/components/Loading";
+import RuleChange from "@/components/RuleChange";
 
 const WINNER_INDEX = 35;
-const PICK_COUNT = 5;
 
 const Game = () => {
-  const { game, isPending: gamePending, submitGame, restart } = useGame();
+  const {
+    game,
+    isLoading: gameLoading,
+    isError: gameErrored,
+    startNewGame,
+    isStartingNewGame,
+    submitLineup,
+    isSubmitting,
+  } = useGame();
 
-  const { teams, isPending: teamPending } = useTeams();
+  const {
+    teams,
+    isLoading: teamsLoading,
+    isError: teamsErrored,
+    retry: retryTeams,
+  } = useTeams();
 
-  const [teamId, setTeamId] = useState(1);
-  const [selections, setSelections] = useState<string[]>(
-    Array(PICK_COUNT).fill(""),
-  );
-  const [rerollIndex, setRerollIndex] = useState<number | null>(null);
+  const builder = useLineupBuilder();
 
   const [result, setResult] = useState<Result | null>(null);
 
-  const [slides, setSlides] = useState<Team[]>([]);
-  const [team, setTeam] = useState<Team | null>(null);
-
-  const [igl, setIgl] = useState<LineupRole | null>(null);
-
-  const [submitting, setSubmitting] = useState(false);
-  const [rollId, setRollId] = useState(0);
-
-  const {
-    reset: resetTeam,
-    compatibility,
-    selectOpener,
-    selectCloser,
-    selectAwper,
-    selectSupport,
-    createLineup,
-  } = useTeamActions();
-
-  const status = useStatus();
-  const rerollStatus = useRerollStatus();
-
-  const { startRoll, finishRoll, reset: resetRoll, reroll } = useRollActions();
-
-  const opener = useOpener();
-  const closer = useCloser();
-  const awper = useAwper();
-  const support = useSupport();
-  const flex = useFlex();
-
-  const slots = useMemo<Record<LineupRole, Player | null>>(
-    () => ({
-      [lineupRoles.opener]: opener,
-      [lineupRoles.closer]: closer,
-      [lineupRoles.awper]: awper,
-      [lineupRoles.support]: support,
-      [lineupRoles.flex]: flex,
-    }),
-    [opener, closer, awper, support, flex],
-  );
-
-  const iglCandidates = useMemo(
-    () =>
-      (Object.entries(slots) as [LineupRole, Player | null][])
-        .filter(([, player]) => player !== null)
-        .map(([role, player]) => ({
-          role,
-          player: player!,
-        })),
-    [slots],
-  );
-
   const { setNotification } = useNotificationActions();
 
-  const getRandomInt = (max: number): number =>
-    1 + Math.floor(Math.random() * max);
+  const [lastSyncedGameId, setLastSyncedGameId] = useState<string | undefined>(
+    undefined,
+  );
 
-  const getTeamId = (turn: number): number | null => {
-    switch (turn) {
-      case 1:
-        return game?.team_1_id ?? null;
-      case 2:
-        return game?.team_2_id ?? null;
-      case 3:
-        return game?.team_3_id ?? null;
-      case 4:
-        return game?.team_4_id ?? null;
-      case 5:
-        return game?.team_5_id ?? null;
-      case 6:
-        return game?.team_6_id ?? null;
-      default:
-        return null;
-    }
+  if (game && game.id !== lastSyncedGameId) {
+    setLastSyncedGameId(game.id);
+    builder.reset();
+    setResult(null);
+  }
+
+  const teamIdsBySlot = game
+    ? [
+        game.team_1_id,
+        game.team_2_id,
+        game.team_3_id,
+        game.team_4_id,
+        game.team_5_id,
+        game.team_6_id,
+      ]
+    : [];
+
+  const rollTeamForSlot = (slotNumber: number): Team | null => {
+    const teamId = teamIdsBySlot[slotNumber - 1];
+    if (teamId === undefined || !teams) return null;
+    return teams[teamId] ?? null;
   };
 
   const makeSlides = (winningTeam: Team): Team[] => {
-    const numberOfTeams = Object.keys(teams ?? {}).length;
-    const result: Team[] = [];
+    const teamsData = teams;
+    if (!teamsData) return [winningTeam];
 
-    for (let i = 0; i < WINNER_INDEX; i++) {
-      const randomId = getRandomInt(numberOfTeams);
-      result.push(teams![randomId]);
-    }
+    const teamIds = Object.keys(teamsData).map(Number);
+    if (teamIds.length === 0) return [winningTeam];
 
-    result.push(winningTeam);
+    const randomTeam = (): Team => {
+      const id = teamIds[Math.floor(Math.random() * teamIds.length)];
+      return teamsData[id];
+    };
 
-    for (let i = 0; i < 4; i++) {
-      const randomId = getRandomInt(numberOfTeams);
-      result.push(teams![randomId]);
-    }
+    const slides: Team[] = [];
+    for (let i = 0; i < WINNER_INDEX; i++) slides.push(randomTeam());
+    slides.push(winningTeam);
+    for (let i = 0; i < 4; i++) slides.push(randomTeam());
 
-    return result;
-  };
-
-  const prepareRoll = (turn: number): boolean => {
-    const selectedTeamId = getTeamId(turn);
-
-    if (!selectedTeamId || !teams) {
-      return false;
-    }
-
-    const selectedTeam = teams[selectedTeamId];
-
-    if (!selectedTeam) {
-      return false;
-    }
-
-    setTeam(selectedTeam);
-    setSlides(makeSlides(selectedTeam));
-    setRollId((current) => current + 1);
-
-    return true;
+    return slides;
   };
 
   const startRolling = (): void => {
-    if (status !== "idle") return;
-    if (teamId > 6) return;
+    if (!builder.canRoll) return;
 
-    if (prepareRoll(teamId)) {
-      startRoll();
-    }
-  };
+    const team = rollTeamForSlot(builder.slotNumber);
+    if (!team) return;
 
-  const handleRollComplete = (): void => {
-    finishRoll();
+    builder.roll(team, makeSlides(team));
   };
 
   const handleReroll = (): void => {
-    if (status !== "picking") return;
-    if (!rerollStatus) return;
-    if (teamId >= 6) return;
+    if (!builder.canReroll) return;
+
+    const team = rollTeamForSlot(builder.slotNumber + 1);
     if (!team) return;
 
-    const currentIndex = teamId - 1;
-
-    setSelections((previous) => {
-      const next = [...previous];
-      next[currentIndex] = team.name;
-      next.push("");
-      return next;
-    });
-
-    setRerollIndex(currentIndex);
-
-    const nextTeamId = teamId + 1;
-
-    if (!prepareRoll(nextTeamId)) {
-      return;
-    }
-
-    setTeamId(nextTeamId);
-    reroll();
-  };
-
-  const handleSelectPlayer = (player: Player): void => {
-    if (!team) return;
-    if (!compatibility(player)) return;
-
-    switch (player.role) {
-      case Roles.AWPER:
-        selectAwper(player);
-        break;
-
-      case Roles.CLOSER:
-        selectCloser(player);
-        break;
-
-      case Roles.OPENER:
-        selectOpener(player);
-        break;
-
-      case Roles.SUPPORT:
-        selectSupport(player);
-        break;
-    }
-
-    const selectedIndex = teamId - 1;
-
-    setSelections((previous) => {
-      const next = [...previous];
-      next[selectedIndex] = team.name;
-      return next;
-    });
-
-    setTeam(null);
-    setTeamId((current) => current + 1);
-    setRerollIndex(null);
-    resetRoll();
+    builder.reroll(team, makeSlides(team));
   };
 
   const handleSubmit = async (): Promise<void> => {
     if (!game) return;
 
-    if (!igl) {
-      setNotification("Select an IGL", "error");
+    const lineup = createLineupPayload(builder.lineup, builder.igl, game.id);
+
+    if (!lineup) {
+      setNotification(
+        builder.igl ? "Your lineup isn't complete yet" : "Select an IGL",
+        "error",
+      );
       return;
     }
 
-    setSubmitting(true);
-
     try {
-      const lineup = createLineup(game.id, igl);
-      const response = await submitGame(lineup);
-
+      const response = await submitLineup(lineup);
       setResult(response);
-
-      setSlides([]);
-      setTeam(null);
-      resetRoll();
-      resetTeam();
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setNotification(error.message, "error");
-      } else {
-        setNotification("Unable to submit lineup", "error");
-      }
-    } finally {
-      setSubmitting(false);
+      setNotification(
+        getErrorMessage(error, "Unable to submit lineup"),
+        "error",
+      );
     }
   };
 
   const handleRestart = async (): Promise<void> => {
-    if (submitting) return;
-
-    setSubmitting(true);
-
     try {
-      setResult(null);
-      setTeamId(1);
-      setSelections(Array(PICK_COUNT).fill(""));
-      setRerollIndex(null);
-      setSlides([]);
-      setTeam(null);
-      setIgl(null);
-
-      resetTeam();
-      resetRoll();
-
-      await restart();
+      await startNewGame();
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setNotification(error.message, "error");
-      } else {
-        setNotification("Unable to start a new game", "error");
-      }
-    } finally {
-      setSubmitting(false);
+      setNotification(
+        getErrorMessage(error, "Unable to start a new game"),
+        "error",
+      );
     }
   };
 
-  if (teamPending || !teams || gamePending || !game) {
-    return <h1>Loading data...</h1>;
+  if (gameLoading || teamsLoading) {
+    return <Loading />;
   }
 
-  const playersSelected =
-    opener !== null &&
-    closer !== null &&
-    awper !== null &&
-    support !== null &&
-    flex !== null;
+  if (gameErrored || teamsErrored || !game || !teams) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Something went wrong loading the game.
+          </p>
+          <Button
+            onClick={() => {
+              retryTeams();
+              void handleRestart();
+            }}
+            disabled={isStartingNewGame}
+          >
+            {isStartingNewGame ? "Retrying…" : "Try again"}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const showIglSelector =
-    playersSelected && teamId === PICK_COUNT + 1 && result === null;
-
-  const canSubmit = showIglSelector && igl !== null && !submitting;
-
-  const currentProgressIndex = Math.min(teamId - 1, PICK_COUNT);
+  const showIglSelector = builder.isComplete && result === null;
+  const canSubmit = showIglSelector && builder.igl !== null && !isSubmitting;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Build your lineup</h1>
-
-        <p className="text-sm text-muted-foreground">
-          Roll teams, pick 5 players, choose an IGL, submit to score.
-        </p>
+      <div className="mx-auto flex w-full max-w-3xl flex-row justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Build your lineup</h1>
+          <p className="text-sm text-muted-foreground">
+            Roll teams, pick 5 players, choose an IGL, submit to score.
+          </p>
+        </div>
+        <RuleChange />
       </div>
 
       <LineupProgress
-        selections={selections}
-        current={currentProgressIndex}
-        reroll={rerollIndex}
+        selections={builder.slotHistory}
+        current={builder.slotNumber - 1}
+        reroll={builder.rerolledAtIndex}
       />
 
-      <LineupSlots slots={slots} />
+      <LineupSlots slots={builder.lineup} />
 
       <Card>
         <CardContent className="p-6">
-          <GameStage
-            status={status}
-            team={team}
-            slides={slides}
-            rollId={rollId}
-            winnerIndex={WINNER_INDEX}
-            pickNumber={Math.min(teamId, PICK_COUNT)}
-            maxPickNumber={PICK_COUNT}
-            canReroll={rerollStatus && teamId < PICK_COUNT + 1}
-            canPick={compatibility}
-            onRoll={startRolling}
-            onRollComplete={handleRollComplete}
-            onPick={handleSelectPlayer}
-            onReroll={handleReroll}
-          />
+          {(!showIglSelector && (
+            <GameStage
+              status={builder.phase}
+              team={builder.rolledTeam}
+              slides={builder.rollSlides}
+              rollId={builder.rollSequence}
+              winnerIndex={WINNER_INDEX}
+              pickNumber={builder.pickNumber}
+              maxPickNumber={PICK_COUNT}
+              canReroll={builder.canReroll}
+              canPick={builder.canPick}
+              onRoll={startRolling}
+              onRollComplete={builder.rollComplete}
+              onPick={builder.pick}
+              onReroll={handleReroll}
+            />
+          )) || (
+            <IglSelector
+              candidates={builder.iglCandidates}
+              selected={builder.igl}
+              onSelect={builder.selectIgl}
+            />
+          )}
         </CardContent>
       </Card>
 
-      {showIglSelector && (
-        <IglSelector
-          candidates={iglCandidates}
-          selected={igl}
-          onSelect={setIgl}
-        />
-      )}
-
       {canSubmit && (
         <Button
-          onClick={handleSubmit}
+          onClick={() => void handleSubmit()}
           size="lg"
           className="w-full"
-          disabled={submitting}
+          disabled={isSubmitting}
         >
-          {submitting ? "Submitting…" : "Submit lineup"}
+          {isSubmitting ? "Submitting…" : "Submit lineup"}
         </Button>
       )}
 
-      <GameResultDialog result={result} onRestart={handleRestart} />
+      <GameResultDialog
+        result={result}
+        onRestart={() => void handleRestart()}
+        isRestarting={isStartingNewGame}
+      />
     </div>
   );
 };
