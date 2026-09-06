@@ -132,6 +132,7 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
 async def evaluation_base(
     game: active_game_schemas.GameResult,
     active_game: active_game_schemas.ActiveGame,
+    cache: Redis,
     db: AsyncSession,
 ) -> active_game_schemas.GameEvaluation:
     game_list = await validate_game(game=game, active_game=active_game, db=db)
@@ -141,18 +142,16 @@ async def evaluation_base(
 
     score = eval_lineup(game_list)
 
+    await cache.delete(game.game_id)
+
     return active_game_schemas.GameEvaluation(score=score, best=False)
 
 
-async def update_user_game(
-    db: AsyncSession, user: models.User, score: float, cache: Redis, id: str
-):
+async def update_user_game(db: AsyncSession, user: models.User, score: float):
     best = False
     if user.best_score is None or user.best_score < score:
         user.best_score = score
         best = True
-
-    await cache.delete(id)
 
     await safe_commit(db=db, datatype="Best Score")
 

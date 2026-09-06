@@ -52,7 +52,7 @@ async def game_evaluation(
     cache: redis.Redis,
 ) -> active_game_schemas.GameEvaluation:
     game_evaluation = await game_helpers.evaluation_base(
-        game=game, active_game=active_game, db=db
+        game=game, active_game=active_game, cache=cache, db=db
     )
 
     if user:
@@ -60,8 +60,6 @@ async def game_evaluation(
             db=db,
             user=user,
             score=game_evaluation.score,
-            cache=cache,
-            id=active_game.id,
         )
         game_evaluation.best = best
 
