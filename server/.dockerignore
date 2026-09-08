@@ -9,6 +9,7 @@ __pycache__
 **/*.gitignore
 .gitattributes
 **/*.md
+**/*:Zone-Identifier
 
 .pytest_cache
 **/.pytest_cache
@@ -19,6 +20,8 @@ tests
 redis_temp
 old_ml
 data
+ml/.ipynb_checkpoints
+ml/*.csv
 
 .env
 .env.*

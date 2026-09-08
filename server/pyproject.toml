@@ -22,9 +22,10 @@ dependencies = [
 [dependency-groups]
 data = [
     "ipykernel>=7.3.0",
+    "ipywidgets>=8.1.9",
     "matplotlib>=3.11.1",
     "pandas>=3.0.3",
-    "seaborn>=0.13.2",
+    "pygam>=0.12.0",
 ]
 dev = [
     { include-group = "data" },
@@ -74,6 +75,7 @@ exclude = [
     "database/init_players.py",
     "database/init_db.py",
     "database/init_teams.py",
+    "ml"
 ]
 line-length = 88
 indent-width = 4
@@ -244,7 +246,6 @@ pythonpath = ["."]
 [tool.pyrefly]
 project-includes = [
     "**/*.py",
-    "**/*.ipynb",
 ]
 project-excludes = [
     ".bzr",
@@ -278,6 +279,7 @@ project-excludes = [
     "/database/init_players.py",
     "/database/init_db.py",
     "/database/init_teams.py",
+    "/ml/*"
 ]
 python-platform = "linux"
 python-version = "3.12"
