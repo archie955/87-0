@@ -20,6 +20,8 @@ const useLoginStore = create<LoginState>((set, get) => ({
   },
 }));
 
+export { useLoginStore };
+
 export const useLogin = (): boolean => useLoginStore((state) => state.login);
 export const useShow = (): boolean => useLoginStore((state) => state.show);
 

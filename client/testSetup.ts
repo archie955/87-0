@@ -1,7 +1,11 @@
-import { afterEach } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+
+import { useRuleStore } from "@/stores/ruleStore";
+import { useLoginStore } from "@/stores/loginStore";
+import { useNotificationStore } from "@/stores/notificationStore";
+import userService from "@/services/user";
 
 vi.mock("@/services/email", () => ({
   default: {
@@ -30,6 +34,28 @@ vi.mock("@/services/user", async () => ({
     getUser: vi.fn(),
   },
 }));
+
+vi.mock("@/services/auth", async () => ({
+  default: {
+    logout: vi.fn(),
+  },
+}));
+
+beforeEach(() => {
+  vi.mocked(userService.getUser).mockRejectedValue(
+    new Error("no active session"),
+  );
+});
+
+const initialRuleState = useRuleStore.getState();
+const initialLoginState = useLoginStore.getState();
+const initialNotificationState = useNotificationStore.getState();
+
+afterEach(() => {
+  useRuleStore.setState(initialRuleState, true);
+  useLoginStore.setState(initialLoginState, true);
+  useNotificationStore.setState(initialNotificationState, true);
+});
 
 afterEach(() => {
   cleanup();

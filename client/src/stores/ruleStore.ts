@@ -3,8 +3,7 @@ import { create } from "zustand";
 export type Rules = "easy" | "hard";
 
 interface RuleActions {
-  setHard: () => void;
-  setEasy: () => void;
+  setRules: (rules: Rules) => void;
 }
 
 interface RuleStore {
@@ -15,16 +14,14 @@ interface RuleStore {
 const useRuleStore = create<RuleStore>((set) => ({
   rules: "easy",
   actions: {
-    setHard: (): void =>
+    setRules: (rules: Rules): void =>
       set({
-        rules: "hard",
-      }),
-    setEasy: (): void =>
-      set({
-        rules: "easy",
+        rules: rules,
       }),
   },
 }));
+
+export { useRuleStore };
 
 export const useRules = (): Rules => useRuleStore((state) => state.rules);
 

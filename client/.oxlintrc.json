@@ -61,7 +61,7 @@
     },
     {
       "files": [
-        "tests",
+        "tests/**",
         "testSetup.ts"
       ],
       "rules": {

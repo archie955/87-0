@@ -33,6 +33,8 @@ const useNotificationStore = create<NotificationState>((set) => ({
   },
 }));
 
+export { useNotificationStore };
+
 export const useNotificationActions = (): NotificationAction =>
   useNotificationStore((state) => state.actions);
 

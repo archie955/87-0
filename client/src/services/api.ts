@@ -13,7 +13,7 @@ let refreshPromise: Promise<void> | null = null;
 const refreshAccessToken = async () => {
   if (!refreshPromise) {
     refreshPromise = api
-      .post("/auth.refresh")
+      .post("/auth/refresh")
       .then(() => undefined)
       .finally(() => {
         refreshPromise = null;

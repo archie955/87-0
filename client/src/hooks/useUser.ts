@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import authService from "@/services/auth";
 import userService from "@/services/user";
 import emailService from "@/services/email";
 import type {
@@ -63,9 +64,14 @@ const useUser = (): useUserOutput => {
     },
   });
 
-  const logoutUser = () => {
-    queryClient.setQueryData(["user"], null);
-  };
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await authService.logout();
+    },
+    onSettled: () => {
+      queryClient.setQueryData(["user"], null);
+    },
+  });
 
   return {
     user: result.data ?? null,
@@ -84,7 +90,7 @@ const useUser = (): useUserOutput => {
     update_user: (updated_credentials: UpdatedUser): Promise<void> =>
       updateUserMutation.mutateAsync(updated_credentials),
 
-    logout: (): void => logoutUser(),
+    logout: (): void => logoutMutation.mutate(),
   };
 };
 

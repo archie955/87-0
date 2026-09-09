@@ -11,8 +11,8 @@ type IglSelectorProps = {
 };
 
 const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
-  if (candidates.length === 0) return null;
   const rules = useRules();
+  if (candidates.length === 0) return null;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
