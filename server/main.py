@@ -13,7 +13,7 @@ from database.database import AsyncSessionLocal, DBDep
 from exceptions.app_exceptions import AppException, UninstantiatedCache
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from routers import email, game, steam, teams, user
+from routers import auth, email, game, steam, teams, user
 from utils.config import get_settings
 
 
@@ -57,6 +57,7 @@ app.include_router(teams.router)
 app.include_router(game.router)
 app.include_router(steam.router)
 app.include_router(email.router)
+app.include_router(auth.router)
 
 
 @app.exception_handler(AppException)

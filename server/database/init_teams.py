@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
-
 from database.database import AsyncSessionLocal
 from models.models import Team
 
@@ -13,6 +11,8 @@ DATA_DIR = Path(__file__).parent
 
 
 async def process_teams():
+    # lazy import pandas so it isnt loaded in lifespan unless necessary
+    import pandas as pd
     teams = pd.read_csv(DATA_DIR / "teams.csv")
 
     async with AsyncSessionLocal() as db:

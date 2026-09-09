@@ -1,8 +1,6 @@
 import asyncio
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
 from sqlalchemy import select
 
 from database.database import AsyncSessionLocal
@@ -17,6 +15,10 @@ DATA_DIR = Path(__file__).parent
 
 
 async def process_players():
+    # lazy import numpy and pandas so they only import into lifespan if needed
+    import numpy as np
+    import pandas as pd
+    
     players = pd.read_csv(DATA_DIR / "players.csv")  # contains all igl data too
 
     players["role"] = players["role"].replace(
@@ -28,6 +30,7 @@ async def process_players():
         }
     )
 
+    # pyrefly: ignore [no-matching-overload]
     players["igl_bonus"] = np.where(
         players["no_events"] > 0,
         (

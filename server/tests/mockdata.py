@@ -1,4 +1,4 @@
-import numpy as np
+import math
 
 from models.enums import Roles
 
@@ -6,11 +6,11 @@ from models.enums import Roles
 def mock_igl_bonus(p) -> float:
     perf_sum = (4 * p["wins"] + 3 * p["second"] + 2 * p["semi"] + p["quarter"]) / 40
     perf = (
-        perf_sum / np.sqrt(p["total_tournaments"])
+        perf_sum / math.sqrt(p["total_tournaments"])
         if p["total_tournaments"] > 0
         else 0.0
     )
-    team_bonus = np.sqrt(p["win_teammates"]) / 10
+    team_bonus = math.sqrt(p["win_teammates"]) / 10
     return perf + team_bonus
 
 

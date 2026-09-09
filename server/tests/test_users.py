@@ -1,5 +1,9 @@
 import pytest
 
+# ---------------------------------------------------------------------------
+# Router-level: POST /email
+# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_registration(client, helpers):
@@ -83,7 +87,9 @@ async def test_incorrect_email_type(client):
     assert response.status_code == 422
 
 
-# Login endpoint testing
+# ---------------------------------------------------------------------------
+# Router-level: POST /email/login
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
@@ -128,7 +134,9 @@ async def test_incorrect_email(client, helpers):
     assert response.status_code == 401
 
 
-# test update endpoint
+# ---------------------------------------------------------------------------
+# Router-level: PUT /users
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
@@ -181,7 +189,9 @@ async def test_update_incorrect_password(client, helpers):
     assert response.status_code == 401
 
 
-# test delete endpoint
+# ---------------------------------------------------------------------------
+# Router-level: DELETE /users
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio

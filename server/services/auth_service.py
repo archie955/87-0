@@ -46,6 +46,23 @@ def set_cookie_headers(
     return response
 
 
+def clear_cookie_headers(response: Response, settings: Settings) -> Response:
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=settings.prod == "prod",
+        samesite="strict" if settings.prod == "prod" else "lax",
+    )
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=settings.prod == "prod",
+        samesite="strict" if settings.prod == "prod" else "lax",
+    )
+
+    return response
+
+
 async def refresh(
     request: Request, settings: Settings, db: AsyncSession
 ) -> token_schemas.Tokens:
@@ -59,7 +76,7 @@ async def refresh(
     user = (
         await db.execute(
             select(models.User)
-            .where(models.User.id == token.id)
+            .where(models.User.id == int(token.id))
             .options(selectinload(models.User.refresh))
         )
     ).scalar_one_or_none()
@@ -76,6 +93,9 @@ async def refresh(
         raise InvalidCredentialsError()
 
     await db.delete(old_token)
+
+    # to ensure no unique constraint violation when making new token
+    await db.flush()
 
     user_data = {"sub": str(user.id)}
 
@@ -97,3 +117,27 @@ async def refresh(
     return token_schemas.Tokens(
         access_token=new_access_token, refresh_token=new_refresh.token
     )
+
+
+async def logout(request: Request, db: AsyncSession, settings: Settings) -> None:
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        return
+
+    try:
+        token = verify_refresh_token(token=refresh_token, settings=settings)
+    except InvalidCredentialsError:
+        return
+
+    old_token = (
+        await db.execute(
+            select(models.RefreshToken).where(models.RefreshToken.jti == token.jti)
+        )
+    ).scalar_one_or_none()
+
+    if old_token:
+        await db.delete(old_token)
+        await db.commit()
+
+    logger.info("User logged out", extra={"user_id": token.id})

@@ -129,7 +129,7 @@ async def update_steam_login(
 
     user = steam_login.user
 
-    steam_login.username = profile.profile_name
+    steam_login.profile_name = profile.profile_name
     steam_login.url = profile.url
     steam_login.avatar = profile.avatar
 

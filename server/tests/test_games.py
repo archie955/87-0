@@ -2,6 +2,10 @@ import pytest
 
 from tests.game_helpers import play_game, play_game_switch_team, play_game_wrong_igl
 
+# ---------------------------------------------------------------------------
+# Router-level: POST /games
+# ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_create_game(auth_client_seed):
@@ -25,6 +29,11 @@ async def test_create_game_no_teams(auth_client):
     response = await auth_client.post("/games")
 
     assert response.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Router-level: POST /games/{id}
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
