@@ -1,8 +1,14 @@
+import asyncio
+
+# ruff: ignore[suspicious-pickle-import]
+import pickle
 from collections.abc import AsyncGenerator
+from pathlib import Path
 
 import pytest_asyncio
 import redis.asyncio as redis
 from httpx import ASGITransport, AsyncClient
+from pygam import LogisticGAM
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -13,6 +19,7 @@ from sqlalchemy.ext.asyncio import (
 from cache.redis import get_redis
 from database.database import get_db
 from main import app
+from ml.ml_model import get_model
 from models.models import Base
 from tests.authclient import AuthClient
 from tests.helpers import Helpers
@@ -23,6 +30,9 @@ SQLALCHEMY_DATABASE_URL = (
 )
 
 REDIS_URL = "redis://localhost:6380/0"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_PATH = BASE_DIR / "ml" / "gam.pkl"
 
 
 @pytest_asyncio.fixture
@@ -56,6 +66,13 @@ async def redis_cache() -> AsyncGenerator[redis.Redis, None]:
 
 
 @pytest_asyncio.fixture
+async def ml_model() -> AsyncGenerator[LogisticGAM, None]:
+    with MODEL_PATH.open("rb") as f:
+        # ruff: ignore[suspicious-pickle-usage]
+        yield await asyncio.to_thread(pickle.load, f)
+
+
+@pytest_asyncio.fixture
 async def db(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
     session_local: async_sessionmaker[AsyncSession] = async_sessionmaker(
         bind=engine, class_=AsyncSession, expire_on_commit=False
@@ -74,7 +91,7 @@ async def cache(redis_cache: redis.Redis) -> redis.Redis:
 
 @pytest_asyncio.fixture
 async def client(
-    db: AsyncSession, cache: redis.Redis
+    db: AsyncSession, cache: redis.Redis, ml_model: LogisticGAM
 ) -> AsyncGenerator[AsyncClient, None]:
     # ruff: ignore[unused-async]
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -84,8 +101,13 @@ async def client(
     async def override_get_redis() -> AsyncGenerator[redis.Redis, None]:
         yield cache
 
+    # ruff: ignore[unused-async]
+    async def override_get_model() -> AsyncGenerator[LogisticGAM, None]:
+        yield ml_model
+
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_redis] = override_get_redis
+    app.dependency_overrides[get_model] = override_get_model
 
     transport = ASGITransport(app=app, raise_app_exceptions=True)
 

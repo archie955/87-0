@@ -3,6 +3,7 @@ import uuid
 from random import randint
 
 import redis.asyncio as redis
+from pygam import LogisticGAM
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from exceptions.app_exceptions import DataNotFoundError
@@ -44,15 +45,17 @@ async def create_game(cache: redis.Redis) -> active_game_schemas.ActiveGame:
     return active_game
 
 
+# ruff: ignore[too-many-positional-arguments, too-many-arguments]
 async def game_evaluation(
     game: active_game_schemas.GameResult,
+    gam: LogisticGAM,
     active_game: active_game_schemas.ActiveGame,
     user: User | None,
     db: AsyncSession,
     cache: redis.Redis,
 ) -> active_game_schemas.GameEvaluation:
     game_evaluation = await game_helpers.evaluation_base(
-        game=game, active_game=active_game, cache=cache, db=db
+        game=game, gam=gam, active_game=active_game, cache=cache, db=db
     )
 
     if user:

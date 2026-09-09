@@ -1,5 +1,8 @@
 # pyrefly: ignore-errors [bad-argument-type]
 
+import math
+
+from pygam import LogisticGAM
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,11 +22,16 @@ MAX_DOUBLE_PLAYER = 2
 TEAM_SIZE = 5
 
 
-def eval_lineup(game: active_game_schemas.GameList) -> float:
+def linear_score(gam: LogisticGAM, hltv: float) -> float:
+    p = gam.predict_proba([hltv])[0]
+    return math.log(p / (1 - p))
+
+
+def eval_lineup(gam: LogisticGAM, game: active_game_schemas.GameList) -> float:
     score = 0.0
 
     for p in game.players:
-        score += p.score
+        score += linear_score(gam, p.score)
     return score
 
 
@@ -131,6 +139,7 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
 
 async def evaluation_base(
     game: active_game_schemas.GameResult,
+    gam: LogisticGAM,
     active_game: active_game_schemas.ActiveGame,
     cache: Redis,
     db: AsyncSession,
@@ -140,7 +149,7 @@ async def evaluation_base(
     if not valid_lineup(game=game_list):
         raise BadRequestError(message="Invalid Game")
 
-    score = eval_lineup(game_list)
+    score = eval_lineup(gam, game_list)
 
     await cache.delete(game.game_id)
 

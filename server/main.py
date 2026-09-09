@@ -1,5 +1,9 @@
 import logging
+
+# ruff: ignore[suspicious-pickle-import]
+import pickle
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -16,6 +20,9 @@ from logger.logging_middleware import LoggingMiddleware
 from routers import auth, email, game, steam, teams, user
 from utils.config import get_settings
 
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "ml" / "gam.pkl"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,6 +31,10 @@ async def lifespan(app: FastAPI):
     app.state.redis = create_redis()
 
     try:
+        with MODEL_PATH.open("rb") as f:
+            # ruff: ignore[suspicious-pickle-usage]
+            app.state.model = pickle.load(f)
+
         await app.state.redis.ping()
         await app.state.redis.set("app:status", "healthy")
 
