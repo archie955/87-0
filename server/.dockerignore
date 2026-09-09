@@ -22,14 +22,15 @@ old_ml
 data
 ml/.ipynb_checkpoints
 ml/*.csv
+ml/*.ipynb
+.coverage
 
 .env
 .env.*
+**/*.md
 
 Dockerfile
 .dockerignore
 docker-compose.test.yml
-notes.md
-README.md
 
 node_modules
