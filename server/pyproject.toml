@@ -1,5 +1,5 @@
 [project]
-name = "87-0"
+name = "87-0_backend"
 version = "0.0.1"
 description = "Counter Strike Esports Game"
 readme = "README.md"

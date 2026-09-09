@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "87-0"
+name = "87-0-backend"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
