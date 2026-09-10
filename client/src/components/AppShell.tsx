@@ -99,7 +99,7 @@ const BREADCRUMBS: Record<string, { parent: string; current: string }> = {
 
 const sidebarData: Omit<SidebarData, "user"> = {
   logo: {
-    title: "CS-ACE",
+    title: "87-0",
     description: "Build the best 5-stack",
   },
   navGroups: [

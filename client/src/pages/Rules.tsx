@@ -7,7 +7,7 @@ const Rules = () => {
       <div className="py-20 relative flex flex-col justify-center items-center gap-y-8 z-10">
         <span>HOW TO PLAY</span>
         <span className="text-6xl max-w-3xl mx-auto text-center font-medium">
-          CS-ACE
+          87-0
         </span>
         <p className="text-xl dark:text-neutral-400 text-neutral-600 mb-12 leading-relaxed">
           Build the best lineup you can
