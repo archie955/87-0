@@ -106,7 +106,7 @@ jobs:
 
           - name: Run frontend tests
             working-directory: client
-            run: npm run test -- --run
+            run: npm run test
     build:
         needs: test
         runs-on: ubuntu-latest

@@ -13,7 +13,8 @@
     "type-check": "tsc --noEmit true",
     "build-dev": "npm run build && npm run dev",
     "prettier": "npx prettier . --write",
-    "test": "vitest"
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
