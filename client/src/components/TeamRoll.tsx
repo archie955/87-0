@@ -1,6 +1,6 @@
 import type { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
-import { cn, teamToImg } from "@/lib/utils";
+import { cn /*teamToImg*/ } from "@/lib/utils";
 
 const SLIDE_WIDTH = 120;
 const MAX_SPEED = 1400;
@@ -118,11 +118,12 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
             )}
             style={{ width: SLIDE_WIDTH, backgroundColor: "oklch(0.269 0 0)" }}
           >
-            <img
+            {/*<img
               src={teamToImg(slide.name)}
               alt={slide.name}
               className="max-h-24 w-full object-contain"
-            />
+            />*/}
+            {slide.name}
           </div>
         ))}
       </div>

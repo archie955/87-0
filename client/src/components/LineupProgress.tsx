@@ -1,5 +1,5 @@
 import { Check, X } from "lucide-react";
-import { cn, teamToImg } from "@/lib/utils";
+import { cn /*teamToImg*/ } from "@/lib/utils";
 
 type LineupProgressProps = {
   selections: string[];
@@ -35,7 +35,7 @@ const LineupProgress = ({
             >
               {team !== "" && (
                 <img
-                  src={teamToImg(team)}
+                  src={team /*teamToImg(team)*/}
                   alt={team}
                   className="size-7 object-contain"
                 />

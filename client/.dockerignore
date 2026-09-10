@@ -16,3 +16,5 @@ Dockerfile
 .env
 .env.example
 .env.*
+
+src/assets
