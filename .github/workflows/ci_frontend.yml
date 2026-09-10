@@ -36,11 +36,15 @@ jobs:
         
       - name: Run typecheck
         working-directory: client
-        run: npm run type-check
+        run: npm run tsc -- --force
         
       - name: Run linting
         working-directory: client
         run: npm run lint
+
+      - name: Check formatting
+        working-directory: client
+        run: npx prettier . --check
         
       - name: Run tests
         working-directory: client

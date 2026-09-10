@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+# client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript frontend for 87-0, built with Vite.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The dev server proxies `/api/*` to `http://localhost:8000` (see `vite.config.ts`), so it expects the backend (see `../server/README.md`) to already be running there.
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+## Tests
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npx vitest run          # once
+npx vitest               # watch mode
 ```
+
+`testSetup.ts` mocks every network-touching service (`@/services/*`) and resets every Zustand store between tests. `tests/test-utils.tsx` exports a `render()` that wraps the same providers the real app tree does (`QueryClientProvider`, a router, `<Notification />`) - import `render`/`screen`/etc. from there rather than directly from `@testing-library/react` in new test files, or hooks that depend on those providers will throw.
+
+## Linting, formatting, type checking
+
+```bash
+npx tsc -b --force        # type check
+npx oxlint --type-aware   # lint
+npx prettier . --write    # format
+```
+
+## Building the application locally
+
+```bash
+npm run build
+```
+
+## Project layout
+
+- `src/pages/` - top-level routed views
+- `src/components/` - everything else, including `components/ui/` (shadcn-generated primitives)
+- `src/hooks/` - data-fetching hooks (React Query) and other reusable logic
+- `src/stores/` - Zustand stores for client-only state (notifications, the login/register toggle, the ruleset preference)
+- `src/services/` - the actual `axios` calls, one file per backend resource
+- `src/types/` - shared TypeScript types, generally mirroring the backend's Pydantic schemas

@@ -54,7 +54,7 @@ jobs:
 
           - name: Sync backend dependencies
             working-directory: server
-            run: uv sync --group dev
+            run: uv sync --no-default-groups --group dev
 
           - name: Check backend formatting
             working-directory: server
@@ -83,7 +83,7 @@ jobs:
               REDIS_DB: ${{ secrets.REDIS_DB }}
               PROD: ${{ secrets.DEV }}
               FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_DEV_URL }}
-            run: uv run pytest
+            run: uv run pytest --cov-report=xml
 
           - name: Use Node.js
             uses: actions/setup-node@v6
@@ -98,11 +98,15 @@ jobs:
 
           - name: Run frontend typecheck
             working-directory: client
-            run: npm run type-check
+            run: npm run tsc -- --force
 
           - name: Run frontend linting
             working-directory: client
             run: npm run lint
+
+          - name: Check formatting
+            working-directory: client
+            run: npx prettier . --check
 
           - name: Run frontend tests
             working-directory: client

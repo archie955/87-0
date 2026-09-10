@@ -50,14 +50,16 @@ jobs:
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
         with:
           version: "0.11.17"
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
 
       - name: Sync linting dependencies
         working-directory: server
-        run: uv sync --group lint
+        run: uv sync --no-default-groups --group lint
 
       - name: Check formatting
         working-directory: server
-        run: uv run ruff format
+        run: uv run ruff format --check
 
       - name: Run linting
         working-directory: server
@@ -69,7 +71,7 @@ jobs:
 
       - name: Sync testing dependencies
         working-directory: server
-        run: uv sync --group test
+        run: uv sync --no-default-groups --group test
 
       - name: Run tests
         working-directory: server
@@ -90,4 +92,4 @@ jobs:
           REDIS_DB: ${{ secrets.REDIS_DB }}
           PROD: ${{ secrets.DEV }}
           FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_DEV_URL }}
-        run: uv run pytest
+        run: uv run pytest --cov-report=xml
