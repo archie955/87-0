@@ -55,10 +55,14 @@ const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
       </div>
 
       <div className="flex items-baseline gap-1 rounded-md bg-muted px-2.5 py-1">
-        <span className="text-xs text-muted-foreground">HLTV</span>
-        <span className="text-sm font-bold tabular-nums">
-          {rules === "easy" && player.hltv.toFixed(2)}
-        </span>
+        {rules === "easy" && (
+          <div>
+            <span className="text-xs text-muted-foreground">HLTV</span>
+            <span className="text-sm font-bold tabular-nums">
+              {player.hltv.toFixed(2)}
+            </span>
+          </div>
+        )}
       </div>
 
       {selectable && (

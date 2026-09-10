@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { cn, teamToImg } from "@/lib/utils";
 
 const SLIDE_WIDTH = 120;
-const START_SPEED = 7000;
+const MAX_SPEED = 1400;
+const BRAKE_DISTANCE = 1440;
 
 type TeamRollProps = {
   slides: Team[];
@@ -14,17 +15,50 @@ type TeamRollProps = {
 const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
   const [position, setPosition] = useState(0);
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   const positionRef = useRef(0);
   const animationRef = useRef<number | null>(null);
   const completedRef = useRef(false);
 
-  const targetPosition = SLIDE_WIDTH * (winnerIndex - 2.3);
-
   useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) {
+      return;
+    }
+
     let previousTime: number | null = null;
 
+    const containerWidth = container.clientWidth;
+
+    const targetPosition =
+      winnerIndex * SLIDE_WIDTH + SLIDE_WIDTH / 2 - containerWidth / 2;
+
+    positionRef.current = 0;
+    setPosition(0);
+
+    const getSpeed = (remainingDistance: number) => {
+      if (remainingDistance >= BRAKE_DISTANCE) {
+        return MAX_SPEED;
+      }
+
+      const progress = Math.max(0, (remainingDistance + 60) / BRAKE_DISTANCE);
+
+      return MAX_SPEED * progress;
+    };
+
     const animate = (time: number) => {
-      if (positionRef.current >= targetPosition) {
+      if (previousTime === null) {
+        previousTime = time;
+      }
+
+      const deltaTime = Math.min((time - previousTime) / 1000, 0.05);
+      previousTime = time;
+
+      const remainingDistance = targetPosition - positionRef.current;
+
+      if (remainingDistance <= 0.5) {
         positionRef.current = targetPosition;
         setPosition(targetPosition);
 
@@ -36,20 +70,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         return;
       }
 
-      if (previousTime === null) {
-        previousTime = time;
-      }
-
-      const deltaTime = (time - previousTime) / 1000;
-      previousTime = time;
-
-      const currentSlide = positionRef.current / SLIDE_WIDTH;
-
-      const remainingDistance = winnerIndex - 1 - currentSlide;
-
-      const speed =
-        (START_SPEED * Math.sqrt(Math.max(remainingDistance, 0))) /
-        (winnerIndex - 2);
+      const speed = getSpeed(remainingDistance);
 
       positionRef.current += speed * deltaTime;
 
@@ -69,10 +90,10 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [onComplete, targetPosition, winnerIndex]);
+  }, [onComplete, winnerIndex]);
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* Centre marker */}
       <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-secondary" />
 
@@ -85,6 +106,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
         className="flex"
         style={{
           transform: `translateX(-${position}px)`,
+          willChange: "transform",
         }}
       >
         {slides.map((slide, index) => (

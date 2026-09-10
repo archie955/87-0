@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Crosshair, Shield, Target, Wrench } from "lucide-react";
+import { Crosshair, HatGlasses, Book, SportShoe, Wrench } from "lucide-react";
 import type { LineupRole } from "@/services/enum";
 import { lineupRoles } from "@/services/enum";
 import type { Player } from "@/types/playerTypes";
@@ -9,11 +9,11 @@ const ROLE_ICONS: Record<
   LineupRole,
   React.ComponentType<{ className?: string }>
 > = {
-  [lineupRoles.opener]: Crosshair,
-  [lineupRoles.closer]: Shield,
-  [lineupRoles.awper]: Target,
+  [lineupRoles.opener]: SportShoe,
+  [lineupRoles.closer]: HatGlasses,
+  [lineupRoles.awper]: Crosshair,
   [lineupRoles.support]: Wrench,
-  [lineupRoles.flex]: Shield,
+  [lineupRoles.flex]: Book,
 };
 
 const ROLE_LABELS: Record<LineupRole, string> = {
