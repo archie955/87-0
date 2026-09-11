@@ -2,6 +2,8 @@
 
 A Counter-Strike esports fantasy-lineup game, in the spirit of the NBA's ["82-0"](https://www.82-0.com/): roll random teams, build a 5-player lineup one pick at a time (with one reroll allowed), name your in-game leader, and get scored against the field.
 
+You can play the game [here](https://www.87-0.net/).
+
 ## Stack
 
 - **`client/`** - React 19 + TypeScript, Vite, Tailwind, Zustand, TanStack Query
