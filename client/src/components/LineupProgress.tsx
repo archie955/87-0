@@ -1,5 +1,5 @@
 import { Check, X } from "lucide-react";
-import { cn /*teamToImg*/ } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type LineupProgressProps = {
   selections: string[];
@@ -33,13 +33,7 @@ const LineupProgress = ({
                   "border-muted bg-muted/30",
               )}
             >
-              {team !== "" && (
-                <img
-                  src={team /*teamToImg(team)*/}
-                  alt={team}
-                  className="size-7 object-contain"
-                />
-              )}
+              {team}
 
               {isComplete && (
                 <div className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-green-500 text-white">
@@ -58,7 +52,7 @@ const LineupProgress = ({
               <div
                 className={cn(
                   "h-0.5 w-8 transition-colors",
-                  index < current && !isRerolled ? "bg-green-500" : "bg-muted",
+                  index < current ? "bg-green-500" : "bg-muted",
                 )}
               />
             )}

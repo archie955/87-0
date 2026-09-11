@@ -1,10 +1,10 @@
 import type { Team } from "@/types/teamTypes";
 import { useEffect, useRef, useState } from "react";
-import { cn /*teamToImg*/ } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const SLIDE_WIDTH = 120;
-const MAX_SPEED = 1400;
-const BRAKE_DISTANCE = 1440;
+const MAX_SPEED = 1600;
+const BRAKE_DISTANCE = 1800;
 
 type TeamRollProps = {
   slides: Team[];
@@ -95,7 +95,7 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       {/* Centre marker */}
-      <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-secondary" />
+      <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-px -translate-x-1/2 bg-primary" />
 
       {/* Edge fades */}
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
@@ -114,15 +114,9 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
             key={index}
             className={cn(
               "flex h-32 shrink-0 items-center justify-center border-x border-border bg-card px-4",
-              index === winnerIndex && "bg-primary/5",
             )}
-            style={{ width: SLIDE_WIDTH, backgroundColor: "oklch(0.269 0 0)" }}
+            style={{ width: SLIDE_WIDTH }}
           >
-            {/*<img
-              src={teamToImg(slide.name)}
-              alt={slide.name}
-              className="max-h-24 w-full object-contain"
-            />*/}
             {slide.name}
           </div>
         ))}

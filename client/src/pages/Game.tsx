@@ -20,7 +20,7 @@ import GameResultDialog from "@/components/GameResultDialog";
 import Loading from "@/components/Loading";
 import RuleChange from "@/components/RuleChange";
 
-const WINNER_INDEX = 45;
+const WINNER_INDEX = 65;
 
 const Game = () => {
   const {

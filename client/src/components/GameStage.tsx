@@ -5,7 +5,6 @@ import type { Player } from "@/types/playerTypes";
 import { Button } from "@/components/ui/button";
 import TeamRoll from "@/components/TeamRoll";
 import PlayerCard from "@/components/PlayerCard";
-/*import { teamToImg } from "@/lib/utils";*/
 
 type Status = "idle" | "rolling" | "picking";
 
@@ -96,12 +95,6 @@ const GameStage = ({
           >
             <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
               <div className="flex items-center gap-3">
-                {/*<img
-                  src={teamToImg(team.name)}
-                  alt={team.name}
-                  className="size-12 object-contain"
-                />*/}
-                {team.name}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">
                     Pick {pickNumber} of {maxPickNumber}
