@@ -30,7 +30,6 @@ async def process_players():
         }
     )
 
-    # pyrefly: ignore [no-matching-overload]
     players["igl_bonus"] = np.where(
         players["no_events"] > 0,
         (

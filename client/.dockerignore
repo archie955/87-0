@@ -1,6 +1,7 @@
 node_modules
 dist
 build
+.tsbuildinfo
 
 .git
 .github
@@ -17,4 +18,4 @@ Dockerfile
 .env.example
 .env.*
 
-src/assets
+*.md

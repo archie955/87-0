@@ -17,10 +17,10 @@ const LineupProgress = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="text-muted-foreground text-[9px] font-black tracking-[0.2em] uppercase">
           Draft progression
         </p>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="text-muted-foreground font-mono text-[10px]">
           {pickNumber}/5 locked
         </p>
       </div>
@@ -42,7 +42,7 @@ const LineupProgress = ({
                     isRerolled &&
                       "border-destructive/25 bg-destructive/10 text-destructive",
                     isActive &&
-                      "scale-105 border-primary/40 bg-primary/15 text-primary shadow-[0_0_18px_oklch(0.78_0.16_80_/_10%)]",
+                      "border-primary/40 bg-primary/15 text-primary scale-105 shadow-[0_0_18px_oklch(0.78_0.16_80_/_10%)]",
                     !isComplete &&
                       !isRerolled &&
                       !isActive &&
@@ -55,17 +55,17 @@ const LineupProgress = ({
                   {!isActive && !isComplete && !isRerolled && index + 1}
                 </div>
 
-                <span className="mt-1.5 w-full truncate px-1 text-center text-[8px] font-medium text-muted-foreground">
+                <span className="text-muted-foreground mt-1.5 w-full truncate px-1 text-center text-[8px] font-medium">
                   {team}
                 </span>
               </div>
 
               {index < selections.length - 1 && (
-                <div className="mx-1 h-px flex-1 bg-border/60">
+                <div className="bg-border/60 mx-1 h-px flex-1">
                   <div
                     className={cn(
                       "h-px transition-all duration-300",
-                      index < current ? "w-full bg-primary/60" : "w-0",
+                      index < current ? "bg-primary/60 w-full" : "w-0",
                     )}
                   />
                 </div>

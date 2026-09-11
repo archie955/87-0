@@ -54,7 +54,7 @@ async def create_steam_login(
     profile: steam_schemas.SteamProfile,
     settings: Settings,
     username: str,
-):
+) -> token_schemas.Tokens:
     steam_login = (
         await db.execute(
             select(models.Steam)
@@ -113,7 +113,7 @@ async def create_steam_login(
 
 async def update_steam_login(
     db: AsyncSession, profile: steam_schemas.SteamProfile, settings: Settings
-):
+) -> token_schemas.Tokens:
     steam_login = (
         await db.execute(
             select(models.Steam)

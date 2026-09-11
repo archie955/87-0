@@ -36,7 +36,6 @@ def set_cookie_headers(
 
     response.set_cookie(
         key="refresh_token",
-        # pyrefly: ignore [bad-argument-type]
         value=tokens.refresh_token,
         httponly=True,
         secure=settings.prod == "prod",

@@ -1,12 +1,23 @@
 # Python-generated files
-__pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-.ruff_cache
-.pytest_cache
+**/*.py[oc]
+**/build/
+**/dist/
+**/wheels/
+**/.pytest_cache
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.venv/
+**/venv/
+**/*.egg-info/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
+**/.pyrefly_cache/
+**/.coverage
+**/.coverage.*
+**/htmlcov/
+**/coverage.xml
 
 # Virtual environments
 .venv

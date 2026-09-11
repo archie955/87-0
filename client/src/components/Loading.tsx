@@ -9,7 +9,7 @@ import {
 const Loading = () => {
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-ends gap-4">
+      <CardHeader className="justify-ends flex-row items-center gap-4">
         <CardTitle className="text-lg">Loading...</CardTitle>
       </CardHeader>
       <CardContent>

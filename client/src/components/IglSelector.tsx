@@ -38,16 +38,16 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
   return (
     <div className="mx-auto flex min-h-[470px] w-full max-w-4xl flex-col justify-center gap-7">
       <div className="mx-auto max-w-xl text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+        <div className="border-primary/20 bg-primary/10 text-primary mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl border">
           <Crown className="size-5" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary/80">
+        <p className="text-primary/80 text-[10px] font-black tracking-[0.22em] uppercase">
           Final decision
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">
           Who leads the team?
         </h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm leading-6">
           Pick one eligible player to become the IGL. Your final score is based
           on the lineup you have built.
         </p>
@@ -72,16 +72,16 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
                   : "border-border/80 bg-card hover:border-primary/20 hover:bg-secondary/60",
               )}
             >
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/80 opacity-60" />
+              <div className="bg-primary/80 absolute inset-x-0 top-0 h-0.5 opacity-60" />
 
               <div className="flex items-start justify-between gap-3">
                 {isSelected ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-primary-foreground">
+                  <span className="bg-primary text-primary-foreground inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black tracking-[0.14em] uppercase">
                     <Crown className="size-3" />
                     IGL
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="text-muted-foreground inline-flex items-center gap-1.5 text-[9px] font-bold tracking-[0.14em] uppercase">
                     <Icon className="size-3" />
                     {String(role)}
                   </span>
@@ -94,11 +94,11 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
                 </p>
 
                 {rules === "easy" && (
-                  <div className="mt-4 flex items-end justify-between border-t border-border/60 pt-3">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                  <div className="border-border/60 mt-4 flex items-end justify-between border-t pt-3">
+                    <span className="text-muted-foreground text-[9px] font-bold tracking-[0.15em] uppercase">
                       IGL bonus
                     </span>
-                    <span className="font-mono text-sm font-bold tabular-nums text-primary">
+                    <span className="text-primary font-mono text-sm font-bold tabular-nums">
                       +{player.igl_bonus.toFixed(2)}
                     </span>
                   </div>

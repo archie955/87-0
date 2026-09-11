@@ -1,3 +1,4 @@
+from typing import override
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -9,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
+    @override
     @staticmethod
     async def dispatch(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]

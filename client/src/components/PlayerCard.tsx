@@ -75,8 +75,8 @@ const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
       className={cn(
         "group relative overflow-hidden rounded-2xl border text-left transition-all",
         selectable
-          ? "cursor-pointer border-border/80 bg-card hover:border-primary/30 hover:shadow-[0_14px_40px_oklch(0_0_0_/_25%)]"
-          : "cursor-not-allowed border-border/60 bg-card/60 opacity-35 grayscale",
+          ? "border-border/80 bg-card hover:border-primary/30 cursor-pointer hover:shadow-[0_14px_40px_oklch(0_0_0_/_25%)]"
+          : "border-border/60 bg-card/60 cursor-not-allowed opacity-35 grayscale",
       )}
       style={
         selectable
@@ -106,21 +106,21 @@ const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
           </span>
 
           {selectable && (
-            <span className="flex size-7 items-center justify-center rounded-full border border-border/70 bg-background/40 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="border-border/70 bg-background/40 text-muted-foreground flex size-7 items-center justify-center rounded-full border opacity-0 transition-opacity group-hover:opacity-100">
               <Check className="size-3.5" />
             </span>
           )}
         </div>
 
         <div className="mt-5">
-          <p className="min-h-12 text-lg font-extrabold leading-tight tracking-tight">
+          <p className="min-h-12 text-lg leading-tight font-extrabold tracking-tight">
             {player.name}
           </p>
 
-          <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
+          <div className="border-border/60 mt-4 flex items-center justify-between border-t pt-3">
             {rules === "easy" ? (
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-muted-foreground text-[9px] font-bold tracking-[0.16em] uppercase">
                   HLTV
                 </p>
                 <p className="mt-0.5 font-mono text-xl font-bold tabular-nums">
@@ -129,7 +129,7 @@ const PlayerCard = ({ player, selectable, onSelect }: PlayerPickCardProps) => {
               </div>
             ) : (
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-muted-foreground text-[9px] font-bold tracking-[0.16em] uppercase">
                   Role
                 </p>
                 <p className="mt-0.5 text-sm font-semibold">{player.role}</p>

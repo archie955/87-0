@@ -85,7 +85,7 @@ class SteamValidator:
         "openid.sig",
     )
 
-    async def validate_login(self, data) -> str:  # ruff: ignore[complex-structure]
+    async def validate_login(self, data: dict[str, str]) -> str:  # ruff: ignore[complex-structure]
         validation_params: dict[str, str] = {}
         for param in self.__OPENID_PARAMETERS:
             value = data.get(param)

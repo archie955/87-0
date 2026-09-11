@@ -28,11 +28,9 @@ function Toast({ open, message, severity, onClose }: ToastProps) {
 
   return (
     <div className="fixed inset-x-4 bottom-4 z-100 flex justify-center sm:inset-x-auto sm:right-4 sm:justify-end">
-      <div
-        role="status"
-        aria-live="polite"
+      <output
         className={cn(
-          "animate-in fade-in slide-in-from-bottom-2 flex w-full max-w-sm items-start gap-3 rounded-lg border bg-popover p-4 text-sm text-popover-foreground shadow-lg duration-200",
+          "animate-in fade-in slide-in-from-bottom-2 bg-popover text-popover-foreground flex w-full max-w-sm items-start gap-3 rounded-lg border p-4 text-sm shadow-lg duration-200",
           isError && "border-destructive/40",
         )}
       >
@@ -52,7 +50,7 @@ function Toast({ open, message, severity, onClose }: ToastProps) {
           <X />
           <span className="sr-only">Dismiss</span>
         </Button>
-      </div>
+      </output>
     </div>
   );
 }

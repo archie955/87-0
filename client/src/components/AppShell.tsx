@@ -128,7 +128,7 @@ const SidebarLogo = ({ logo }: { logo: Logo }) => {
         <SidebarMenuButton size="lg" render={<Link to="/" />}>
           <div className="flex flex-col gap-0.5 leading-none">
             <span className="font-medium">{logo.title}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {logo.description}
             </span>
           </div>
@@ -239,7 +239,7 @@ const NavUser = ({ avatar }: AvatarType) => {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.username}</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="text-muted-foreground truncate text-xs">
                   {authname}
                 </span>
               </div>
@@ -263,7 +263,7 @@ const NavUser = ({ avatar }: AvatarType) => {
                     <span className="truncate font-medium">
                       {user.username}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="text-muted-foreground truncate text-xs">
                       {authname}
                     </span>
                   </div>

@@ -24,7 +24,7 @@ BearerDep = Annotated[str, Depends(oauth2_scheme)]
 OptionalBearerDep = Annotated[str | None, Depends(optional_oauth2_scheme)]
 
 
-def create_access_token(data: dict, settings: Settings) -> str:
+def create_access_token(data: dict[str, Any], settings: Settings) -> str:
     to_encode = data.copy()
 
     expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
@@ -33,7 +33,7 @@ def create_access_token(data: dict, settings: Settings) -> str:
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
 
-def create_refresh_token(data: dict, settings: Settings) -> token_schemas.RefreshToken:
+def create_refresh_token(data: dict[str, Any], settings: Settings) -> token_schemas.RefreshToken:
     to_encode = data.copy()
 
     expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)

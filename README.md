@@ -46,4 +46,4 @@ See `server/Dockerfile` and `client/Dockerfile` for the production images (multi
 
 ## Licensing
 
-The code in this repository is MIT-licensed - see [`LICENSE`](./LICENSE). Player names, team names, and any associated logos/imagery are the property of their respective organizations and are not covered by that license; see the licensing section of the project's pre-deployment notes for more on this distinction.
+The code in this repository is MIT-licensed - see [`LICENSE`](./LICENSE). Player names, team names, and any associated logos/imagery are the property of their respective organizations and are not covered by that license.

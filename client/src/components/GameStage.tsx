@@ -55,20 +55,20 @@ const GameStage = ({
             <motion.div
               animate={{ y: [0, -5, 0], rotate: [0, -2, 2, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="relative mb-7 flex size-24 items-center justify-center rounded-3xl border border-primary/20 bg-primary/10 text-primary shadow-[0_0_50px_oklch(0.78_0.16_80_/_10%)]"
+              className="border-primary/20 bg-primary/10 text-primary relative mb-7 flex size-24 items-center justify-center rounded-3xl border shadow-[0_0_50px_oklch(0.78_0.16_80_/_10%)]"
             >
-              <div className="absolute inset-3 rounded-2xl border border-primary/20" />
+              <div className="border-primary/20 absolute inset-3 rounded-2xl border" />
               <Dices className="size-10" />
             </motion.div>
 
             <div className="max-w-md">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/80">
+              <p className="text-primary/80 mb-2 text-[10px] font-bold tracking-[0.22em] uppercase">
                 Round {pickNumber} of {maxPickNumber}
               </p>
               <h2 className="text-2xl font-black tracking-tight">
                 Ready to roll?
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
                 Open your next team
               </p>
             </div>
@@ -93,8 +93,8 @@ const GameStage = ({
             transition={{ duration: 0.25 }}
             className="flex min-h-[470px] flex-col justify-center"
           >
-            <div className="mb-6 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              <FastForward className="size-3.5 text-primary" />
+            <div className="text-muted-foreground mb-6 flex items-center justify-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase">
+              <FastForward className="text-primary size-3.5" />
               Searching the pool
             </div>
 
@@ -104,8 +104,8 @@ const GameStage = ({
               onComplete={onRollComplete}
             />
 
-            <div className="mt-7 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Sparkles className="size-3.5 text-primary" />
+            <div className="text-muted-foreground mt-7 flex items-center justify-center gap-2 text-xs">
+              <Sparkles className="text-primary size-3.5" />
               The marker decides your team
             </div>
           </motion.div>
@@ -120,19 +120,19 @@ const GameStage = ({
             transition={{ duration: 0.25 }}
             className="space-y-6"
           >
-            <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.06] p-5">
-              <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-primary/10 blur-2xl" />
+            <div className="border-primary/20 bg-primary/[0.06] relative overflow-hidden rounded-2xl border p-5">
+              <div className="bg-primary/10 pointer-events-none absolute -top-10 -right-10 size-32 rounded-full blur-2xl" />
 
               <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">
+                  <p className="text-primary/80 text-[10px] font-bold tracking-[0.2em] uppercase">
                     Team acquired
                   </p>
                   <div className="mt-1 flex flex-wrap items-end gap-x-3 gap-y-1">
                     <h3 className="text-2xl font-black tracking-tight">
                       {team.name}
                     </h3>
-                    <span className="pb-0.5 text-xs text-muted-foreground">
+                    <span className="text-muted-foreground pb-0.5 text-xs">
                       Pick a player
                     </span>
                   </div>
@@ -143,7 +143,7 @@ const GameStage = ({
                     onClick={onReroll}
                     variant="outline"
                     size="sm"
-                    className="rounded-lg border-primary/20 bg-background/30"
+                    className="border-primary/20 bg-background/30 rounded-lg"
                   >
                     <RotateCcw className="mr-2 size-3.5" />
                     Reroll

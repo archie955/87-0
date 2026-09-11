@@ -17,10 +17,10 @@ const RuleChange = () => {
   };
 
   return (
-    <div className="max-w-sm mx-auto">
+    <div className="mx-auto max-w-sm">
       <label
         htmlFor="rules"
-        className="block mb-2.5 text-sm font-medium text-heading"
+        className="text-heading mb-2.5 block text-sm font-medium"
       >
         Select a ruleset
       </label>
@@ -28,7 +28,7 @@ const RuleChange = () => {
         id="rules"
         value={rules}
         onChange={handleChange}
-        className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body"
+        className="bg-neutral-secondary-medium border-default-medium text-heading rounded-base focus:ring-brand focus:border-brand placeholder:text-body block w-full border px-3 py-2.5 text-sm shadow-xs"
       >
         <option value="easy">Easy - show player ratings</option>
         <option value="hard">Hard - hide player ratings</option>

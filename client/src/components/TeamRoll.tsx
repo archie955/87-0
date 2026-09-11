@@ -95,25 +95,25 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-card via-card/90 to-transparent" />
-        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-card via-card/90 to-transparent" />
+        <div className="from-card via-card/90 absolute inset-y-0 left-0 w-24 bg-gradient-to-r to-transparent" />
+        <div className="from-card via-card/90 absolute inset-y-0 right-0 w-24 bg-gradient-to-l to-transparent" />
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-12 bg-gradient-to-b from-card to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-12 bg-gradient-to-t from-card to-transparent" />
+      <div className="from-card pointer-events-none absolute inset-x-0 top-0 z-30 h-12 bg-gradient-to-b to-transparent" />
+      <div className="from-card pointer-events-none absolute inset-x-0 bottom-0 z-30 h-12 bg-gradient-to-t to-transparent" />
 
-      <div className="relative mx-auto h-[220px] overflow-hidden rounded-2xl border border-border/80 bg-background/40 shadow-[inset_0_0_60px_oklch(0_0_0_/_18%)]">
-        <div className="pointer-events-none absolute inset-y-0 left-1/2 z-40 w-px -translate-x-1/2 bg-primary/80 shadow-[0_0_18px_oklch(0.78_0.16_80_/_45%)]" />
+      <div className="border-border/80 bg-background/40 relative mx-auto h-[220px] overflow-hidden rounded-2xl border shadow-[inset_0_0_60px_oklch(0_0_0_/_18%)]">
+        <div className="bg-primary/80 pointer-events-none absolute inset-y-0 left-1/2 z-40 w-px -translate-x-1/2 shadow-[0_0_18px_oklch(0.78_0.16_80_/_45%)]" />
 
-        <div className="pointer-events-none absolute left-1/2 top-0 z-40 -translate-x-1/2">
-          <div className="flex -translate-y-1 items-center justify-center text-primary">
-            <Crosshair className="size-8 fill-primary/10 drop-shadow-[0_0_12px_oklch(0.78_0.16_80_/_50%)]" />
+        <div className="pointer-events-none absolute top-0 left-1/2 z-40 -translate-x-1/2">
+          <div className="text-primary flex -translate-y-1 items-center justify-center">
+            <Crosshair className="fill-primary/10 size-8 drop-shadow-[0_0_12px_oklch(0.78_0.16_80_/_50%)]" />
           </div>
         </div>
 
         <div
           className={cn(
-            "absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] transition-all",
+            "absolute top-1/2 left-1/2 z-40 -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-1 text-[9px] font-black tracking-[0.2em] uppercase transition-all",
             settled
               ? "border-primary/40 bg-primary/15 text-primary shadow-[0_0_20px_oklch(0.78_0.16_80_/_12%)]"
               : "border-border/70 bg-background/70 text-muted-foreground",
@@ -147,11 +147,11 @@ const TeamRoll = ({ slides, winnerIndex, onComplete }: TeamRollProps) => {
                   )}
                 >
                   {isWinner && (
-                    <div className="absolute inset-x-4 top-0 h-0.5 bg-primary/70" />
+                    <div className="bg-primary/70 absolute inset-x-4 top-0 h-0.5" />
                   )}
 
-                  <div className="flex size-11 items-center justify-center rounded-xl border border-border/60 bg-background/40">
-                    <span className="font-mono text-xs font-black text-muted-foreground">
+                  <div className="border-border/60 bg-background/40 flex size-11 items-center justify-center rounded-xl border">
+                    <span className="text-muted-foreground font-mono text-xs font-black">
                       {slide.name.slice(0, 2).toUpperCase()}
                     </span>
                   </div>

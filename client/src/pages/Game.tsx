@@ -165,12 +165,12 @@ const Game = () => {
     return (
       <Card className="game-panel game-glow mx-auto w-full max-w-xl">
         <CardContent className="flex flex-col items-center gap-5 p-8 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive">
+          <div className="border-destructive/20 bg-destructive/10 text-destructive flex size-14 items-center justify-center rounded-2xl border">
             <ShieldCheck className="size-7" />
           </div>
           <div className="space-y-1">
             <p className="font-semibold">Unable to load your draft</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               The game data did not arrive correctly. Try starting the session
               again.
             </p>
@@ -196,11 +196,11 @@ const Game = () => {
   return (
     <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-5">
       <section className="game-panel game-grid-bg game-glow relative overflow-hidden rounded-2xl p-5 sm:p-6">
-        <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="bg-primary/10 pointer-events-none absolute -top-24 -right-24 size-64 rounded-full blur-3xl" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
-              <span className="size-1.5 rounded-full bg-primary shadow-[0_0_12px_var(--primary)]" />
+            <div className="text-primary/80 flex items-center gap-2 text-[11px] font-bold tracking-[0.22em] uppercase">
+              <span className="bg-primary size-1.5 rounded-full shadow-[0_0_12px_var(--primary)]" />
               Draft lobby
             </div>
 
@@ -208,7 +208,7 @@ const Game = () => {
               <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
                 Build your <span className="text-primary">5-stack</span>.
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
                 Roll a team, lock in a player, repeat until you have a full
                 roster. Assign IGL responsibility, and submit.
               </p>
@@ -216,14 +216,14 @@ const Game = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full border border-border/70 bg-background/40 px-3 py-2 text-xs text-muted-foreground backdrop-blur">
+            <div className="border-border/70 bg-background/40 text-muted-foreground flex items-center gap-2 rounded-full border px-3 py-2 text-xs backdrop-blur">
               <Gauge className="size-3.5" />
               {builder.pickNumber > PICK_COUNT
                 ? PICK_COUNT
                 : builder.pickNumber}
               /{PICK_COUNT}
             </div>
-            <div className="rounded-full border border-border/70 bg-background/40 px-1 py-1 backdrop-blur">
+            <div className="border-border/70 bg-background/40 rounded-full border px-1 py-1 backdrop-blur">
               <RuleChange />
             </div>
           </div>
@@ -239,18 +239,18 @@ const Game = () => {
                   Your roster
                 </h2>
               </div>
-              <div className="flex size-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+              <div className="border-primary/20 bg-primary/10 text-primary flex size-9 items-center justify-center rounded-xl border">
                 <Users className="size-4" />
               </div>
             </div>
 
             <LineupSlots slots={builder.lineup} />
 
-            <div className="mt-5 border-t border-border/60 pt-4">
+            <div className="border-border/60 mt-5 border-t pt-4">
               <LineupProgress
                 selections={builder.slotHistory}
                 current={builder.slotNumber - 1}
-                pickNumber={builder.pickNumber}
+                pickNumber={builder.canReroll ? builder.pickNumber : builder.pickNumber - 1}
                 reroll={builder.rerolledAtIndex}
               />
             </div>
@@ -259,10 +259,10 @@ const Game = () => {
 
         <main className="min-w-0">
           <section className="game-panel game-glow overflow-hidden rounded-2xl">
-            <div className="border-b border-border/60 bg-background/20 px-5 py-4 sm:px-6">
+            <div className="border-border/60 bg-background/20 border-b px-5 py-4 sm:px-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_24px_oklch(0.78_0.16_80_/_18%)]">
+                  <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-xl shadow-[0_0_24px_oklch(0.78_0.16_80_/_18%)]">
                     {showIglSelector ? (
                       <Trophy className="size-5" />
                     ) : (
@@ -270,7 +270,7 @@ const Game = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">
+                    <p className="text-primary/80 text-[10px] font-bold tracking-[0.2em] uppercase">
                       {showIglSelector ? "Final decision" : "Live draft"}
                     </p>
                     <h2 className="mt-0.5 text-lg font-bold">
@@ -281,7 +281,7 @@ const Game = () => {
                   </div>
                 </div>
 
-                <div className="hidden rounded-full border border-border/60 bg-background/30 px-3 py-1.5 text-[11px] font-medium text-muted-foreground sm:block">
+                <div className="border-border/60 bg-background/30 text-muted-foreground hidden rounded-full border px-3 py-1.5 text-[11px] font-medium sm:block">
                   {showIglSelector
                     ? "One last choice"
                     : `Pick ${builder.pickNumber}`}
@@ -321,7 +321,7 @@ const Game = () => {
               <Button
                 onClick={() => void handleSubmit()}
                 size="lg"
-                className="h-12 w-full rounded-xl text-sm font-bold uppercase tracking-wide shadow-[0_0_30px_oklch(0.78_0.16_80_/_16%)]"
+                className="h-12 w-full rounded-xl text-sm font-bold tracking-wide uppercase shadow-[0_0_30px_oklch(0.78_0.16_80_/_16%)]"
                 disabled={isSubmitting}
               >
                 <Trophy className="mr-2 size-4" />

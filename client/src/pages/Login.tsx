@@ -6,7 +6,7 @@ import { CardContent } from "@/components/ui/card";
 const Login = () => {
   const login = useLogin();
   return (
-    <div className="card">
+    <div className="card text-align m-auto">
       <CardContent className="max-w-fit">
         {login ? <LoginForm /> : <RegistrationForm />}
       </CardContent>

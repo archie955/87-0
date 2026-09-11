@@ -78,7 +78,7 @@ const LineupSlots = ({ slots }: LineupSlotsProps) => {
               "relative min-w-0 overflow-hidden rounded-xl border p-2.5 text-center transition-colors sm:p-3",
               player
                 ? "border-border/80 bg-background/25"
-                : "border-dashed border-border/70 bg-background/10",
+                : "border-border/70 bg-background/10 border-dashed",
             )}
           >
             <div
@@ -93,7 +93,7 @@ const LineupSlots = ({ slots }: LineupSlotsProps) => {
                 className="size-3 shrink-0"
                 style={{ color: player ? meta.accent : undefined }}
               />
-              <span className="truncate text-[8px] font-black uppercase tracking-[0.14em] text-muted-foreground sm:text-[9px]">
+              <span className="text-muted-foreground truncate text-[8px] font-black tracking-[0.14em] uppercase sm:text-[9px]">
                 {meta.label}
               </span>
             </div>
@@ -120,22 +120,22 @@ const LineupSlots = ({ slots }: LineupSlotsProps) => {
                   )}
                 </div>
 
-                <p className="mt-2 truncate text-[10px] font-bold leading-tight sm:text-xs">
+                <p className="mt-2 truncate text-[10px] leading-tight font-bold sm:text-xs">
                   {player.name}
                 </p>
 
                 {rules === "easy" && (
-                  <p className="mt-0.5 truncate font-mono text-[9px] tabular-nums text-muted-foreground">
-                    {player.hltv.toFixed(2)}
+                  <p className="text-muted-foreground mt-2 truncate font-mono text-[10px] tabular-nums">
+                    hltv: {player.hltv.toFixed(2)}
                   </p>
                 )}
               </motion.div>
             ) : (
               <div className="mt-3">
-                <div className="mx-auto flex size-9 items-center justify-center rounded-lg border border-dashed border-border/70 text-muted-foreground/30">
+                <div className="border-border/70 text-muted-foreground/30 mx-auto flex size-9 items-center justify-center rounded-lg border border-dashed">
                   <Icon className="size-4" />
                 </div>
-                <p className="mt-2 text-[9px] font-medium uppercase tracking-wider text-muted-foreground/40">
+                <p className="text-muted-foreground/40 mt-2 text-[9px] font-medium tracking-wider uppercase">
                   Empty
                 </p>
               </div>

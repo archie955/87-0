@@ -297,7 +297,10 @@ project-excludes = [
     "/database/init_players.py",
     "/database/init_db.py",
     "/database/init_teams.py",
-    "/ml/*"
+    "/ml/*",
+    "/tests/*",
+    "tests"
 ]
 python-platform = "linux"
 python-version = "3.12"
+preset = "strict"

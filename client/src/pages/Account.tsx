@@ -122,10 +122,10 @@ const Account = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-4">
-            <Trophy className="size-5 shrink-0 text-muted-foreground" />
+          <div className="bg-muted/40 flex items-center gap-3 rounded-lg border p-4">
+            <Trophy className="text-muted-foreground size-5 shrink-0" />
             <div>
-              <p className="text-sm text-muted-foreground">Best lineup score</p>
+              <p className="text-muted-foreground text-sm">Best lineup score</p>
               {user.best_score !== null ? (
                 <p className="text-xl font-semibold">
                   {user.best_score.toFixed(2)}
