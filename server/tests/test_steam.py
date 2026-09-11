@@ -3,11 +3,11 @@ import pytest
 import respx
 from sqlalchemy import select
 
-from exceptions.app_exceptions import (
-    BadRequestError,
-    DataNotFoundError,
-    InvalidCredentialsError,
-    PermissionDeniedError,
+from exceptions.steam_exceptions import (
+    SteamBadRequestError,
+    SteamDataNotFoundError,
+    SteamInvalidCredentialsError,
+    SteamPermissionDeniedError,
 )
 from models.models import Steam, User
 from services.steam_login import BASEURL, FETCHURL, SteamValidator
@@ -81,7 +81,7 @@ async def test_validate_login_success():
 async def test_validate_login_rejects_missing_param(missing_param):
     params = {k: v for k, v in VALID_OPENID_PARAMS.items() if k != missing_param}
 
-    with pytest.raises(InvalidCredentialsError):
+    with pytest.raises(SteamInvalidCredentialsError):
         await SteamValidator().validate_login(params)
 
 
@@ -90,7 +90,7 @@ async def test_validate_login_rejects_when_steam_says_invalid():
     with respx.mock:
         mock_openid_verify(is_valid=False)
 
-        with pytest.raises(InvalidCredentialsError):
+        with pytest.raises(SteamInvalidCredentialsError):
             await SteamValidator().validate_login(VALID_OPENID_PARAMS)
 
 
@@ -104,7 +104,7 @@ async def test_validate_login_rejects_identity_claimed_id_mismatch():
     with respx.mock:
         mock_openid_verify(is_valid=True)
 
-        with pytest.raises(InvalidCredentialsError):
+        with pytest.raises(SteamInvalidCredentialsError):
             await SteamValidator().validate_login(params)
 
 
@@ -120,7 +120,7 @@ async def test_validate_login_rejects_wrong_identity_prefix():
     with respx.mock:
         mock_openid_verify(is_valid=True)
 
-        with pytest.raises(PermissionDeniedError):
+        with pytest.raises(SteamPermissionDeniedError):
             await SteamValidator().validate_login(params)
 
 
@@ -129,7 +129,7 @@ async def test_validate_login_network_error_becomes_bad_request():
     with respx.mock:
         respx.get(BASEURL).mock(side_effect=httpx.ConnectError("no route to host"))
 
-        with pytest.raises(BadRequestError):
+        with pytest.raises(SteamBadRequestError):
             await SteamValidator().validate_login(VALID_OPENID_PARAMS)
 
 
@@ -138,7 +138,7 @@ async def test_validate_login_steam_5xx_becomes_invalid_credentials():
     with respx.mock:
         respx.get(BASEURL).mock(return_value=httpx.Response(500))
 
-        with pytest.raises(InvalidCredentialsError):
+        with pytest.raises(SteamInvalidCredentialsError):
             await SteamValidator().validate_login(VALID_OPENID_PARAMS)
 
 
@@ -165,7 +165,7 @@ async def test_fetch_details_no_players_returned():
             return_value=httpx.Response(200, json={"response": {"players": []}})
         )
 
-        with pytest.raises(DataNotFoundError):
+        with pytest.raises(SteamDataNotFoundError):
             await SteamValidator.fetch_details(STEAM_ID)
 
 
@@ -174,7 +174,7 @@ async def test_fetch_details_steamid_mismatch():
     with respx.mock:
         mock_player_summary(steam_id="1" * 17)
 
-        with pytest.raises(InvalidCredentialsError):
+        with pytest.raises(SteamInvalidCredentialsError):
             await SteamValidator.fetch_details(STEAM_ID)
 
 
@@ -187,7 +187,7 @@ async def test_fetch_details_missing_profile_field(missing_field):
     with respx.mock:
         respx.get(FETCHURL).mock(return_value=httpx.Response(200, json=payload))
 
-        with pytest.raises(DataNotFoundError):
+        with pytest.raises(SteamDataNotFoundError):
             await SteamValidator.fetch_details(STEAM_ID)
 
 
@@ -196,7 +196,7 @@ async def test_fetch_details_network_error_becomes_bad_request():
     with respx.mock:
         respx.get(FETCHURL).mock(side_effect=httpx.ConnectError("no route to host"))
 
-        with pytest.raises(BadRequestError):
+        with pytest.raises(SteamBadRequestError):
             await SteamValidator.fetch_details(STEAM_ID)
 
 
@@ -205,7 +205,7 @@ async def test_fetch_details_steam_error_status_becomes_not_found():
     with respx.mock:
         respx.get(FETCHURL).mock(return_value=httpx.Response(403))
 
-        with pytest.raises(DataNotFoundError):
+        with pytest.raises(SteamDataNotFoundError):
             await SteamValidator.fetch_details(STEAM_ID)
 
 

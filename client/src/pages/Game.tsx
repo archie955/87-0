@@ -223,7 +223,7 @@ const Game = () => {
                 : builder.pickNumber}
               /{PICK_COUNT}
             </div>
-            <div className="border-border/70 bg-background/40 rounded-full border px-1 py-1 backdrop-blur">
+            <div className="border-border/70 bg-background/40 rounded-full border px-5 py-3 backdrop-blur">
               <RuleChange />
             </div>
           </div>

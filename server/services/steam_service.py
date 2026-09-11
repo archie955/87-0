@@ -8,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token, create_refresh_token
-from exceptions.app_exceptions import (
-    DataAlreadyExistsError,
-    DataNotFoundError,
-    InvalidCredentialsError,
+from exceptions.steam_exceptions import (
+    SteamDataAlreadyExistsError,
+    SteamDataNotFoundError,
+    SteamInvalidCredentialsError,
 )
 from models import models
 from schemas import steam_schemas, token_schemas
@@ -28,7 +28,7 @@ async def check_username(db: AsyncSession, username: str) -> None:
     ).scalar_one_or_none()
 
     if existing_username:
-        raise DataAlreadyExistsError(datatype="Username")
+        raise SteamDataAlreadyExistsError(datatype="Username")
 
 
 def redirect(return_url: str) -> RedirectResponse:
@@ -44,7 +44,7 @@ async def validate_profile(query_params: QueryParams) -> steam_schemas.SteamProf
     steam_id = await validator.validate_login(query_params)
 
     if not steam_id:
-        raise InvalidCredentialsError()
+        raise SteamInvalidCredentialsError()
 
     return await validator.fetch_details(steam_id)
 
@@ -64,7 +64,7 @@ async def create_steam_login(
     ).scalar_one_or_none()
 
     if steam_login is not None:
-        raise DataAlreadyExistsError(datatype="Steam Login")
+        raise SteamDataAlreadyExistsError(datatype="Steam Login")
 
     user = models.User(
         username=username,
@@ -88,7 +88,7 @@ async def create_steam_login(
     ).scalar_one_or_none()
 
     if not user:
-        raise DataNotFoundError(datatype="User")
+        raise SteamDataNotFoundError(datatype="User")
 
     user_data = {"sub": str(user.id)}
 
@@ -125,7 +125,7 @@ async def update_steam_login(
     ).scalar_one_or_none()
 
     if steam_login is None:
-        raise DataNotFoundError(datatype="Steam Login")
+        raise SteamDataNotFoundError(datatype="Steam Login")
 
     user = steam_login.user
 

@@ -4,7 +4,7 @@ import {
   Crosshair,
   HatGlasses,
   Shield,
-  Sparkles,
+  SportShoe,
   Wrench,
 } from "lucide-react";
 
@@ -21,7 +21,7 @@ const ROLE_META: Record<
   }
 > = {
   Opener: {
-    icon: Sparkles,
+    icon: SportShoe,
     accent: "oklch(0.72 0.18 145)",
     label: "OPENER",
   },

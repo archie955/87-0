@@ -28,10 +28,14 @@ const RuleChange = () => {
         id="rules"
         value={rules}
         onChange={handleChange}
-        className="bg-neutral-secondary-medium border-default-medium text-heading rounded-base focus:ring-brand focus:border-brand placeholder:text-body block w-full border px-3 py-2.5 text-sm shadow-xs"
+        className="border-default-medium text-heading rounded-base focus:ring-brand focus:border-brand placeholder:text-body block w-full border px-3 py-2.5 text-sm shadow-xs"
       >
-        <option value="easy">Easy - show player ratings</option>
-        <option value="hard">Hard - hide player ratings</option>
+        <option className="bg-secondary" value="easy">
+          Easy - show player ratings
+        </option>
+        <option className="bg-secondary" value="hard">
+          Hard - hide player ratings
+        </option>
       </select>
     </div>
   );

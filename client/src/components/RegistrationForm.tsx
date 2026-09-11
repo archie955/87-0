@@ -123,10 +123,10 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                 Or continue with
               </FieldSeparator>
               <Field className="align-center flex justify-center">
-                <FieldLabel htmlFor="steam_username">Steam Username</FieldLabel>
+                <FieldLabel htmlFor="username">Steam Username</FieldLabel>
                 <Input
-                  id="steam_username"
-                  name="steam_username"
+                  id="username"
+                  name="username"
                   {...steamUsername}
                   placeholder="username"
                   required

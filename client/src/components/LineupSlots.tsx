@@ -55,9 +55,9 @@ type LineupSlotsProps = {
 
 const LineupSlots = ({ slots }: LineupSlotsProps) => {
   const order: LineupRole[] = [
-    lineupRoles.opener,
-    lineupRoles.closer,
     lineupRoles.awper,
+    lineupRoles.closer,
+    lineupRoles.opener,
     lineupRoles.support,
     lineupRoles.flex,
   ];

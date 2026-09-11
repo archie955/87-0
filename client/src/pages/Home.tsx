@@ -10,6 +10,7 @@ const Home = () => {
         <p className="mb-12 text-xl leading-relaxed dark:text-neutral-400">
           The Counter Strike lineup builder game
         </p>
+        <div className="pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] mask-[radial-gradient(ellipse_25%_30%_at_50%_50%,#000_65%,transparent_110%)] bg-size-[48px_50px]"></div>
       </div>
       <div className="p-8 lg:p-12">
         <div className="mx-auto max-w-5xl gap-10 text-left md:flex">

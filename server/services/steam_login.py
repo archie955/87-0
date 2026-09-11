@@ -4,11 +4,11 @@ from fastapi import status
 from fastapi.responses import RedirectResponse
 from httpx import AsyncClient, HTTPStatusError, RequestError
 
-from exceptions.app_exceptions import (
-    BadRequestError,
-    DataNotFoundError,
-    InvalidCredentialsError,
-    PermissionDeniedError,
+from exceptions.steam_exceptions import (
+    SteamBadRequestError,
+    SteamDataNotFoundError,
+    SteamInvalidCredentialsError,
+    SteamPermissionDeniedError,
 )
 from schemas.steam_schemas import SteamProfile
 from utils.config import get_settings
@@ -91,7 +91,7 @@ class SteamValidator:
             value = data.get(param)
 
             if not value or not isinstance(value, str):
-                raise InvalidCredentialsError()
+                raise SteamInvalidCredentialsError()
 
             validation_params[param] = value
 
@@ -104,11 +104,11 @@ class SteamValidator:
                 )
                 response.raise_for_status()
             except RequestError as exc:
-                raise BadRequestError(
+                raise SteamBadRequestError(
                     message=f"Error whilst requesting {exc.request.url}"
                 ) from exc
             except HTTPStatusError as exc:
-                raise InvalidCredentialsError() from exc
+                raise SteamInvalidCredentialsError() from exc
 
         validation_result = {}
 
@@ -118,24 +118,24 @@ class SteamValidator:
                 validation_result[key.strip()] = value.strip()
 
         if validation_result.get("is_valid") != "true":
-            raise InvalidCredentialsError()
+            raise SteamInvalidCredentialsError()
 
         identity = data.get("openid.identity")
         claimed_id = data.get("openid.claimed_id")
 
         if identity != claimed_id:
-            raise InvalidCredentialsError()
+            raise SteamInvalidCredentialsError()
 
         if not isinstance(identity, str):
-            raise InvalidCredentialsError()
+            raise SteamInvalidCredentialsError()
 
         if not identity.startswith(self.__IDENTITY_PREFIX):
-            raise PermissionDeniedError()
+            raise SteamPermissionDeniedError()
 
         steam_id = identity.removeprefix(self.__IDENTITY_PREFIX)
 
         if not steam_id:
-            raise InvalidCredentialsError()
+            raise SteamInvalidCredentialsError()
 
         return steam_id
 
@@ -152,36 +152,36 @@ class SteamValidator:
                 )
                 response.raise_for_status()
             except RequestError as exc:
-                raise BadRequestError(
+                raise SteamBadRequestError(
                     message=f"Error while requesting {exc.request.url}"
                 ) from exc
             except HTTPStatusError as exc:
-                raise DataNotFoundError(datatype="Steam user") from exc
+                raise SteamDataNotFoundError(datatype="Steam user") from exc
 
         data = response.json()
 
         players = data.get("response", {}).get("players", [])
 
         if not players:
-            raise DataNotFoundError(datatype="user")
+            raise SteamDataNotFoundError(datatype="user")
 
         player = players[0]
 
         if player.get("steamid") != steam_id:
-            raise InvalidCredentialsError()
+            raise SteamInvalidCredentialsError()
 
         profile_name = player.get("personaname")
         profile_url = player.get("profileurl")
         avatar = player.get("avatar")
 
         if not profile_name:
-            raise DataNotFoundError(datatype="username")
+            raise SteamDataNotFoundError(datatype="username")
 
         if not profile_url:
-            raise DataNotFoundError(datatype="profile")
+            raise SteamDataNotFoundError(datatype="profile")
 
         if not avatar:
-            raise DataNotFoundError(datatype="avatar")
+            raise SteamDataNotFoundError(datatype="avatar")
 
         return SteamProfile(
             steam_id=steam_id,

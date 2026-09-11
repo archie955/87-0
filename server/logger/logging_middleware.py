@@ -1,7 +1,7 @@
-from typing import override
 import logging
 import time
 from collections.abc import Awaitable, Callable
+from typing import override
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

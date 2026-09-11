@@ -8,13 +8,14 @@ from pathlib import Path
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import text
 
 from cache.init_cache import initialise_db_and_cache
 from cache.redis import RedisDep, create_redis
 from database.database import AsyncSessionLocal, DBDep
 from exceptions.app_exceptions import AppException, UninstantiatedCache
+from exceptions.steam_exceptions import SteamException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from routers import auth, email, game, steam, teams, user
@@ -82,6 +83,15 @@ def app_exception_handler(
         content={"detail": exc.message},
         headers=exc.headers,
     )
+
+
+@app.exception_handler(SteamException)
+def steam_exception_handler(
+    request: Request,
+    exc: SteamException,
+) -> RedirectResponse:
+    logger.warning(f"SteamException raised: {exc.__class__.__name__}: {exc.message}")
+    return RedirectResponse(url=settings.frontend_auth_url, status_code=exc.status_code)
 
 
 @app.exception_handler(RequestValidationError)
