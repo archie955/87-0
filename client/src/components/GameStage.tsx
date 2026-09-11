@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "motion/react";
-import { Dices } from "lucide-react";
+import { Dices, FastForward, RotateCcw, Sparkles } from "lucide-react";
+
 import type { Team } from "@/types/teamTypes";
 import type { Player } from "@/types/playerTypes";
+
 import { Button } from "@/components/ui/button";
 import TeamRoll from "@/components/TeamRoll";
 import PlayerCard from "@/components/PlayerCard";
@@ -40,27 +42,42 @@ const GameStage = ({
   onReroll,
 }: GameStageProps) => {
   return (
-    <div className="relative min-h-[420px]">
+    <div className="relative min-h-[470px]">
       <AnimatePresence mode="wait">
         {status === "idle" && (
           <motion.div
             key="idle"
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col items-center justify-center gap-6 py-16"
+            exit={{ opacity: 0, y: -10 }}
+            className="flex min-h-[470px] flex-col items-center justify-center px-4 py-10 text-center"
           >
-            <div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <motion.div
+              animate={{ y: [0, -5, 0], rotate: [0, -2, 2, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="relative mb-7 flex size-24 items-center justify-center rounded-3xl border border-primary/20 bg-primary/10 text-primary shadow-[0_0_50px_oklch(0.78_0.16_80_/_10%)]"
+            >
+              <div className="absolute inset-3 rounded-2xl border border-primary/20" />
               <Dices className="size-10" />
-            </div>
-            <div className="space-y-1 text-center">
-              <h2 className="text-xl font-semibold">Ready to roll?</h2>
-              <p className="text-sm text-muted-foreground">
-                Pick {pickNumber} of {maxPickNumber} — roll to get a random team
+            </motion.div>
+
+            <div className="max-w-md">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                Round {pickNumber} of {maxPickNumber}
+              </p>
+              <h2 className="text-2xl font-black tracking-tight">
+                Ready to roll?
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Open your next team
               </p>
             </div>
-            <Button onClick={onRoll} size="lg">
+
+            <Button
+              onClick={onRoll}
+              size="lg"
+              className="mt-7 h-12 rounded-xl px-6 font-bold"
+            >
               <Dices className="mr-2 size-4" />
               Roll a team
             </Button>
@@ -70,48 +87,72 @@ const GameStage = ({
         {status === "rolling" && slides.length > 0 && (
           <motion.div
             key={`rolling-${rollId}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="py-8"
+            transition={{ duration: 0.25 }}
+            className="flex min-h-[470px] flex-col justify-center"
           >
+            <div className="mb-6 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <FastForward className="size-3.5 text-primary" />
+              Searching the pool
+            </div>
+
             <TeamRoll
               slides={slides}
               winnerIndex={winnerIndex}
               onComplete={onRollComplete}
             />
+
+            <div className="mt-7 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Sparkles className="size-3.5 text-primary" />
+              The marker decides your team
+            </div>
           </motion.div>
         )}
 
         {status === "picking" && team && (
           <motion.div
             key={`picking-${team.id}-${rollId}`}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-5"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-6"
           >
-            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
-              <div className="flex items-center gap-3">
+            <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.06] p-5">
+              <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-primary/10 blur-2xl" />
+
+              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Pick {pickNumber} of {maxPickNumber}
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">
+                    Team acquired
                   </p>
-                  <p className="text-lg font-semibold leading-none">
-                    {team.name}
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-end gap-x-3 gap-y-1">
+                    <h3 className="text-2xl font-black tracking-tight">
+                      {team.name}
+                    </h3>
+                    <span className="pb-0.5 text-xs text-muted-foreground">
+                      Pick a player
+                    </span>
+                  </div>
                 </div>
+
+                {canReroll && (
+                  <Button
+                    onClick={onReroll}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg border-primary/20 bg-background/30"
+                  >
+                    <RotateCcw className="mr-2 size-3.5" />
+                    Reroll
+                  </Button>
+                )}
               </div>
-              {canReroll && (
-                <Button onClick={onReroll} variant="outline" size="sm">
-                  Reroll team
-                </Button>
-              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
               {team.players.map((player) => (
                 <PlayerCard
                   key={player.id}

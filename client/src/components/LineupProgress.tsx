@@ -1,64 +1,79 @@
-import { Check, X } from "lucide-react";
+import { Check, CircleDot, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type LineupProgressProps = {
   selections: string[];
   current: number;
+  pickNumber: number;
   reroll: number | null;
 };
 
 const LineupProgress = ({
   selections,
   current,
+  pickNumber,
   reroll,
 }: LineupProgressProps) => {
   return (
-    <div className="flex items-center justify-center gap-1">
-      {selections.map((team, index) => {
-        const isRerolled = index === reroll;
-        const isComplete = index < current && !isRerolled;
-        const isActive = index === current;
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+          Draft progression
+        </p>
+        <p className="font-mono text-[10px] text-muted-foreground">
+          {pickNumber}/5 locked
+        </p>
+      </div>
 
-        return (
-          <div key={index} className="flex items-center">
-            <div
-              className={cn(
-                "relative flex size-10 shrink-0 items-center justify-center rounded-full border-2 transition-all",
-                isComplete && "border-green-500 bg-green-500/10",
-                isRerolled && "border-red-500 bg-red-500/10",
-                isActive && "scale-110 border-primary bg-primary/5",
-                !isComplete &&
-                  !isRerolled &&
-                  !isActive &&
-                  "border-muted bg-muted/30",
-              )}
-            >
-              {team}
+      <div className="flex items-center">
+        {selections.map((team, index) => {
+          const isRerolled = index === reroll;
+          const isComplete = index < current && !isRerolled;
+          const isActive = index === current;
 
-              {isComplete && (
-                <div className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-green-500 text-white">
-                  <Check className="size-3" />
+          return (
+            <div key={index} className="flex min-w-0 flex-1 items-center">
+              <div className="flex min-w-0 flex-1 flex-col items-center">
+                <div
+                  className={cn(
+                    "relative flex size-8 items-center justify-center rounded-lg border font-mono text-[10px] font-bold transition-all",
+                    isComplete &&
+                      "border-primary/25 bg-primary/10 text-primary",
+                    isRerolled &&
+                      "border-destructive/25 bg-destructive/10 text-destructive",
+                    isActive &&
+                      "scale-105 border-primary/40 bg-primary/15 text-primary shadow-[0_0_18px_oklch(0.78_0.16_80_/_10%)]",
+                    !isComplete &&
+                      !isRerolled &&
+                      !isActive &&
+                      "border-border/70 bg-background/20 text-muted-foreground/50",
+                  )}
+                >
+                  {isActive && <CircleDot className="size-3.5" />}
+                  {isComplete && <Check className="size-3.5" />}
+                  {isRerolled && <RotateCcw className="size-3.5" />}
+                  {!isActive && !isComplete && !isRerolled && index + 1}
                 </div>
-              )}
 
-              {isRerolled && (
-                <div className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-white">
-                  <X className="size-3" />
+                <span className="mt-1.5 w-full truncate px-1 text-center text-[8px] font-medium text-muted-foreground">
+                  {team}
+                </span>
+              </div>
+
+              {index < selections.length - 1 && (
+                <div className="mx-1 h-px flex-1 bg-border/60">
+                  <div
+                    className={cn(
+                      "h-px transition-all duration-300",
+                      index < current ? "w-full bg-primary/60" : "w-0",
+                    )}
+                  />
                 </div>
               )}
             </div>
-
-            {index < selections.length - 1 && (
-              <div
-                className={cn(
-                  "h-0.5 w-8 transition-colors",
-                  index < current ? "bg-green-500" : "bg-muted",
-                )}
-              />
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };
