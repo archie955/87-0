@@ -250,7 +250,11 @@ const Game = () => {
               <LineupProgress
                 selections={builder.slotHistory}
                 current={builder.slotNumber - 1}
-                pickNumber={builder.canReroll ? builder.pickNumber : builder.pickNumber - 1}
+                pickNumber={
+                  builder.canReroll
+                    ? builder.pickNumber
+                    : builder.pickNumber - 1
+                }
                 reroll={builder.rerolledAtIndex}
               />
             </div>

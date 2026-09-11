@@ -36,7 +36,8 @@ const Home = () => {
         </div>
         <div className="mx-auto max-w-5xl gap-10 text-left md:flex">
           <p className="mb:12 text-xl leading-relaxed dark:text-neutral-400">
-            You can create an account and sign in with either email or steam by following{" "}
+            You can create an account and sign in with either email or steam by
+            following{" "}
             <Link
               to="/login"
               className="text-blue-600 underline underline-offset-2 hover:no-underline"

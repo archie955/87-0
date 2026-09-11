@@ -84,19 +84,6 @@ describe("LoginForm", () => {
     expect(emailService.login).not.toHaveBeenCalled();
   });
 
-  it("warns that password reset is unavailable instead of navigating anywhere", async () => {
-    const user = userEvent.setup();
-    render(<LoginForm />);
-
-    await user.click(
-      screen.getByRole("button", { name: /forgot your password/i }),
-    );
-
-    expect(
-      await screen.findByText("This service is not currently available"),
-    ).toBeInTheDocument();
-  });
-
   it("switches to the registration form via the shared login store", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);

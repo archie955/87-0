@@ -22,8 +22,8 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   const { create_email } = useUser();
   const navigate = useNavigate();
   const email = useField("email");
-  const display = useField("text");
-  const steamDisplay = useField("text");
+  const username = useField("text");
+  const steamUsername = useField("text");
   const password = useField("password");
   const { changeLogin } = useChangeActions();
   const { setNotification } = useNotificationActions();
@@ -46,7 +46,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
     e.preventDefault();
 
     const credentials: RegisterUser = {
-      username: display.value,
+      username: username.value,
       email: email.value,
       password: password.value,
     };
@@ -60,7 +60,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
       setNotification("Successfully registered user", "success");
       await navigate("/");
     } catch {
-      setNotification("Register Failed", "error");
+      setNotification("Registration Failed", "error");
     }
   };
 
@@ -80,11 +80,11 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                 </p>
               </div>
               <Field>
-                <FieldLabel htmlFor="display">Username</FieldLabel>
+                <FieldLabel htmlFor="username">Username</FieldLabel>
                 <Input
-                  id="display"
-                  {...display}
-                  placeholder="display name"
+                  id="username"
+                  {...username}
+                  placeholder="username"
                   required
                 />
               </Field>
@@ -98,13 +98,18 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                </div>
-                <Input id="password" {...password} required />
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  {...password}
+                  placeholder="*****"
+                  required
+                />
               </Field>
               <Field>
-                <Button type="submit">Register</Button>
+                <Button type="submit" name="email_register">
+                  Register
+                </Button>
               </Field>
             </FieldGroup>
           </form>
@@ -118,22 +123,23 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                 Or continue with
               </FieldSeparator>
               <Field className="align-center flex justify-center">
-                <FieldLabel htmlFor="username">Display Name</FieldLabel>
+                <FieldLabel htmlFor="steam_username">Steam Username</FieldLabel>
                 <Input
-                  id="username"
-                  name="username"
-                  {...steamDisplay}
-                  placeholder="display name"
+                  id="steam_username"
+                  name="steam_username"
+                  {...steamUsername}
+                  placeholder="username"
                   required
                 />
               </Field>
               <Field className="grid grid-cols-1 gap-4">
-                <Button className="bg-transparent hover:bg-transparent" type="submit" name="steam_login">
-                  <img
-                   src={steamPNG} 
-                   alt={"steam"}
-                  />
-                  <span className="sr-only">Login with Steam</span>
+                <Button
+                  className="bg-transparent hover:bg-transparent"
+                  type="submit"
+                  name="steam_register"
+                >
+                  <img src={steamPNG} alt={"steam"} />
+                  <span className="sr-only">Register with Steam</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
@@ -142,6 +148,7 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
                   type="button"
                   onClick={changeLogin}
                   className="ml-1 underline underline-offset-2"
+                  name="login"
                 >
                   Login
                 </button>

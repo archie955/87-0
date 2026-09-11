@@ -46,10 +46,6 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
     }
   };
 
-  const handleClick = () => {
-    setNotification("This service is not currently available", "warning");
-  };
-
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldDescription className="px-6 text-center">
@@ -75,17 +71,13 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <button
-                    type="button"
-                    onClick={handleClick}
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </button>
-                </div>
-                <Input id="password" {...password} required />
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  {...password}
+                  placeholder="*****"
+                  required
+                />
               </Field>
               <Field>
                 <Button type="submit" name="email_login">
@@ -104,11 +96,12 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-1 gap-4">
-                <Button className="bg-transparent hover:bg-transparent" type="submit" name="steam_login">
-                  <img
-                   src={steamPNG} 
-                   alt={"steam"}
-                  />
+                <Button
+                  className="bg-transparent hover:bg-transparent"
+                  type="submit"
+                  name="steam_login"
+                >
+                  <img src={steamPNG} alt={"steam"} />
                   <span className="sr-only">Login with Steam</span>
                 </Button>
               </Field>
