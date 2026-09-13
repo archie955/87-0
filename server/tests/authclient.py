@@ -9,7 +9,6 @@ from sqlalchemy.orm import selectinload
 
 from models.models import Player, Team
 from schemas import player_schemas, team_schemas
-from tests.mockdata import mock_igl_bonus
 
 SQLALCHEMY_DATABASE_URL = (
     "postgresql+psycopg://postgres:postgres@localhost:5433/test_db"
@@ -80,12 +79,13 @@ class AuthClient:
             team_dict[team.name] = team
 
         for p in data["players"]:
-            p["igl_bonus"] = mock_igl_bonus(p)
             player = Player(
                 name=p["name"],
                 role=p["role"],
                 hltv=p["hltv"],
-                igl_bonus=p["igl_bonus"],
+                igl_score=p["igl_score"],
+                odds=p["odds"],
+                igl_odds=p["igl_odds"],
                 majors=p["majors"],
                 wins=p["wins"],
                 second=p["second"],
@@ -120,5 +120,14 @@ class AuthClient:
             teams_list.append(t.id)
         teams = team_schemas.Teams.model_validate(team_dict)
 
+        categories = {
+            "cat_1": 1.5,
+            "cat_2": 1.0,
+            "cat_3": 0.7,
+            "cat_4": 0.2,
+            "cat_5": -0.2,
+        }
+
         await self.cache.set("teams", teams.model_dump_json())
         await self.cache.set("team_ids", json.dumps(teams_list))
+        await self.cache.set("categories", json.dumps(categories))

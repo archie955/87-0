@@ -1,17 +1,8 @@
-import math
-
 from models.enums import Roles
 
 
-def mock_igl_bonus(p) -> float:
-    perf_sum = (4 * p["wins"] + 3 * p["second"] + 2 * p["semi"] + p["quarter"]) / 40
-    perf = (
-        perf_sum / math.sqrt(p["total_tournaments"])
-        if p["total_tournaments"] > 0
-        else 0.0
-    )
-    team_bonus = math.sqrt(p["win_teammates"]) / 10
-    return perf + team_bonus
+def mock_scores(igl: float, hltv: float):
+    return {"hltv": hltv, "igl_score": igl, "odds": hltv**2 - 1, "igl_odds": igl**2 - 1}
 
 
 data = {
@@ -21,7 +12,7 @@ data = {
             "name": "NiKo",
             "team_name": "Falcons",
             "role": Roles.CLOSER,
-            "hltv": 1.22,
+            **mock_scores(1.02, 1.22),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -35,7 +26,7 @@ data = {
             "name": "m0nesy",
             "team_name": "Falcons",
             "role": Roles.AWPER,
-            "hltv": 1.27,
+            **mock_scores(1.07, 1.27),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -49,7 +40,7 @@ data = {
             "name": "TeSeS",
             "team_name": "Falcons",
             "role": Roles.SUPPORT,
-            "hltv": 1.02,
+            **mock_scores(0.86, 1.02),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -63,7 +54,7 @@ data = {
             "name": "kyousuke",
             "team_name": "Falcons",
             "role": Roles.OPENER,
-            "hltv": 1.16,
+            **mock_scores(0.96, 1.16),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -77,7 +68,7 @@ data = {
             "name": "karrigan",
             "team_name": "Falcons",
             "role": Roles.OPENER,
-            "hltv": 0.82,
+            **mock_scores(1.30, 0.78),
             "majors": 2,
             "wins": 22,
             "second": 16,
@@ -91,7 +82,7 @@ data = {
             "name": "ZywOo",
             "team_name": "Vitality",
             "role": Roles.AWPER,
-            "hltv": 1.34,
+            **mock_scores(1.09, 1.34),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -105,7 +96,7 @@ data = {
             "name": "ropz",
             "team_name": "Vitality",
             "role": Roles.CLOSER,
-            "hltv": 1.14,
+            **mock_scores(0.94, 1.14),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -119,7 +110,7 @@ data = {
             "name": "mezii",
             "team_name": "Vitality",
             "role": Roles.SUPPORT,
-            "hltv": 1.06,
+            **mock_scores(0.90, 1.06),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -133,7 +124,7 @@ data = {
             "name": "flameZ",
             "team_name": "Vitality",
             "role": Roles.OPENER,
-            "hltv": 1.11,
+            **mock_scores(0.91, 1.11),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -147,7 +138,7 @@ data = {
             "name": "apEX",
             "team_name": "Vitality",
             "role": Roles.OPENER,
-            "hltv": 0.98,
+            **mock_scores(1.29, 0.98),
             "majors": 3,
             "wins": 28,
             "second": 7,
@@ -161,7 +152,7 @@ data = {
             "name": "donk",
             "team_name": "Spirit",
             "role": Roles.OPENER,
-            "hltv": 1.45,
+            **mock_scores(1.16, 1.4),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -175,7 +166,7 @@ data = {
             "name": "TN1R",
             "team_name": "Spirit",
             "role": Roles.CLOSER,
-            "hltv": 1.07,
+            **mock_scores(0.88, 1.07),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -189,7 +180,7 @@ data = {
             "name": "magixx",
             "team_name": "Spirit",
             "role": Roles.OPENER,
-            "hltv": 1.02,
+            **mock_scores(1.16, 1.02),
             "majors": 0,
             "wins": 7,
             "second": 2,
@@ -203,7 +194,7 @@ data = {
             "name": "zont1x",
             "team_name": "Spirit",
             "role": Roles.SUPPORT,
-            "hltv": 0.98,
+            **mock_scores(0.80, 0.98),
             "majors": 0,
             "wins": 0,
             "second": 0,
@@ -217,7 +208,7 @@ data = {
             "name": "sh1ro",
             "team_name": "Spirit",
             "role": Roles.AWPER,
-            "hltv": 1.16,
+            **mock_scores(0.97, 1.16),
             "majors": 0,
             "wins": 0,
             "second": 0,

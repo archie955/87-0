@@ -1,8 +1,8 @@
 # pyrefly: ignore-errors [bad-argument-type]
 
-import math
+import json
+from typing import TYPE_CHECKING
 
-from pygam import LogisticGAM
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,21 +18,39 @@ from models.models import Player
 from schemas import active_game_schemas
 from services.helpers import safe_commit
 
+if TYPE_CHECKING:
+    from database.init_players import Categories
+
 MAX_DOUBLE_PLAYER = 2
 TEAM_SIZE = 5
 
 
-def linear_score(gam: LogisticGAM, hltv: float) -> float:
-    p = gam.predict_proba([hltv])[0]
-    return math.log(p / (1 - p))
-
-
-def eval_lineup(gam: LogisticGAM, game: active_game_schemas.GameList) -> float:
+def eval_lineup(game: active_game_schemas.GameList) -> float:
     score = 0.0
 
     for p in game.players:
-        score += linear_score(gam, p.score)
+        score += p.score
     return score
+
+
+async def eval_category(cache: Redis, score: float) -> active_game_schemas.Cat:
+    # pyrefly: ignore [bad-assignment]
+    categories = await cache.get("categories")
+    if not categories:
+        raise DataNotFoundError(datatype="Categories")
+
+    categories: Categories = json.loads(categories)
+    if score >= categories["cat_1"]:
+        return active_game_schemas.Cat.cat_1
+    if score >= categories["cat_2"]:
+        return active_game_schemas.Cat.cat_2
+    if score >= categories["cat_3"]:
+        return active_game_schemas.Cat.cat_3
+    if score >= categories["cat_4"]:
+        return active_game_schemas.Cat.cat_4
+    if score >= categories["cat_5"]:
+        return active_game_schemas.Cat.cat_5
+    return active_game_schemas.Cat.cat_6
 
 
 async def validate_game(
@@ -100,7 +118,7 @@ async def validate_game(
 
     for p in players:
         igl = game.igl == p.id
-        score = p.hltv + p.igl_bonus if igl else p.hltv
+        score = p.igl_odds if igl else p.odds
         ps = active_game_schemas.ReducedGamePlayer(
             id=p.id,
             role=p.role,
@@ -139,7 +157,6 @@ def valid_lineup(game: active_game_schemas.GameList) -> bool:
 
 async def evaluation_base(
     game: active_game_schemas.GameResult,
-    gam: LogisticGAM,
     active_game: active_game_schemas.ActiveGame,
     cache: Redis,
     db: AsyncSession,
@@ -149,11 +166,13 @@ async def evaluation_base(
     if not valid_lineup(game=game_list):
         raise BadRequestError(message="Invalid Game")
 
-    score = eval_lineup(gam, game_list)
+    score = eval_lineup(game_list)
+
+    cat = await eval_category(cache, score)
 
     await cache.delete(game.game_id)
 
-    return active_game_schemas.GameEvaluation(score=score, best=False)
+    return active_game_schemas.GameEvaluation(score=score, cat=cat, best=False)
 
 
 async def update_user_game(db: AsyncSession, user: models.User, score: float):

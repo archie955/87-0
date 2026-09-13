@@ -3,7 +3,6 @@ from fastapi import APIRouter, status
 from authentication.auth import NullableUserDep
 from cache.redis import RedisDep
 from database.database import DBDep
-from ml.ml_model import ModelDep
 from routers.game_dep import GameDep
 from schemas import active_game_schemas
 from services import game_service
@@ -29,12 +28,11 @@ async def create_game(cache: RedisDep):
 async def submit_lineup(
     game_id: str,
     game: active_game_schemas.GameResult,
-    gam: ModelDep,
     active_game: GameDep,
     user: NullableUserDep,
     db: DBDep,
     cache: RedisDep,
 ):
     return await game_service.game_evaluation(
-        game=game, gam=gam, active_game=active_game, user=user, db=db, cache=cache
+        game=game, active_game=active_game, user=user, db=db, cache=cache
     )

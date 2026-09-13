@@ -1,8 +1,19 @@
+from enum import StrEnum
+
 from pydantic import BaseModel
 
 from models.enums import Roles
 from schemas.base_schema import OrmModel
 from schemas.player_schemas import Player
+
+
+class Cat(StrEnum):
+    cat_1 = "cat_1"
+    cat_2 = "cat_2"
+    cat_3 = "cat_3"
+    cat_4 = "cat_4"
+    cat_5 = "cat_5"
+    cat_6 = "cat_6"
 
 
 class ActiveGame(OrmModel):
@@ -38,4 +49,5 @@ class GameList(BaseModel):
 
 class GameEvaluation(BaseModel):
     score: float
+    cat: Cat
     best: bool

@@ -1,3 +1,4 @@
+from typing import TypedDict
 import asyncio
 from pathlib import Path
 
@@ -11,10 +12,17 @@ from models.enums import Roles
 IGL Bonus is calculated as:
 """
 
+class Categories(TypedDict):
+    cat_1: float
+    cat_2: float
+    cat_3: float
+    cat_4: float
+    cat_5: float
+
 DATA_DIR = Path(__file__).parent
 ML_DIR = DATA_DIR.parent / "ml/gam.pkl"
 
-async def process_players():
+async def process_players() -> Categories:
     # lazy import numpy and pandas so they only import into lifespan if needed
     import numpy as np
     import pandas as pd
@@ -56,7 +64,7 @@ async def process_players():
     df["odds"] = df["odds"] - (team_avg_score/5)
     df["igl_odds"] = df["igl_odds"] - (team_avg_score/5)
 
-    scores: list[tuple[str, float]] = []
+    scores: list[tuple[str, np.float64]] = []
     teams = df["team"].unique()
     for team in teams:
         players = df[df["team"] == team][["name", "odds", "igl_odds", "no_events"]].sort_values(by="no_events", ascending=False)
@@ -64,7 +72,10 @@ async def process_players():
         score = players[players["name"] != igl["name"]]["odds"].sum() + igl["igl_odds"]
         scores.append((team, score))
 
-    scores.sort(key=lambda x: x[1], reverse=True)
+    def score_key(x: tuple[str, np.float64]) -> np.float64:
+        return x[1]
+        
+    scores.sort(key=score_key, reverse=True)
 
     best_igl = df.sort_values("igl_odds", ascending=False).iloc[0]
     best_opener = df[df["role"] == Roles.OPENER].sort_values("odds", ascending=False).iloc[0]
@@ -77,6 +88,12 @@ async def process_players():
 
     df["odds"] = df["odds"]*factor
     df["igl_odds"] = df["igl_odds"]*factor
+
+    cat_1 = factor*(best_score + scores[0][1]) / 2
+    cat_2 = factor*(scores[0][1] + scores[1][1]) / 2
+    cat_3 = factor*(scores[3][1] + scores[4][1]) / 2
+    cat_4 = factor*(scores[8][1] + scores[9][1]) / 2
+    cat_5 = factor*(scores[15][1] + scores[16][1]) / 2
     
 
     async with AsyncSessionLocal() as db:
@@ -110,7 +127,8 @@ async def process_players():
             db.add(models.Player(**player))
 
         await db.commit()
-    return {"status": "success"}
+    response: Categories = {"cat_1": cat_1, "cat_2": cat_2, "cat_3": cat_3, "cat_4": cat_4, "cat_5": cat_5}
+    return response
 
 
 def main():

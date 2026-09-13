@@ -21,7 +21,7 @@ roles = Enum(Roles, name="roles")
 
 class User(Base, Name, TimeStamps):
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    best_score: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=True)
+    best_score: Mapped[float] = mapped_column(DECIMAL(5, 2), nullable=True)
 
     steam_login: Mapped["Steam | None"] = relationship(
         back_populates="user",
@@ -87,11 +87,13 @@ class Player(Base, Name, TimeStamps):
 
     team_id: Mapped[int] = mapped_column(Integer, ForeignKey("team.id"), nullable=False)
 
-    hltv: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
+    hltv: Mapped[float] = mapped_column(DECIMAL(5, 2), nullable=False)
 
-    odds: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
+    igl_score: Mapped[float] = mapped_column(DECIMAL(5, 2), nullable=False)
 
-    igl_odds: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
+    odds: Mapped[float] = mapped_column(DECIMAL(5, 2), nullable=False)
+
+    igl_odds: Mapped[float] = mapped_column(DECIMAL(5, 2), nullable=False)
 
     majors: Mapped[int] = mapped_column(Integer, nullable=False)
 

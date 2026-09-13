@@ -44,6 +44,7 @@ async def test_play_game_user(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
     assert "score" in data
+    assert "cat" in data
     assert "best" in data
 
     assert isinstance(data["score"], float)
@@ -61,6 +62,8 @@ async def test_play_game(auth_client_seed):
     assert response.status_code == 200
     data = response.json()
     assert "score" in data
+    assert "cat" in data
+    assert "best" in data
 
     assert isinstance(data["score"], float)
     assert not data["best"]

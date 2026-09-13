@@ -8,7 +8,7 @@ class Player(OrmModel):
     name: str
     role: Roles
     hltv: float
-    igl_bonus: float
+    igl_score: float
 
 
 class TeamPlayers(OrmModel):

@@ -32,7 +32,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("username", sa.String(100), unique=True, nullable=False),
-        sa.Column("best_score", sa.DECIMAL(4, 2), nullable=True),
+        sa.Column("best_score", sa.DECIMAL(5, 2), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -198,10 +198,24 @@ def upgrade() -> None:
         ),
         sa.Column(
             "hltv",
-            sa.DECIMAL(4, 2),
+            sa.DECIMAL(5, 2),
             nullable=False,
         ),
-        sa.Column("igl_bonus", sa.DECIMAL(4, 2), nullable=False),
+        sa.Column(
+            "igl_score",
+            sa.DECIMAL(5, 2),
+            nullable=False
+        ),
+        sa.Column(
+            "odds",
+            sa.DECIMAL(5, 2),
+            nullable=False
+        ),
+        sa.Column(
+            "igl_odds",
+            sa.DECIMAL(5, 2),
+            nullable=False,
+        ),
         sa.Column(
             "majors",
             sa.Integer,

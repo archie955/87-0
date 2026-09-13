@@ -13,7 +13,7 @@ from sqlalchemy import text
 
 from cache.init_cache import initialise_db_and_cache
 from cache.redis import RedisDep, create_redis
-from database.database import AsyncSessionLocal, DBDep
+from database.database import DBDep
 from exceptions.app_exceptions import AppException, UninstantiatedCache
 from exceptions.steam_exceptions import SteamException
 from logger.configuration import configure_logging
@@ -39,8 +39,7 @@ async def lifespan(app: FastAPI):
         await app.state.redis.ping()
         await app.state.redis.set("app:status", "healthy")
 
-        async with AsyncSessionLocal() as db:
-            await initialise_db_and_cache(db=db, cache=app.state.redis)
+        await initialise_db_and_cache(cache=app.state.redis)
         yield
     finally:
         await app.state.redis.aclose()
