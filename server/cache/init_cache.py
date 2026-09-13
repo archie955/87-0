@@ -1,21 +1,18 @@
 import json
-from typing import is_typeddict
 
 import redis.asyncio as redis
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from database.database import AsyncSessionLocal
-from database.init_db import init_db_wrapper
+from database.init_players import process_players
 from exceptions.app_exceptions import DataNotFoundError
 from models import models
 from schemas import player_schemas, team_schemas
 
 
-async def initialise_db_and_cache(cache: redis.Redis) -> dict[str, str]:
-    categories = await init_db_wrapper()
-    if not is_typeddict(categories):
-        return {"status": "Failed"}
+async def initialise_cache(cache: redis.Redis) -> dict[str, str]:
+    categories = await process_players(persist=False)
 
     async with AsyncSessionLocal() as db:
         teams = (
@@ -27,18 +24,6 @@ async def initialise_db_and_cache(cache: redis.Redis) -> dict[str, str]:
             .scalars()
             .all()
         )
-
-        if not teams:
-            await init_db_wrapper()
-            teams = (
-                (
-                    await db.execute(
-                        select(models.Team).options(selectinload(models.Team.players))
-                    )
-                )
-                .scalars()
-                .all()
-            )
 
         if not teams:
             raise DataNotFoundError(datatype="Teams")

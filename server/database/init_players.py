@@ -12,17 +12,10 @@ from models.enums import Roles
 IGL Bonus is calculated as:
 """
 
-class Categories(TypedDict):
-    cat_1: float
-    cat_2: float
-    cat_3: float
-    cat_4: float
-    cat_5: float
-
 DATA_DIR = Path(__file__).parent
 ML_DIR = DATA_DIR.parent / "ml/gam.pkl"
 
-async def process_players() -> Categories:
+async def process_players(persist: bool) -> dict[str, float]:
     # lazy import numpy and pandas so they only import into lifespan if needed
     import numpy as np
     import pandas as pd
@@ -95,45 +88,48 @@ async def process_players() -> Categories:
     cat_4 = factor*(scores[8][1] + scores[9][1]) / 2
     cat_5 = factor*(scores[15][1] + scores[16][1]) / 2
     
+    if persist:
+        async with AsyncSessionLocal() as db:
+            teams = (await db.execute(select(models.Team))).scalars().all()
 
-    async with AsyncSessionLocal() as db:
-        teams = (await db.execute(select(models.Team))).scalars().all()
+            team_map = {team.name: team.id for team in teams}
 
-        team_map = {team.name: team.id for team in teams}
+            df["team_id"] = df["team"].map(team_map)
 
-        df["team_id"] = df["team"].map(team_map)
+            unmatched = df.loc[df["team_id"].isna(), "team"].unique()
 
-        unmatched = df.loc[df["team_id"].isna(), "team"].unique()
+            if len(unmatched) > 0:
+                print(f"unmatched teams: {unmatched}")
+                raise ValueError("Some players lack team id")
 
-        if len(unmatched) > 0:
-            print(f"unmatched teams: {unmatched}")
-            raise ValueError("Some players lack team id")
+            df = df.drop(
+                columns=[
+                    "team",
+                    "p",
+                    "p_igl",
+                    "events_bonus",
+                    "perf_bonus",
+                    "igl_bonus",
+                    "team_bonus"
+                ]
+            )
 
-        df = df.drop(columns=["team", "p", "p_igl", "events_bonus", "perf_bonus", "igl_bonus", "team_bonus"])
+            df = df.rename(
+                columns={
+                    "major_wins": "majors",
+                    "win": "wins",
+                    "no_major_teammates": "major_teammates",
+                    "no_teammates": "win_teammates",
+                    "no_events": "total_tournaments",
+                }
+            )
 
-        df = df.rename(
-            columns={
-                "major_wins": "majors",
-                "win": "wins",
-                "no_major_teammates": "major_teammates",
-                "no_teammates": "win_teammates",
-                "no_events": "total_tournaments",
-            }
-        )
+            df = df.to_dict(orient="records")
+            for player in df:
+                db.add(models.Player(**player))
 
-        df = df.to_dict(orient="records")
+            await db.commit()
 
-        for player in df:
-            db.add(models.Player(**player))
-
-        await db.commit()
-    response: Categories = {"cat_1": cat_1, "cat_2": cat_2, "cat_3": cat_3, "cat_4": cat_4, "cat_5": cat_5}
+    response = {"cat_1": cat_1, "cat_2": cat_2, "cat_3": cat_3, "cat_4": cat_4, "cat_5": cat_5}
     return response
 
-
-def main():
-    asyncio.run(process_players())
-
-
-if __name__ == "__main__":
-    main()

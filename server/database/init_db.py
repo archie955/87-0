@@ -1,20 +1,18 @@
-import asyncio
+from sqlalchemy import select
 
-from database.init_players import process_players, Categories
+from database.database import AsyncSessionLocal
+from database.init_players import process_players
 from database.init_teams import process_teams
+from models.models import Team
 
 
-async def init_db_wrapper() -> Categories | dict[str, str]:
-    team = await process_teams()
-    if team["status"] == "success":
-        res = await process_players()
-        return res
-    return {"status": "failure"}
+async def initialise_db_if_empty() -> None:
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(Team.id).limit(1))
+        has_teams = result.scalar_one_or_none() is not None
 
+    if has_teams:
+        return
 
-def main():
-    asyncio.run(init_db_wrapper())
-
-
-if __name__ == "__main__":
-    main()
+    await process_teams()
+    await process_players(persist=True)

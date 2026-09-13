@@ -11,12 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy import text
 
-from cache.init_cache import initialise_db_and_cache
+from cache.init_cache import initialise_cache
 from cache.redis import RedisDep, create_redis
 from database.database import DBDep
+from database.init_db import initialise_db_if_empty
 from exceptions.app_exceptions import (
     AppException,
-    DataNotFoundError,
     UninstantiatedCache,
 )
 from exceptions.steam_exceptions import SteamException
@@ -41,12 +41,12 @@ async def lifespan(app: FastAPI):
             app.state.model = pickle.load(f)
 
         await app.state.redis.ping()
+
+        await initialise_db_if_empty()
+        await initialise_cache(cache=app.state.redis)
+
         await app.state.redis.set("app:status", "healthy")
 
-        response = await initialise_db_and_cache(cache=app.state.redis)
-        if response["status"] == "Failed":
-            # ruff: ignore[raise-vanilla-args]
-            raise DataNotFoundError("Initialisation data")
         yield
     finally:
         await app.state.redis.aclose()

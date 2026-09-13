@@ -1,7 +1,6 @@
 # pyrefly: ignore-errors [bad-argument-type]
 
 import json
-from typing import TYPE_CHECKING
 
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -18,9 +17,6 @@ from models.models import Player
 from schemas import active_game_schemas
 from services.helpers import safe_commit
 
-if TYPE_CHECKING:
-    from database.init_players import Categories
-
 MAX_DOUBLE_PLAYER = 2
 TEAM_SIZE = 5
 
@@ -34,12 +30,11 @@ def eval_lineup(game: active_game_schemas.GameList) -> float:
 
 
 async def eval_category(cache: Redis, score: float) -> active_game_schemas.Cat:
-    # pyrefly: ignore [bad-assignment]
     categories = await cache.get("categories")
     if not categories:
         raise DataNotFoundError(datatype="Categories")
 
-    categories: Categories = json.loads(categories)
+    categories = json.loads(categories)
     if score >= categories["cat_1"]:
         return active_game_schemas.Cat.cat_1
     if score >= categories["cat_2"]:
