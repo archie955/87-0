@@ -89,7 +89,9 @@ class Player(Base, Name, TimeStamps):
 
     hltv: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
 
-    igl_bonus: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
+    odds: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
+
+    igl_odds: Mapped[float] = mapped_column(DECIMAL(4, 2), nullable=False)
 
     majors: Mapped[int] = mapped_column(Integer, nullable=False)
 
