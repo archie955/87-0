@@ -1,51 +1,166 @@
 name,role,team,hltv,major_wins,win,second,semi,quarter,no_major_teammates,no_teammates,no_events
-NiKo,Closer,Falcons,1.14,0,0,0,0,0,0,0,0
-m0NESY,AWPer,Falcons,1.27,0,0,0,0,0,0,0,0
-karrigan,Opener,Falcons,0.8,2,16,17,23,45,8,18,127
-kyousuke,Opener,Falcons,1.15,0,0,0,0,0,0,0,0
-TeSeS,Support,Falcons,0.99,0,0,0,0,0,0,0,0
-sh1ro,AWPer,Spirit,1.18,0,0,0,0,0,0,0,0
-tN1R,Closer,Spirit,1.04,0,0,0,0,0,0,0,0
-magixx,Opener,Spirit,0.98,0,1,1,2,3,0,4,7
-donk,Opener,Spirit,1.36,0,0,0,0,0,0,0,0
+donk,Opener,Spirit,1.4,0,0,0,0,0,0,0,0
+magixx,Opener,Spirit,0.97,0,3,1,2,3,0,4,9
+sh1ro,AWPer,Spirit,1.17,0,0,0,0,0,0,0,0
+tN1R,Closer,Spirit,1.05,0,0,0,0,0,0,0,0
 zont1x,Support,Spirit,0.99,0,0,0,0,0,0,0,0
+karrigan,Opener,Falcons,0.77,2,16,17,24,46,8,18,129
+NiKo,Closer,Falcons,1.12,0,0,0,0,0,0,0,0
+TeSeS,Support,Falcons,1.01,0,0,0,0,0,0,0,0
+m0NESY,AWPer,Falcons,1.29,0,0,0,0,0,0,0,0
+kyousuke,Opener,Falcons,1.15,0,0,0,0,0,0,0,0
+FalleN,Opener,FURIA,0.93,2,12,10,26,33,4,10,110
+yuurih,Support,FURIA,0.98,0,0,0,0,0,0,0,0
+YEKINDAR,Opener,FURIA,1.07,0,0,0,0,0,0,0,0
+KSCERATO,Closer,FURIA,1.17,0,0,0,0,0,0,0,0
 molodoy,AWPer,FURIA,1.14,0,0,0,0,0,0,0,0
-KSCERATO,Closer,FURIA,1.18,0,0,0,0,0,0,0,0
-FalleN,Opener,FURIA,0.92,2,12,10,25,32,4,10,110
-YEKINDAR,Opener,FURIA,1.08,0,0,0,0,0,0,0,0
-yuurih,Support,FURIA,1.02,0,0,0,0,0,0,0,0
-ZywOo,AWPer,Vitality,1.34,0,0,0,0,0,0,0,0
-ropz,Closer,Vitality,1.14,0,0,0,0,0,0,0,0
-apEX,Opener,Vitality,0.92,3,22,7,11,13,7,9,61
-flameZ,Opener,Vitality,1.14,0,0,0,0,0,0,0,0
-mezii,Support,Vitality,1.05,0,0,0,0,0,0,0,0
-torzsi,AWPer,MOUZ,1.03,0,0,0,0,0,0,0,0
-Spinx,Closer,MOUZ,1.08,0,0,0,0,0,0,0,0
-xertioN,Opener,MOUZ,1.11,0,0,0,1,0,0,0,2
-xelex,Opener,MOUZ,0.97,0,0,0,0,0,0,0,0
-PR,Support,MOUZ,1.01,0,0,0,0,0,0,0,0
-w0nderful,AWPer,Natus Vincere,1.09,0,0,0,0,0,0,0,0
-Aleksib,Closer,Natus Vincere,0.89,1,7,10,8,19,4,9,61
-makazze,Opener,Natus Vincere,1.12,0,0,0,0,0,0,0,0
-iM,Opener,Natus Vincere,1.1,0,0,0,0,0,0,0,0
+apEX,Opener,Vitality,0.97,3,22,7,12,14,7,9,63
+ropz,Closer,Vitality,1.12,0,0,0,0,0,0,0,0
+ZywOo,AWPer,Vitality,1.36,0,0,0,0,0,0,0,0
+flameZ,Opener,Vitality,1.16,0,0,0,0,0,0,0,0
+mezii,Support,Vitality,1.03,0,0,0,0,0,0,0,0
+torzsi,AWPer,MOUZ,1.04,0,0,0,0,0,0,0,0
+Spinx,Closer,MOUZ,1.06,0,0,0,0,0,0,0,0
+xertioN,Opener,MOUZ,1.11,0,0,1,1,1,0,0,4
+PR,Support,MOUZ,1.02,0,0,0,0,0,0,0,0
+xelex,Opener,MOUZ,1,0,0,0,0,0,0,0,0
+xfl0ud,Opener,FUT,1.06,0,0,0,0,0,0,0,0
+dem0n,Closer,FUT,1.08,0,0,0,0,0,0,0,0
+Krabeni,Opener,FUT,0.99,0,0,1,1,2,0,0,8
+cmtry,AWPer,FUT,0.95,0,0,0,0,0,0,0,0
+dziugss,Support,FUT,1.06,0,0,0,0,0,0,0,0
+arT,Opener,Legacy,0.86,0,0,1,7,6,0,0,26
+dumau,Opener,Legacy,1.12,0,0,0,0,0,0,0,0
+latto,Closer,Legacy,1.11,0,0,0,0,0,0,0,0
+try,AWPer,Legacy,1.12,0,0,0,0,0,0,0,0
+n1ssim,Support,Legacy,0.91,0,0,0,0,0,0,0,0
+Aleksib,Closer,Natus Vincere,0.88,1,7,10,8,19,4,9,63
+iM,Opener,Natus Vincere,1.07,0,0,0,0,0,0,0,0
 b1t,Support,Natus Vincere,1.13,0,0,0,0,0,0,0,0
-meyern,AWPer,9z,0.95,0,0,0,0,0,0,0,0
-dgt,Closer,9z,1.08,0,0,0,0,0,0,0,0
-max,Opener,9z,0.87,0,0,0,1,2,0,0,11
-luchov,Opener,9z,1.16,0,0,0,0,0,0,0,0
-HUASOPEEK,Support,9z,1.01,0,0,0,0,0,0,0,0
-woxic,AWPer,Aurora,1.06,0,0,0,0,0,0,0,0
-Wicadia,Closer,Aurora,1.09,0,0,0,0,0,0,0,0
-kyxsan,Opener,Aurora,0.97,0,1,6,7,8,0,4,32
-XANTARES,Opener,Aurora,1.12,0,0,0,0,0,0,0,0
-Jimpphat,Support,Aurora,1.02,0,0,0,0,0,0,0,0
+w0nderful,AWPer,Natus Vincere,1.1,0,0,0,0,0,0,0,0
+makazze,Opener,Natus Vincere,1.12,0,0,0,0,0,0,0,0
+huNter-,Opener,G2,0.96,0,1,0,0,7,0,4,14
+NertZ,Opener,G2,1.01,0,0,0,0,0,0,0,0
 r1nkle,AWPer,G2,1.07,0,0,0,0,0,0,0,0
-MATYS,Closer,G2,1.06,0,0,0,0,0,0,0,0
-huNter-,Opener,G2,0.94,0,1,0,0,5,0,4,12
-NertZ,Opener,G2,0.98,0,0,0,0,0,0,0,0
-HeavyGod,Support,G2,1.16,0,0,0,0,0,0,0,0
-zorte,AWPer,BetBoom,0.98,0,0,0,0,0,0,0,0
-d1Ledez,Closer,BetBoom,0.99,0,0,0,0,0,0,0,0
-Boombl4,Opener,BetBoom,0.96,1,5,1,6,5,4,5,21
-Magnojez,Opener,BetBoom,1.11,0,0,0,0,0,0,0,0
-s1ren,Support,BetBoom,0.9,0,0,0,0,0,0,0,0
+HeavyGod,Support,G2,1.17,0,0,0,0,0,0,0,0
+MATYS,Closer,G2,1.01,0,0,0,0,0,0,0,0
+XANTARES,Opener,Aurora,1.07,0,0,0,0,0,0,0,0
+woxic,AWPer,Aurora,1.04,0,0,0,0,0,0,0,0
+Jimpphat,Support,Aurora,1.02,0,0,0,0,0,0,0,0
+kyxsan,Opener,Aurora,0.95,0,1,6,7,9,0,4,34
+Wicadia,Closer,Aurora,1.09,0,0,0,0,0,0,0,0
+max,Opener,9z,0.85,0,0,0,1,2,0,0,13
+dgt,Closer,9z,1.03,0,0,0,0,0,0,0,0
+meyern,AWPer,9z,0.95,0,0,0,0,0,0,0,0
+luchov,Opener,9z,1.11,0,0,0,0,0,0,0,0
+HUASOPEEK,Support,9z,1.03,0,0,0,0,0,0,0,0
+frozen,Closer,FaZe,1.08,0,0,0,0,0,0,0,0
+Twistzz,Opener,FaZe,1.05,0,0,0,1,0,0,0,4
+Neityu,Support,FaZe,0.92,0,0,0,0,0,0,0,0
+jcobbb,Opener,FaZe,0.95,0,0,0,0,0,0,0,0
+JBOEN,AWPer,FaZe,1.15,0,0,0,0,0,0,0,0
+HooXi,Opener,Astralis,0.85,0,3,1,7,14,0,4,34
+phzy,AWPer,Astralis,1.06,0,0,0,0,0,0,0,0
+jabbi,Closer,Astralis,1.02,0,0,0,0,0,0,0,0
+Staehr,Opener,Astralis,1.15,0,0,0,0,0,0,0,0
+ryu,Support,Astralis,0.99,0,0,0,0,0,0,0,0
+bLitz,Opener,MongolZ,0.95,0,1,3,5,11,0,4,35
+Techno,Opener,MongolZ,0.92,0,0,0,0,0,0,0,0
+910,AWPer,MongolZ,1.1,0,0,0,0,0,0,0,0
+tikuak,Support,MongolZ,0.91,0,0,0,0,0,0,0,0
+DarkMeister,Closer,MongolZ,0.89,0,0,0,0,0,0,0,0
+alex666,Closer,B8,0.93,0,0,0,0,1,0,0,7
+npl,Opener,B8,1.05,0,0,0,0,0,0,0,0
+kensizor,Opener,B8,0.92,0,0,0,0,0,0,0,0
+esenthial,Support,B8,0.95,0,0,0,0,0,0,0,0
+s1zzi,AWPer,B8,1,0,0,0,0,0,0,0,0
+zorte,AWPer,BetBoom,0.97,0,0,0,0,0,0,0,0
+d1Ledez,Closer,BetBoom,0.95,0,0,0,0,0,0,0,0
+Boombl4,Opener,BetBoom,0.94,1,5,1,6,5,4,5,22
+Magnojez,Opener,BetBoom,1.1,0,0,0,0,0,0,0,0
+s1ren,Support,BetBoom,0.94,0,0,0,0,0,0,0,0
+Jame,AWPer,PARIVISION,1.05,1,2,2,4,12,4,8,37
+xiELO,Opener,PARIVISION,0.97,0,0,0,0,0,0,0,0
+FL1T,Support,PARIVISION,0.97,0,0,0,0,0,0,0,0
+zweih,Closer,PARIVISION,1.04,0,0,0,0,0,0,0,0
+slaxejezzz,Opener,PARIVISION,0.9,0,0,0,0,0,0,0,0
+hypex,AWPer,GamerLegion,1.04,0,0,0,0,0,0,0,0
+FL4MUS,Opener,GamerLegion,1.04,0,0,0,0,0,0,0,0
+Snax,Closer,GamerLegion,0.86,0,2,3,4,6,0,4,22
+REZ,Opener,GamerLegion,1.14,0,0,0,0,0,0,0,0
+Tauson,Support,GamerLegion,1.04,0,0,0,0,0,0,0,0
+saffee,AWPer,paiN,0.95,0,0,0,0,0,0,0,0
+vsm,Closer,paiN,0.81,0,0,0,0,0,0,0,0
+biguzera,Opener,paiN,0.9,0,0,0,2,6,0,0,20
+snow,Opener,paiN,0.99,0,0,0,0,0,0,0,0
+pirajr,Support,paiN,0.99,0,0,0,0,0,0,0,0
+mo0N,AWPer,magic,0.92,0,0,0,0,0,0,0,0
+AW,Closer,magic,0.99,0,0,0,0,0,0,0,0
+sFade8,Opener,magic,0.97,0,0,0,1,0,0,0,2
+tENZY,Opener,magic,1.1,0,0,0,0,0,0,0,0
+MaSvAI,Support,magic,1.04,0,0,0,0,0,0,0,0
+Lucky,Closer,3DMAX,0.97,0,0,0,0,0,0,0,0
+Maka,AWPer,3DMAX,0.88,0,0,0,0,3,0,0,19
+Kursy,Opener,3DMAX,0.84,0,0,0,0,0,0,0,0
+Graviti,Opener,3DMAX,0.92,0,0,0,0,0,0,0,1
+misutaaa,Support,3DMAX,0.79,0,0,0,0,0,0,0,0
+Ultimate,AWPer,Liquid,0.9,0,0,0,0,0,0,0,0
+NAF,Closer,Liquid,0.93,0,0,0,0,0,0,0,0
+JT,Opener,Liquid,0.88,0,0,1,3,4,0,0,27
+EliGE,Opener,Liquid,1.05,0,0,0,0,0,0,0,0
+malbsMd,Support,Liquid,1.02,0,0,0,0,0,0,0,0
+gr1ks,AWPer,BIG,0.85,0,0,0,0,0,0,0,0
+tabseN,Closer,BIG,1.08,0,0,0,1,5,0,0,21
+blameF,Opener,BIG,0.88,0,0,0,0,0,0,0,1
+JDC,Opener,BIG,0.88,0,0,0,0,0,0,0,0
+faveN,Support,BIG,0.88,0,0,0,0,0,0,0,0
+headtr1ck,AWPer,Inner Circle,1.02,0,0,0,0,0,0,0,0
+zeRRoFIX,Closer,Inner Circle,0.75,0,0,0,0,0,0,0,0
+onic,Opener,Inner Circle,0.86,0,0,0,0,0,0,0,2
+Dawy,Opener,Inner Circle,0.88,0,0,0,0,0,0,0,0
+cptkurtka023,Support,Inner Circle,1.09,0,0,0,0,0,0,0,0
+nqz,AWPer,MIBR,1.1,0,0,0,0,0,0,0,0
+brnz4n,Opener,MIBR,0.96,0,0,0,0,0,0,0,0
+LNZ,Closer,MIBR,0.88,0,0,0,0,3,0,0,8
+insani,Opener,MIBR,1.1,0,0,0,0,0,0,0,0
+venomzera,Support,MIBR,0.9,0,0,0,0,0,0,0,0
+stavn,AWPer,Ninjas in Pyjamas,0.98,0,0,0,0,0,0,0,0
+Snappi,Closer,Ninjas in Pyjamas,0.79,0,1,4,6,7,0,4,39
+xKacpersky,Opener,Ninjas in Pyjamas,1.33,0,0,0,0,0,0,0,0
+n0te,Opener,Ninjas in Pyjamas,0.89,0,0,0,0,0,0,0,0
+sjuush,Support,Ninjas in Pyjamas,0.92,0,0,0,0,0,0,0,0
+m1N1,AWPer,JiJieHao,0.79,0,0,0,0,0,0,0,0
+sinnopsyy,Opener,JiJieHao,0.87,0,0,0,0,0,0,0,4
+CacaNito,Opener,JiJieHao,1.05,0,0,0,0,0,0,0,0
+Bibu,Closer,JiJieHao,0.91,0,0,0,0,0,0,0,0
+0SAMAS,Support,JiJieHao,0.7,0,0,0,0,0,0,0,0
+z4kr,AWPer,Lynn Vision,0.97,0,0,0,0,0,0,0,0
+C4LLM3SU3,Closer,Lynn Vision,0.99,0,0,0,0,0,0,0,0
+Westmelon,Opener,Lynn Vision,0.83,0,0,0,0,0,0,0,10
+Starry,Opener,Lynn Vision,1.08,0,0,0,0,0,0,0,0
+EmiliaQAQ,Support,Lynn Vision,0.94,0,0,0,0,0,0,0,0
+MartinezSa,AWPer,HEROIC,1.05,0,0,0,0,0,0,0,0
+nilo,Closer,HEROIC,0.98,0,0,0,0,0,0,0,0
+Brollan,Support,HEROIC,0.97,0,1,4,9,4,0,4,20
+Chr1zN,Opener,HEROIC,0.81,0,0,0,0,1,0,0,3
+susp,Opener,HEROIC,0.93,0,0,0,0,0,0,0,0
+slaxz-,AWPer,M80,0.87,0,0,0,0,0,0,0,0
+s1n,Closer,M80,0.92,0,0,0,0,2,0,0,10
+Swisher,Opener,M80,0.94,0,0,0,0,0,0,0,0
+Lake,Opener,M80,0.94,0,0,0,0,0,0,0,0
+JBa,Support,M80,0.9,0,0,0,0,0,0,0,0
+maxxkor,AWPer,DENDELE,0.96,0,0,0,0,0,0,0,0
+rdnzao,Closer,DENDELE,0.86,0,0,0,0,0,0,0,0
+gafolo,Opener,DENDELE,0.69,0,0,0,0,0,0,0,1
+doc,Opener,DENDELE,0.82,0,0,0,0,0,0,0,0
+koala,Support,DENDELE,1.1,0,0,0,0,0,0,0,0
+device,AWPer,100 Thieves,0.88,0,0,0,0,0,0,0,0
+poiii,Closer,100 Thieves,0.7,0,0,0,0,0,0,0,0
+Gizmy,Opener,100 Thieves,0.9,0,0,0,0,0,0,0,4
+sirah,Opener,100 Thieves,0.65,0,0,0,0,0,0,0,0
+rain,Support,100 Thieves,0.71,0,0,0,0,0,0,0,0
+Jee,AWPer,TYLOO,0.83,0,0,0,0,0,0,0,0
+Moseyuh,Closer,TYLOO,0.87,0,0,0,0,0,0,0,0
+Mercury,Opener,TYLOO,0.86,0,0,0,0,2,0,0,7
+JamYoung,Opener,TYLOO,1.07,0,0,0,0,0,0,0,0
+Zero,Support,TYLOO,0.92,0,0,0,0,0,0,0,0
