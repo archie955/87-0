@@ -12,7 +12,7 @@ const player: Player = {
   name: "s1mple",
   role: Roles.AWPER,
   hltv: 1.34,
-  igl_bonus: 0.1,
+  igl_score: 0.1,
 };
 
 describe("RuleChange", () => {

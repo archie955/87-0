@@ -14,7 +14,11 @@ from sqlalchemy import text
 from cache.init_cache import initialise_db_and_cache
 from cache.redis import RedisDep, create_redis
 from database.database import DBDep
-from exceptions.app_exceptions import AppException, UninstantiatedCache
+from exceptions.app_exceptions import (
+    AppException,
+    DataNotFoundError,
+    UninstantiatedCache,
+)
 from exceptions.steam_exceptions import SteamException
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
@@ -39,7 +43,10 @@ async def lifespan(app: FastAPI):
         await app.state.redis.ping()
         await app.state.redis.set("app:status", "healthy")
 
-        await initialise_db_and_cache(cache=app.state.redis)
+        response = await initialise_db_and_cache(cache=app.state.redis)
+        if response["status"] == "Failed":
+            # ruff: ignore[raise-vanilla-args]
+            raise DataNotFoundError("Initialisation data")
         yield
     finally:
         await app.state.redis.aclose()

@@ -6,7 +6,7 @@ export interface Player {
   name: string;
   role: Role;
   hltv: number;
-  igl_bonus: number;
+  igl_score: number;
 }
 
 export interface PlayerSelection {
@@ -15,6 +15,6 @@ export interface PlayerSelection {
   name: string;
   role: Role;
   hltv: number;
-  igl_bonus: number;
+  igl_score: number;
   igl: boolean;
 }

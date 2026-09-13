@@ -95,11 +95,11 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
 
                 {rules === "easy" && (
                   <div className="border-border/60 mt-4 flex items-end justify-between border-t pt-3">
-                    <span className="text-muted-foreground text-[9px] font-bold tracking-[0.15em] uppercase">
-                      IGL bonus
+                    <span className="text-muted-foreground text-[12px] font-bold tracking-[0.15em] uppercase">
+                      IGL Score
                     </span>
-                    <span className="text-primary font-mono text-sm font-bold tabular-nums">
-                      +{player.igl_bonus.toFixed(2)}
+                    <span className="font-mono text-sm text-[12px] font-bold tabular-nums">
+                      +{player.igl_score.toFixed(2)}
                     </span>
                   </div>
                 )}
