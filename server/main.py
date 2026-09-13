@@ -14,7 +14,7 @@ from sqlalchemy import text
 from cache.init_cache import initialise_cache
 from cache.redis import RedisDep, create_redis
 from database.database import DBDep
-from database.init_db import initialise_db_if_empty
+from database.init_db import initialise_db
 from exceptions.app_exceptions import (
     AppException,
     UninstantiatedCache,
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
         await app.state.redis.ping()
 
-        await initialise_db_if_empty()
+        await initialise_db()
         await initialise_cache(cache=app.state.redis)
 
         await app.state.redis.set("app:status", "healthy")
