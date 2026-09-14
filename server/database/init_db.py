@@ -1,5 +1,5 @@
 from services.helpers import safe_commit_delete
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from database.database import AsyncSessionLocal
 from database.init_players import process_players
@@ -14,8 +14,8 @@ async def initialise_db() -> None:
 
         if has_teams:
 
-            await db.delete(models.Player)
-            await db.delete(models.Team)
+            await db.execute(delete(models.Player))
+            await db.execute(delete(models.Team))
 
             await safe_commit_delete(db=db, datatype="Teams and Players")
 
