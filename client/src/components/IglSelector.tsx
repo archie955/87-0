@@ -96,10 +96,10 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
                 {rules === "easy" && (
                   <div className="border-border/60 mt-4 flex items-end justify-between border-t pt-3">
                     <span className="text-muted-foreground text-[12px] font-bold tracking-[0.15em] uppercase">
-                      IGL Score
+                      IGL Bonus
                     </span>
                     <span className="font-mono text-sm text-[12px] font-bold uppercase tabular-nums">
-                      {player.igl_score.toFixed(2)}
+                      {(player.igl_score - player.hltv).toFixed(2)}
                     </span>
                   </div>
                 )}
