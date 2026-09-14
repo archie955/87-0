@@ -13,14 +13,13 @@ FormDep = Annotated[str, Form(...)]
 
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
-async def steam_register(
-    request: Request, db: DBDep, settings: SettingsDep, username: FormDep
-):
+async def steam_register(db: DBDep, settings: SettingsDep, username: FormDep):
     await steam_service.check_username(db=db, username=username)
     if settings.prod == "prod":
-        url = f"api/{request.url_for('steam_validate_register', username=username)!s}"
+        url = f"{settings.frontend_auth_url}/api/steam/validate/{username}"
     else:
-        url = str(request.url_for("steam_validate_register", username=username))
+        url = f"{settings.frontend_auth_url}/steam/validate/{username}"
+
     return steam_service.redirect(return_url=url)
 
 
@@ -41,7 +40,8 @@ async def steam_validate_register(
     )
 
     response = RedirectResponse(
-        url=settings.frontend_auth_url, status_code=status.HTTP_303_SEE_OTHER
+        url=f"{settings.frontend_auth_url}/account",
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
     return auth_service.set_cookie_headers(
@@ -52,11 +52,12 @@ async def steam_validate_register(
 @router.get(
     "/login", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse
 )
-def steam_login(request: Request, settings: SettingsDep):
+def steam_login(settings: SettingsDep):
     if settings.prod == "prod":
-        url = f"api/{request.url_for('steam_validate_login')!s}"
+        url = f"{settings.frontend_auth_url}/api/steam/login/validate"
     else:
-        url = str(request.url_for("steam_validate_login"))
+        url = f"{settings.frontend_auth_url}/steam/login/validate"
+
     return steam_service.redirect(return_url=url)
 
 
@@ -75,7 +76,8 @@ async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDe
     )
 
     response = RedirectResponse(
-        url=settings.frontend_auth_url, status_code=status.HTTP_303_SEE_OTHER
+        url=f"{settings.frontend_auth_url}/account",
+        status_code=status.HTTP_303_SEE_OTHER,
     )
 
     return auth_service.set_cookie_headers(
