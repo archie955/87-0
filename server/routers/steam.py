@@ -18,7 +18,7 @@ async def steam_register(
 ):
     await steam_service.check_username(db=db, username=username)
     if settings.prod == "prod":
-        url = f"/api/{request.url_for('steam_validate_register', username=username)!s}"
+        url = f"api/{request.url_for('steam_validate_register', username=username)!s}"
     else:
         url = str(request.url_for("steam_validate_register", username=username))
     return steam_service.redirect(return_url=url)
@@ -54,7 +54,7 @@ async def steam_validate_register(
 )
 def steam_login(request: Request, settings: SettingsDep):
     if settings.prod == "prod":
-        url = f"/api/{request.url_for('steam_validate_login')!s}"
+        url = f"api/{request.url_for('steam_validate_login')!s}"
     else:
         url = str(request.url_for("steam_validate_login"))
     return steam_service.redirect(return_url=url)
