@@ -71,7 +71,7 @@ async def process_players(persist: bool) -> dict[str, float]:
     scores.sort(key=score_key, reverse=True)
 
     best_igl = df.sort_values("igl_odds", ascending=False).iloc[0]
-    alt_best_igl = df[df["name"] == "Aleksib"]
+    alt_best_igl = df[df["name"] == "Aleksib"].iloc[0]
     best_opener = df[df["role"] == Roles.OPENER].sort_values("odds", ascending=False).iloc[0]
     second_best_opener = df[df["role"] == Roles.OPENER].sort_values("odds", ascending=False).iloc[1]
     best_closer = df[df["role"] == Roles.CLOSER].sort_values("odds", ascending=False).iloc[0]
