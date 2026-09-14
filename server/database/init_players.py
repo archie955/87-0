@@ -82,11 +82,13 @@ async def process_players(persist: bool) -> dict[str, float]:
     df["odds"] = df["odds"]*factor
     df["igl_odds"] = df["igl_odds"]*factor
 
-    cat_1 = factor*(best_score + scores[0][1]) / 2
-    cat_2 = factor*(scores[0][1] + scores[1][1]) / 2
-    cat_3 = factor*(scores[3][1] + scores[4][1]) / 2
-    cat_4 = factor*(scores[8][1] + scores[9][1]) / 2
-    cat_5 = factor*(scores[15][1] + scores[16][1]) / 2
+    cat_1 = factor*(best_score + scores[0][1]) / 2 # GOAT
+    cat_2 = factor*(min(scores[0][1] + scores[2][1], scores[1][1])) / 2 # not if, but how many majors
+    cat_3 = factor*(min(scores[2][1] + scores[4][1], scores[3][1])) / 2 # wins and major hopefuls
+    cat_4 = factor*(min(scores[4][1] + scores[9][1], scores[7][1])) / 2 # win sometimes, major knockouts
+    cat_5 = factor*(min(scores[9][1] + scores[17][1], scores[15][1])) / 2 # no win, knockout hopefuls, maybe young prospects or maybe just a new player or two
+    cat_6 = factor*(min(scores[17][1] + scores[25][1], scores[23][1])) / 2 # tier 2, but tier 1 hopefuls. 
+    # cat_7 is tier 2 at best, not much hope
     
     if persist:
         async with AsyncSessionLocal() as db:
@@ -130,6 +132,6 @@ async def process_players(persist: bool) -> dict[str, float]:
 
             await db.commit()
 
-    response = {"cat_1": cat_1, "cat_2": cat_2, "cat_3": cat_3, "cat_4": cat_4, "cat_5": cat_5}
+    response = {"cat_1": cat_1, "cat_2": cat_2, "cat_3": cat_3, "cat_4": cat_4, "cat_5": cat_5, "cat_6": cat_6}
     return response
 

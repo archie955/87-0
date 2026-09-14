@@ -29,6 +29,7 @@ def eval_lineup(game: active_game_schemas.GameList) -> float:
     return score
 
 
+# ruff: ignore[too-many-return-statements]
 async def eval_category(cache: Redis, score: float) -> active_game_schemas.Cat:
     categories = await cache.get("categories")
     if not categories:
@@ -45,7 +46,10 @@ async def eval_category(cache: Redis, score: float) -> active_game_schemas.Cat:
         return active_game_schemas.Cat.cat_4
     if score >= categories["cat_5"]:
         return active_game_schemas.Cat.cat_5
-    return active_game_schemas.Cat.cat_6
+    if score >= categories["cat_6"]:
+        return active_game_schemas.Cat.cat_6
+
+    return active_game_schemas.Cat.cat_7
 
 
 async def validate_game(

@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Result } from "@/types/resultTypes";
 import { useNavigate } from "react-router-dom";
+import { catToDescription } from "@/lib/resultUtils";
 
 type GameResultDialogProps = {
   result: Result | null;
@@ -63,7 +64,9 @@ const GameResultDialog = ({
           <p className="text-6xl font-bold tabular-nums">
             {result?.score.toFixed(2)}
           </p>
-          <p className="text-6xl font-bold tabular-nums">{result?.cat}</p>
+          <p className="text-sm font-bold tabular-nums">
+            {result?.cat ? catToDescription(result.cat) : null}
+          </p>
           {result?.best && (
             <p className="mt-2 text-sm font-medium text-amber-600 dark:text-amber-400">
               🏆 Beat your previous best{" "}

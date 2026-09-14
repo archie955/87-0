@@ -14,6 +14,7 @@ class Cat(StrEnum):
     cat_4 = "cat_4"
     cat_5 = "cat_5"
     cat_6 = "cat_6"
+    cat_7 = "cat_7"
 
 
 class ActiveGame(OrmModel):
