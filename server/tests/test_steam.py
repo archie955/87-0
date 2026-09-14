@@ -11,9 +11,14 @@ from exceptions.steam_exceptions import (
 )
 from models.models import Steam, User
 from services.steam_login import BASEURL, FETCHURL, SteamValidator
+from utils.config import get_settings
 
+settings = get_settings()
+
+KEY = settings.steam_key
 STEAM_ID = "76561197960287930"
 IDENTITY = f"https://steamcommunity.com/openid/id/{STEAM_ID}"
+
 
 VALID_OPENID_PARAMS = {
     "openid.ns": "http://specs.openid.net/auth/2.0",
@@ -151,7 +156,7 @@ async def test_validate_login_steam_5xx_becomes_invalid_credentials():
 async def test_fetch_details_success():
     with respx.mock:
         mock_player_summary()
-        profile = await SteamValidator.fetch_details(STEAM_ID)
+        profile = await SteamValidator.fetch_details(STEAM_ID, KEY)
 
     assert profile.steam_id == STEAM_ID
     assert profile.profile_name == "s1mple"
@@ -166,7 +171,7 @@ async def test_fetch_details_no_players_returned():
         )
 
         with pytest.raises(SteamDataNotFoundError):
-            await SteamValidator.fetch_details(STEAM_ID)
+            await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
 @pytest.mark.asyncio
@@ -175,7 +180,7 @@ async def test_fetch_details_steamid_mismatch():
         mock_player_summary(steam_id="1" * 17)
 
         with pytest.raises(SteamInvalidCredentialsError):
-            await SteamValidator.fetch_details(STEAM_ID)
+            await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
 @pytest.mark.asyncio
@@ -188,7 +193,7 @@ async def test_fetch_details_missing_profile_field(missing_field):
         respx.get(FETCHURL).mock(return_value=httpx.Response(200, json=payload))
 
         with pytest.raises(SteamDataNotFoundError):
-            await SteamValidator.fetch_details(STEAM_ID)
+            await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
 @pytest.mark.asyncio
@@ -197,7 +202,7 @@ async def test_fetch_details_network_error_becomes_bad_request():
         respx.get(FETCHURL).mock(side_effect=httpx.ConnectError("no route to host"))
 
         with pytest.raises(SteamBadRequestError):
-            await SteamValidator.fetch_details(STEAM_ID)
+            await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
 @pytest.mark.asyncio
@@ -206,7 +211,7 @@ async def test_fetch_details_steam_error_status_becomes_not_found():
         respx.get(FETCHURL).mock(return_value=httpx.Response(403))
 
         with pytest.raises(SteamDataNotFoundError):
-            await SteamValidator.fetch_details(STEAM_ID)
+            await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
 # ---------------------------------------------------------------------------

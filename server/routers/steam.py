@@ -13,11 +13,15 @@ FormDep = Annotated[str, Form(...)]
 
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
-async def steam_register(request: Request, db: DBDep, username: FormDep):
+async def steam_register(
+    request: Request, db: DBDep, settings: SettingsDep, username: FormDep
+):
     await steam_service.check_username(db=db, username=username)
-    return steam_service.redirect(
-        return_url=str(request.url_for("steam_validate_register", username=username))
-    )
+    if settings.prod == "prod":
+        url = f"/api/{request.url_for('steam_validate_register', username=username)!s}"
+    else:
+        url = str(request.url_for("steam_validate_register", username=username))
+    return steam_service.redirect(return_url=url)
 
 
 @router.get(
@@ -28,7 +32,9 @@ async def steam_register(request: Request, db: DBDep, username: FormDep):
 async def steam_validate_register(
     request: Request, username: str, db: DBDep, settings: SettingsDep
 ):
-    profile = await steam_service.validate_profile(request.query_params)
+    profile = await steam_service.validate_profile(
+        query_params=request.query_params, key=settings.steam_key
+    )
 
     tokens = await steam_service.create_steam_login(
         db=db, settings=settings, profile=profile, username=username
@@ -46,10 +52,12 @@ async def steam_validate_register(
 @router.get(
     "/login", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse
 )
-def steam_login(request: Request):
-    return steam_service.redirect(
-        return_url=str(request.url_for("steam_validate_login"))
-    )
+def steam_login(request: Request, settings: SettingsDep):
+    if settings.prod == "prod":
+        url = f"/api/{request.url_for('steam_validate_login')!s}"
+    else:
+        url = str(request.url_for("steam_validate_login"))
+    return steam_service.redirect(return_url=url)
 
 
 @router.get(
@@ -58,7 +66,9 @@ def steam_login(request: Request):
     response_class=RedirectResponse,
 )
 async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDep):
-    profile = await steam_service.validate_profile(request.query_params)
+    profile = await steam_service.validate_profile(
+        query_params=request.query_params, key=settings.steam_key
+    )
 
     tokens = await steam_service.update_steam_login(
         db=db, settings=settings, profile=profile

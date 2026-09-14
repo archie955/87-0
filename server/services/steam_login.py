@@ -11,7 +11,6 @@ from exceptions.steam_exceptions import (
     SteamPermissionDeniedError,
 )
 from schemas.steam_schemas import SteamProfile
-from utils.config import get_settings
 
 """example output of fetch here:
 {"response":
@@ -40,8 +39,6 @@ from utils.config import get_settings
 }
 """
 
-settings = get_settings()
-KEY = settings.steam_key
 BASEURL = "https://steamcommunity.com/openid/login"
 FETCHURL = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
 
@@ -140,8 +137,8 @@ class SteamValidator:
         return steam_id
 
     @staticmethod
-    async def fetch_details(steam_id: str) -> SteamProfile:
-        params = {"key": KEY, "steamids": steam_id}
+    async def fetch_details(steam_id: str, key: str) -> SteamProfile:
+        params = {"key": key, "steamids": steam_id}
 
         async with AsyncClient() as client:
             try:

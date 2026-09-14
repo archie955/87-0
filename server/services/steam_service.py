@@ -39,14 +39,16 @@ def redirect(return_url: str) -> RedirectResponse:
     return steam.redirect()
 
 
-async def validate_profile(query_params: QueryParams) -> steam_schemas.SteamProfile:
+async def validate_profile(
+    query_params: QueryParams, key: str
+) -> steam_schemas.SteamProfile:
     validator = SteamValidator()
     steam_id = await validator.validate_login(query_params)
 
     if not steam_id:
         raise SteamInvalidCredentialsError()
 
-    return await validator.fetch_details(steam_id)
+    return await validator.fetch_details(steam_id, key=key)
 
 
 async def create_steam_login(

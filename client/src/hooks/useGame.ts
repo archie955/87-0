@@ -22,7 +22,8 @@ const useGame = (): UseGameOutput => {
     queryKey: ["game"],
     queryFn: gameService.getGame,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 900000, // 15 minutes
+    refetchOnMount: "always",
     retry: false,
   });
 
