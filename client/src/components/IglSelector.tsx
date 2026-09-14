@@ -98,8 +98,8 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
                     <span className="text-muted-foreground text-[12px] font-bold tracking-[0.15em] uppercase">
                       IGL Score
                     </span>
-                    <span className="font-mono text-sm text-[12px] font-bold tabular-nums">
-                      +{player.igl_score.toFixed(2)}
+                    <span className="font-mono text-sm text-[12px] font-bold uppercase tabular-nums">
+                      {player.igl_score.toFixed(2)}
                     </span>
                   </div>
                 )}
