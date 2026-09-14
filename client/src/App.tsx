@@ -12,6 +12,7 @@ const Home = lazy(() => import("@/pages/Home"));
 const Rules = lazy(() => import("@/pages/Rules"));
 const Account = lazy(() => import("@/pages/Account"));
 const Game = lazy(() => import("@/pages/Game"));
+const CatchAll = lazy(() => import("@/pages/CatchAll"));
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
                 }
               />
             </Route>
+            <Route path="/*" element={<CatchAll />} />
           </Route>
         </Routes>
       </ErrorBoundary>
