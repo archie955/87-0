@@ -71,12 +71,17 @@ async def process_players(persist: bool) -> dict[str, float]:
     scores.sort(key=score_key, reverse=True)
 
     best_igl = df.sort_values("igl_odds", ascending=False).iloc[0]
+    alt_best_igl = df[df["name"] == "Aleksib"]
     best_opener = df[df["role"] == Roles.OPENER].sort_values("odds", ascending=False).iloc[0]
+    second_best_opener = df[df["role"] == Roles.OPENER].sort_values("odds", ascending=False).iloc[1]
     best_closer = df[df["role"] == Roles.CLOSER].sort_values("odds", ascending=False).iloc[0]
     best_awper = df[df["role"] == Roles.AWPER].sort_values("odds", ascending=False).iloc[0]
+    second_best_awper = df[df["role"] == Roles.AWPER].sort_values("odds", ascending=False).iloc[1]
     best_support = df[df["role"] == Roles.SUPPORT].sort_values("odds", ascending=False).iloc[0]
 
     best_score = best_igl["igl_odds"] + best_opener["odds"] + best_closer["odds"] + best_awper["odds"] + best_support["odds"]
+    alt_best_score = alt_best_igl["igl_odds"] + best_opener["odds"] + max(second_best_opener["odds"], second_best_awper["odds"]) + best_awper["odds"] + best_support["odds"]
+    best_score = max(best_score, alt_best_score)
     factor = 10/best_score
 
     df["odds"] = df["odds"]*factor
