@@ -83,11 +83,11 @@ async def process_players(persist: bool) -> dict[str, float]:
     df["igl_odds"] = df["igl_odds"]*factor
 
     cat_1 = factor*(best_score + scores[0][1]) / 2 # GOAT
-    cat_2 = factor*(min(scores[0][1] + scores[2][1], scores[1][1])) / 2 # not if, but how many majors
-    cat_3 = factor*(min(scores[2][1] + scores[4][1], scores[3][1])) / 2 # wins and major hopefuls
-    cat_4 = factor*(min(scores[4][1] + scores[9][1], scores[7][1])) / 2 # win sometimes, major knockouts
-    cat_5 = factor*(min(scores[9][1] + scores[17][1], scores[15][1])) / 2 # no win, knockout hopefuls, maybe young prospects or maybe just a new player or two
-    cat_6 = factor*(min(scores[17][1] + scores[25][1], scores[23][1])) / 2 # tier 2, but tier 1 hopefuls. 
+    cat_2 = factor*(max(scores[0][1] + scores[2][1], scores[1][1])) / 2 # not if, but how many majors
+    cat_3 = factor*(max(scores[2][1] + scores[4][1], scores[3][1])) / 2 # wins and major hopefuls
+    cat_4 = factor*(max(scores[4][1] + scores[9][1], scores[7][1])) / 2 # win sometimes, major knockouts
+    cat_5 = factor*(max(scores[9][1] + scores[17][1], scores[15][1])) / 2 # no win, knockout hopefuls, maybe young prospects or maybe just a new player or two
+    cat_6 = factor*(max(scores[17][1] + scores[25][1], scores[23][1])) / 2 # tier 2, but tier 1 hopefuls. 
     # cat_7 is tier 2 at best, not much hope
     
     if persist:
