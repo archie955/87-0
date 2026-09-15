@@ -72,6 +72,7 @@ async def refresh(
 
     token = verify_refresh_token(token=refresh_token, settings=settings)
 
+    print(f"received token should be the same: {token.jti}")
     user = (
         await db.execute(
             select(models.User)
@@ -84,10 +85,12 @@ async def refresh(
         raise DataNotFoundError(datatype="User")
 
     old_token = user.refresh
+    print(f"User token must be deleted: {old_token}")
 
-    if not old_token or not old_token.jti == token.jti:
+    if not old_token or old_token.jti != token.jti:
         raise InvalidCredentialsError()
 
+    print(f"somehow there is still an old token, {old_token.jti}. new token jti is {token.jti}")
     if old_token.expires_at < datetime.now(tz=UTC):
         raise InvalidCredentialsError()
 
@@ -129,6 +132,8 @@ async def logout(request: Request, db: AsyncSession, settings: Settings) -> None
     except InvalidCredentialsError:
         return
 
+    print(f"token received for logout: {token.jti}")
+
     old_token = (
         await db.execute(
             select(models.RefreshToken).where(models.RefreshToken.jti == token.jti)
@@ -136,7 +141,9 @@ async def logout(request: Request, db: AsyncSession, settings: Settings) -> None
     ).scalar_one_or_none()
 
     if old_token:
+        print(f"deleting old token {old_token.jti}")
         await db.delete(old_token)
         await db.commit()
+        print("Deleted successfully")
 
     logger.info("User logged out", extra={"user_id": token.id})

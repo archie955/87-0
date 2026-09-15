@@ -2,28 +2,31 @@ async def test_fetch_teams(auth_client_seed):
     response = await auth_client_seed.get("/teams")
 
     assert response.status_code == 200
-    data = response.json()
 
-    keys = data.keys()
-    teams = [data[key] for key in keys]
+    data = response.json()
+    teams = list(data.values())
 
     assert len(teams) == 3
-    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
-    assert "Vitality" in names
-    assert "Falcons" in names
-    assert "Spirit" in names
+    team_names = {team["name"] for team in teams}
 
-    team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
-    team = teams[2] if teams[2]["name"] == "Falcons" else team
+    assert team_names == {
+        "Vitality",
+        "Falcons",
+        "Spirit",
+    }
 
-    player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
+    falcons = next(team for team in teams if team["name"] == "Falcons")
 
-    assert "players" in team
-    players = team["players"]
+    player_names = {player["name"] for player in falcons["players"]}
 
-    for p in players:
-        assert p["name"] in player_names
+    assert player_names == {
+        "NiKo",
+        "kyousuke",
+        "TeSeS",
+        "m0nesy",
+        "karrigan",
+    }
 
 
 async def test_fetch_no_teams(auth_client):
@@ -36,56 +39,63 @@ async def test_fetch_teams_no_auth(auth_client_seed):
     response = await auth_client_seed.noauth_get("/teams")
 
     assert response.status_code == 200
-    data = response.json()
 
-    keys = data.keys()
-    teams = [data[key] for key in keys]
+    data = response.json()
+    teams = list(data.values())
 
     assert len(teams) == 3
-    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
-    assert "Vitality" in names
-    assert "Falcons" in names
-    assert "Spirit" in names
+    team_names = {team["name"] for team in teams}
 
-    team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
-    team = teams[2] if teams[2]["name"] == "Falcons" else team
+    assert team_names == {
+        "Vitality",
+        "Falcons",
+        "Spirit",
+    }
 
-    player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
+    falcons = next(team for team in teams if team["name"] == "Falcons")
 
-    assert "players" in team
-    players = team["players"]
+    player_names = {player["name"] for player in falcons["players"]}
 
-    for p in players:
-        assert p["name"] in player_names
+    assert player_names == {
+        "NiKo",
+        "kyousuke",
+        "TeSeS",
+        "m0nesy",
+        "karrigan",
+    }
 
 
 async def test_fetch_teams_no_user(client, auth_client_seed):
     health = await auth_client_seed.get("/health")
 
     assert health.status_code == 200
+
     response = await client.get("/teams")
 
     assert response.status_code == 200
-    data = response.json()
 
-    keys = data.keys()
-    teams = [data[key] for key in keys]
+    data = response.json()
+    teams = list(data.values())
 
     assert len(teams) == 3
-    names = {teams[0]["name"], teams[1]["name"], teams[2]["name"]}
 
-    assert "Vitality" in names
-    assert "Falcons" in names
-    assert "Spirit" in names
+    team_names = {team["name"] for team in teams}
 
-    team = teams[0] if teams[0]["name"] == "Falcons" else teams[1]
-    team = teams[2] if teams[2]["name"] == "Falcons" else team
+    assert team_names == {
+        "Vitality",
+        "Falcons",
+        "Spirit",
+    }
 
-    player_names = {"NiKo", "kyousuke", "TeSeS", "m0nesy", "karrigan"}
+    falcons = next(team for team in teams if team["name"] == "Falcons")
 
-    assert "players" in team
-    players = team["players"]
+    player_names = {player["name"] for player in falcons["players"]}
 
-    for p in players:
-        assert p["name"] in player_names
+    assert player_names == {
+        "NiKo",
+        "kyousuke",
+        "TeSeS",
+        "m0nesy",
+        "karrigan",
+    }

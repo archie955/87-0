@@ -1,42 +1,58 @@
+from tests.helpers import register_user
+
 # ---------------------------------------------------------------------------
 # Router-level: POST /email
 # ---------------------------------------------------------------------------
 
 
-async def test_registration(client, helpers):
-    response = await helpers.register_user(client)
+async def test_registration(client):
+    user = await register_user(client)
 
-    assert response["email"] == "authuser@example.com"
-    assert response["username"] == "authuser"
-
-
-async def test_duplicate_email_registration(client, helpers):
-    user = await helpers.register_user(client)
-
-    user["username"] = "newusername"
-
-    response = await client.post("/email", json=user)
-
-    assert response.status_code == 409
+    assert user.email == "authuser@example.com"
+    assert user.username == "authuser"
 
 
-async def test_duplicate_username_registration(client, helpers):
-    user = await helpers.register_user(client)
+async def test_duplicate_email_registration(client):
+    user = await register_user(client)
 
-    user["email"] = "newemail@email.com"
-
-    response = await client.post("/email", json=user)
+    response = await client.post(
+        "/email",
+        json={
+            "username": "newusername",
+            "email": user.email,
+            "password": "newpassword",
+        },
+    )
 
     assert response.status_code == 409
 
 
-async def test_duplicate_password_ok(client, helpers):
-    user = await helpers.register_user(client)
+async def test_duplicate_username_registration(client):
+    user = await register_user(client)
 
-    user["email"] = "newusername@example.com"
-    user["username"] = "newuser"
+    response = await client.post(
+        "/email",
+        json={
+            "username": user.username,
+            "email": "newemail@email.com",
+            "password": "newpassword",
+        },
+    )
 
-    response = await client.post("/email", json=user)
+    assert response.status_code == 409
+
+
+async def test_duplicate_password_ok(client):
+    user = await register_user(client)
+
+    response = await client.post(
+        "/email",
+        json={
+            "username": "new_username",
+            "email": "newemail@email.com",
+            "password": user.password,
+        },
+    )
 
     assert response.status_code == 201
 
@@ -82,43 +98,49 @@ async def test_incorrect_email_type(client):
 # ---------------------------------------------------------------------------
 
 
-async def test_login_email(client, helpers):
-    user = await helpers.register_user(client)
+async def test_login_email(client):
+    user = await register_user(client)
 
     response = await client.post(
         "/email/login",
-        data={"username": user["email"], "password": user["password"]},
+        data={
+            "username": user.email,
+            "password": user.password,
+        },
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
 
     assert response.status_code == 200
-
     assert "access_token" in response.cookies
     assert "refresh_token" in response.cookies
 
 
-async def test_incorrect_password(client, helpers):
-    user = await helpers.register_user(client)
+async def test_incorrect_password(client):
+    user = await register_user(client)
 
     response = await client.post(
         "/email/login",
-        data={"username": user["email"], "password": "incorrectpassword"},
+        data={"username": user.email, "password": "incorrectpassword"},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
 
     assert response.status_code == 401
+    assert "access_token" not in response.cookies
+    assert "refresh_token" not in response.cookies
 
 
-async def test_incorrect_email(client, helpers):
-    user = await helpers.register_user(client)
+async def test_incorrect_email(client):
+    user = await register_user(client)
 
     response = await client.post(
         "/email/login",
-        data={"username": "notroot", "password": user["password"]},
+        data={"username": "incorrectEmail@email.com", "password": user.password},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
 
     assert response.status_code == 401
+    assert "access_token" not in response.cookies
+    assert "refresh_token" not in response.cookies
 
 
 # ---------------------------------------------------------------------------
@@ -126,48 +148,45 @@ async def test_incorrect_email(client, helpers):
 # ---------------------------------------------------------------------------
 
 
-async def test_update_username(client, helpers):
-    user = await helpers.full_login(client)
+async def test_update_username(auth_client):
+    response = await auth_client.put(
+        "/users",
+        json={
+            "updated_username": "newusername",
+            "password": auth_client.user.password,
+        },
+    )
 
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["email_login"]["email"] == auth_client.user.email
+    assert data["username"] == "newusername"
+
+
+async def test_update_same_username(auth_client):
     updated_payload = {
-        "updated_username": "newusername",
-        "password": user["password"],
+        "updated_username": auth_client.user.username,
+        "password": auth_client.user.password,
     }
 
-    response = await helpers.update_user(client, updated_payload, user)
-
-    assert response["email_login"]["email"] == user["email"]
-    assert response["username"] == updated_payload["updated_username"]
-
-
-async def test_update_same_username(client, helpers):
-    user = await helpers.full_login(client)
-
-    updated_payload = {
-        "updated_username": user["username"],
-        "password": user["password"],
-    }
-
-    response = await client.put(
+    response = await auth_client.put(
         "/users",
         json=updated_payload,
-        headers=helpers.auth_headers(user, expired=False),
     )
 
     assert response.status_code == 409
 
 
-async def test_update_incorrect_password(client, helpers):
-    user = await helpers.full_login(client)
-
+async def test_update_incorrect_password(auth_client):
     updated_payload = {
         "updated_username": "newusername",
         "password": "incorrect",
     }
-    response = await client.put(
+    response = await auth_client.put(
         "/users",
         json=updated_payload,
-        headers=helpers.auth_headers(user, expired=False),
     )
 
     assert response.status_code == 401
@@ -178,21 +197,13 @@ async def test_update_incorrect_password(client, helpers):
 # ---------------------------------------------------------------------------
 
 
-async def test_delete(client, helpers):
-    user = await helpers.full_login(client)
-
-    response = await client.delete(
-        "/users", cookies=helpers.auth_headers(user, expired=False)
-    )
+async def test_delete(auth_client):
+    response = await auth_client.delete("/users")
 
     assert response.status_code == 204
 
 
-async def test_delete_not_logged_in(client, helpers):
-    await helpers.register_user(client)
-
-    client.cookies.clear()
-
-    response = await client.delete("/users")
+async def test_delete_not_logged_in(auth_client):
+    response = await auth_client.noauth_delete("/users")
 
     assert response.status_code == 401

@@ -1,133 +1,70 @@
-import json
 from typing import Any
 
-import redis.asyncio as redis
 from httpx import AsyncClient, Cookies, Response
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
-from models.models import Player, Team
-from schemas import player_schemas, team_schemas
-
-SQLALCHEMY_DATABASE_URL = (
-    "postgresql+psycopg://postgres:postgres@localhost:5433/test_db"
-)
+from tests.helpers import TestUser
 
 
 class AuthClient:
     def __init__(
         self,
         client: AsyncClient,
-        user: dict[str, str],
-        db: AsyncSession,
-        cache: redis.Redis,
+        user: TestUser,
     ) -> None:
         self.client = client
-        self.db = db
-        self.cache = cache
         self.user = user
 
-    def auth_headers(self, expired: bool) -> Cookies:
-        access_token = self.user["access_token"]
-        refresh_token = self.user["refresh_token"]
+    def auth_cookies(self, expired: bool = False) -> Cookies:
+        access_token = self.user.access_token
+
         if expired:
             # ruff: ignore[hardcoded-password-string]
             access_token = "expired_token"
-        return Cookies({"access_token": access_token, "refresh_token": refresh_token})
 
-    async def request(self, method: str, url: str, **kwargs: Any) -> Response:
-        headers: dict[str, str] = kwargs.pop("headers", {})
-        cookies = self.auth_headers(expired=False)
+        return Cookies(
+            {
+                "access_token": access_token,
+                "refresh_token": self.user.refresh_token,
+            }
+        )
+
+    async def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> Response:
         return await self.client.request(
-            method, url, headers=headers, cookies=cookies, **kwargs
+            method,
+            url,
+            cookies=self.auth_cookies(),
+            **kwargs,
         )
 
     async def get(self, url: str, **kwargs: Any) -> Response:
-        return await self.request(method="GET", url=url, **kwargs)
+        return await self.request("GET", url, **kwargs)
 
     async def post(self, url: str, **kwargs: Any) -> Response:
-        return await self.request(method="POST", url=url, **kwargs)
+        return await self.request("POST", url, **kwargs)
 
     async def put(self, url: str, **kwargs: Any) -> Response:
-        return await self.request(method="PUT", url=url, **kwargs)
+        return await self.request("PUT", url, **kwargs)
 
     async def delete(self, url: str, **kwargs: Any) -> Response:
-        return await self.request(method="DELETE", url=url, **kwargs)
+        return await self.request("DELETE", url, **kwargs)
 
     async def noauth_get(self, url: str, **kwargs: Any) -> Response:
-        return await self.client.get(url=url, **kwargs)
+        self.client.cookies.clear()
+        return await self.client.get(url, **kwargs)
 
     async def noauth_post(self, url: str, **kwargs: Any) -> Response:
-        return await self.client.post(url=url, **kwargs)
+        self.client.cookies.clear()
+        return await self.client.post(url, **kwargs)
 
     async def noauth_put(self, url: str, **kwargs: Any) -> Response:
-        return await self.client.put(url=url, **kwargs)
+        self.client.cookies.clear()
+        return await self.client.put(url, **kwargs)
 
     async def noauth_delete(self, url: str, **kwargs: Any) -> Response:
-        return await self.client.delete(url=url, **kwargs)
-
-    async def seed_data(self, data: dict[str, Any]) -> None:
-        for t in data["teams"]:
-            team = Team(name=t["name"])
-            self.db.add(team)
-            await self.db.flush()
-
-        teams = (await self.db.execute(select(Team))).scalars().all()
-        team_dict = {}
-        for team in teams:
-            team_dict[team.name] = team
-
-        for p in data["players"]:
-            player = Player(
-                name=p["name"],
-                role=p["role"],
-                hltv=p["hltv"],
-                igl_score=p["igl_score"],
-                odds=p["odds"],
-                igl_odds=p["igl_odds"],
-                majors=p["majors"],
-                wins=p["wins"],
-                second=p["second"],
-                semi=p["semi"],
-                quarter=p["quarter"],
-                total_tournaments=p["total_tournaments"],
-                major_teammates=p["major_teammates"],
-                win_teammates=p["win_teammates"],
-                team=team_dict[p["team_name"]],
-            )
-
-            self.db.add(player)
-            await self.db.flush()
-
-    async def seed_cache(self) -> None:
-        teams = (
-            (await self.db.execute(select(Team).options(selectinload(Team.players))))
-            .scalars()
-            .all()
-        )
-        team_dict = {}
-        teams_list = []
-
-        for t in teams:
-            team_dict[t.id] = team_schemas.Team(
-                # pyrefly: ignore [bad-argument-type]
-                id=t.id,
-                # pyrefly: ignore [bad-argument-type]
-                name=t.name,
-                players=[player_schemas.Player.model_validate(p) for p in t.players],
-            )
-            teams_list.append(t.id)
-        teams = team_schemas.Teams.model_validate(team_dict)
-
-        categories = {
-            "cat_1": 1.5,
-            "cat_2": 1.0,
-            "cat_3": 0.7,
-            "cat_4": 0.2,
-            "cat_5": -0.2,
-        }
-
-        await self.cache.set("teams", teams.model_dump_json())
-        await self.cache.set("team_ids", json.dumps(teams_list))
-        await self.cache.set("categories", json.dumps(categories))
+        self.client.cookies.clear()
+        return await self.client.delete(url, **kwargs)

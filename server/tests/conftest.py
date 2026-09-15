@@ -23,7 +23,8 @@ from main import app
 from ml.ml_model import get_model
 from models.models import Base
 from tests.authclient import AuthClient
-from tests.helpers import Helpers
+from tests.game_helpers import seed_cache, seed_data
+from tests.helpers import register_user
 from tests.mockdata import data as mock_data
 
 SQLALCHEMY_DATABASE_URL = (
@@ -133,30 +134,30 @@ async def client(
         app.dependency_overrides.clear()
 
 
-# pyrefly: ignore [no-matching-overload]
 @pytest_asyncio.fixture
-def helpers() -> Helpers:
-    return Helpers()
+async def auth_client(client: AsyncClient) -> AuthClient:
+    user: dict[str, str] = await register_user(client)
 
-
-@pytest_asyncio.fixture
-async def auth_client(
-    client: AsyncClient, db: AsyncSession, cache: redis.Redis, helpers: Helpers
-) -> AuthClient:
-    user: dict[str, str] = await helpers.full_login(client)
-
-    return AuthClient(client, user, db=db, cache=cache)
+    return AuthClient(client, user)
 
 
 @pytest_asyncio.fixture
 async def auth_client_seed(
-    client: AsyncClient, db: AsyncSession, cache: redis.Redis, helpers: Helpers
+    client: AsyncClient,
+    db: AsyncSession,
+    cache: redis.Redis,
 ) -> AuthClient:
-    user: dict[str, str] = await helpers.full_login(client)
-    ac = AuthClient(client, user, db=db, cache=cache)
-    await ac.seed_data(data=mock_data)
-    await ac.seed_cache()
-    return ac
+    user = await register_user(client)
+
+    authenticated_client = AuthClient(
+        client,
+        user,
+    )
+
+    await seed_data(db)
+    await seed_cache(db, cache)
+
+    return authenticated_client
 
 
 @pytest_asyncio.fixture
