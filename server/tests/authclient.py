@@ -18,7 +18,6 @@ class AuthClient:
         access_token = self.user.access_token
 
         if expired:
-            # ruff: ignore[hardcoded-password-string]
             access_token = "expired_token"
 
         return Cookies(

@@ -25,7 +25,6 @@ async def register_user(
     client: AsyncClient,
     username: str = "authuser",
     email: str = "authuser@example.com",
-    # ruff: ignore[hardcoded-password-default]
     password: str = "authpassword",
 ) -> TestUser:
     user = {

@@ -224,6 +224,10 @@ convention = "google"
     "assert",
     "magic-value-comparison",
     "D",
+    "hardcoded-password-string",
+    "hardcoded-password-func-arg",
+    "float-equality-comparison",
+    "hardcoded-password-default"
 ]
 
 
@@ -264,7 +268,6 @@ source = [
     "cache",
     "utils",
     "authentication",
-    "alembic",
     "ml",
     "logger",
     "exceptions",
@@ -273,6 +276,10 @@ omit = [
     "tests/*",
     "ml/*.ipynb",
     ".venv/*",
+    "database/init_players.py",
+    "database/init_teams.py",
+    "database/init_db.py",
+    "cache/init_cache.py"
 ]
 
 [tool.coverage.report]

@@ -76,6 +76,7 @@ async def seed_cache(
         "cat_3": 0.7,
         "cat_4": 0.2,
         "cat_5": -0.2,
+        "cat_6": -0.5,
     }
 
     await cache.set("teams", teams_schema.model_dump_json())
