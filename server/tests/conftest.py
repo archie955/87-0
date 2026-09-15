@@ -25,7 +25,6 @@ from models.models import Base
 from tests.authclient import AuthClient
 from tests.game_helpers import seed_cache, seed_data
 from tests.helpers import register_user
-from tests.mockdata import data as mock_data
 
 SQLALCHEMY_DATABASE_URL = (
     "postgresql+psycopg://postgres:postgres@localhost:5433/test_db"

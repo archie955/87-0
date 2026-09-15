@@ -84,8 +84,7 @@ async def test_logout_revokes_the_session_server_side(client, db):
     assert response.status_code == 200
 
     rows = (await db.execute(select(RefreshToken))).scalars().all()
-    print(rows)
-    assert rows == []
+    assert rows == [], f"Expected no refresh tokens, but found {len(rows)}"
 
     replay = await client.post(
         "/auth/refresh",
