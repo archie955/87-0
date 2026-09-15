@@ -1,11 +1,8 @@
-import pytest
-
 # ---------------------------------------------------------------------------
 # Router-level: POST /email
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_registration(client, helpers):
     response = await helpers.register_user(client)
 
@@ -13,7 +10,6 @@ async def test_registration(client, helpers):
     assert response["username"] == "authuser"
 
 
-@pytest.mark.asyncio
 async def test_duplicate_email_registration(client, helpers):
     user = await helpers.register_user(client)
 
@@ -24,7 +20,6 @@ async def test_duplicate_email_registration(client, helpers):
     assert response.status_code == 409
 
 
-@pytest.mark.asyncio
 async def test_duplicate_username_registration(client, helpers):
     user = await helpers.register_user(client)
 
@@ -35,7 +30,6 @@ async def test_duplicate_username_registration(client, helpers):
     assert response.status_code == 409
 
 
-@pytest.mark.asyncio
 async def test_duplicate_password_ok(client, helpers):
     user = await helpers.register_user(client)
 
@@ -47,7 +41,6 @@ async def test_duplicate_password_ok(client, helpers):
     assert response.status_code == 201
 
 
-@pytest.mark.asyncio
 async def test_missing_email_registration(client):
     user = {"username": "authuser", "password": "missingdata"}
 
@@ -56,7 +49,6 @@ async def test_missing_email_registration(client):
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
 async def test_missing_username_registration(client):
     user = {"email": "authuser@email.com", "password": "missingdata"}
 
@@ -65,7 +57,6 @@ async def test_missing_username_registration(client):
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
 async def test_missing_password_registration(client):
     user = {"username": "authuser", "email": "missingdata@example.com"}
 
@@ -74,7 +65,6 @@ async def test_missing_password_registration(client):
     assert response.status_code == 422
 
 
-@pytest.mark.asyncio
 async def test_incorrect_email_type(client):
     user = {
         "username": "authuser",
@@ -92,7 +82,6 @@ async def test_incorrect_email_type(client):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_login_email(client, helpers):
     user = await helpers.register_user(client)
 
@@ -108,7 +97,6 @@ async def test_login_email(client, helpers):
     assert "refresh_token" in response.cookies
 
 
-@pytest.mark.asyncio
 async def test_incorrect_password(client, helpers):
     user = await helpers.register_user(client)
 
@@ -121,7 +109,6 @@ async def test_incorrect_password(client, helpers):
     assert response.status_code == 401
 
 
-@pytest.mark.asyncio
 async def test_incorrect_email(client, helpers):
     user = await helpers.register_user(client)
 
@@ -139,7 +126,6 @@ async def test_incorrect_email(client, helpers):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_update_username(client, helpers):
     user = await helpers.full_login(client)
 
@@ -154,7 +140,6 @@ async def test_update_username(client, helpers):
     assert response["username"] == updated_payload["updated_username"]
 
 
-@pytest.mark.asyncio
 async def test_update_same_username(client, helpers):
     user = await helpers.full_login(client)
 
@@ -172,7 +157,6 @@ async def test_update_same_username(client, helpers):
     assert response.status_code == 409
 
 
-@pytest.mark.asyncio
 async def test_update_incorrect_password(client, helpers):
     user = await helpers.full_login(client)
 
@@ -194,7 +178,6 @@ async def test_update_incorrect_password(client, helpers):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_delete(client, helpers):
     user = await helpers.full_login(client)
 
@@ -205,7 +188,6 @@ async def test_delete(client, helpers):
     assert response.status_code == 204
 
 
-@pytest.mark.asyncio
 async def test_delete_not_logged_in(client, helpers):
     await helpers.register_user(client)
 

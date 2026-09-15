@@ -1,7 +1,3 @@
-import pytest
-
-
-@pytest.mark.asyncio
 async def test_fetch_teams(auth_client_seed):
     response = await auth_client_seed.get("/teams")
 

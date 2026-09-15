@@ -37,6 +37,8 @@ lint = [
     "ruff>=0.15.18",
 ]
 test = [
+    "asgi-lifespan>=2.1.0",
+    "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "respx>=0.23.1",
@@ -243,15 +245,33 @@ docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 pythonpath = ["."]
-addopts = "--cov --cov-report=term-missing"
+addopts = [
+    "--cov",
+    "--cov-report=term-missing",
+    "--cov-branch",
+]
 
 [tool.coverage.run]
-source = ["."]
+source = [
+    "routers",
+    "services",
+    "database",
+    "models",
+    "schemas",
+    "cache",
+    "utils",
+    "authentication",
+    "alembic",
+    "ml",
+    "logger",
+    "exceptions",
+]
 omit = [
     "tests/*",
-    "database/init_teams.py",
-    "database/init_players.py",
+    "ml/*.ipynb",
     ".venv/*",
 ]
 

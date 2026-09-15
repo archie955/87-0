@@ -152,7 +152,6 @@ async def test_validate_login_steam_5xx_becomes_invalid_credentials():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_fetch_details_success():
     with respx.mock:
         mock_player_summary()
@@ -163,7 +162,6 @@ async def test_fetch_details_success():
     assert profile.url == "https://steamcommunity.com/id/s1mple/"
 
 
-@pytest.mark.asyncio
 async def test_fetch_details_no_players_returned():
     with respx.mock:
         respx.get(FETCHURL).mock(
@@ -174,7 +172,6 @@ async def test_fetch_details_no_players_returned():
             await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
-@pytest.mark.asyncio
 async def test_fetch_details_steamid_mismatch():
     with respx.mock:
         mock_player_summary(steam_id="1" * 17)
@@ -183,7 +180,6 @@ async def test_fetch_details_steamid_mismatch():
             await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("missing_field", ["personaname", "profileurl", "avatar"])
 async def test_fetch_details_missing_profile_field(missing_field):
     payload = steam_player_payload()
@@ -196,7 +192,6 @@ async def test_fetch_details_missing_profile_field(missing_field):
             await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
-@pytest.mark.asyncio
 async def test_fetch_details_network_error_becomes_bad_request():
     with respx.mock:
         respx.get(FETCHURL).mock(side_effect=httpx.ConnectError("no route to host"))
@@ -205,7 +200,6 @@ async def test_fetch_details_network_error_becomes_bad_request():
             await SteamValidator.fetch_details(STEAM_ID, KEY)
 
 
-@pytest.mark.asyncio
 async def test_fetch_details_steam_error_status_becomes_not_found():
     with respx.mock:
         respx.get(FETCHURL).mock(return_value=httpx.Response(403))
@@ -219,7 +213,6 @@ async def test_fetch_details_steam_error_status_becomes_not_found():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_steam_register_redirects_to_steam(client):
     response = await client.post(
         "/steam", data={"username": "newsteamuser"}, follow_redirects=False
@@ -231,7 +224,6 @@ async def test_steam_register_redirects_to_steam(client):
     assert "openid.mode=checkid_setup" in location
 
 
-@pytest.mark.asyncio
 async def test_steam_register_rejects_taken_username(client, helpers):
     await helpers.register_user(client)
 
@@ -242,7 +234,6 @@ async def test_steam_register_rejects_taken_username(client, helpers):
     assert response.status_code == 409
 
 
-@pytest.mark.asyncio
 async def test_steam_login_redirects_to_steam(client):
     response = await client.get("/steam/login", follow_redirects=False)
 
@@ -257,7 +248,6 @@ async def test_steam_login_redirects_to_steam(client):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_steam_validate_register_creates_user(client, db):
     with respx.mock:
         mock_openid_verify()
@@ -284,7 +274,6 @@ async def test_steam_validate_register_creates_user(client, db):
     assert steam_login.profile_name == "s1mple"
 
 
-@pytest.mark.asyncio
 async def test_steam_validate_register_rejects_already_linked_steam_id(client):
     with respx.mock:
         mock_openid_verify()
@@ -309,7 +298,6 @@ async def test_steam_validate_register_rejects_already_linked_steam_id(client):
     assert second.status_code == 409
 
 
-@pytest.mark.asyncio
 async def test_steam_validate_register_rejects_bad_openid_params(client):
     bad_params = {**VALID_OPENID_PARAMS, "openid.sig": ""}
 
@@ -325,7 +313,6 @@ async def test_steam_validate_register_rejects_bad_openid_params(client):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 async def test_steam_login_validate_updates_returning_user(client, db):
     with respx.mock:
         mock_openid_verify()
@@ -359,7 +346,6 @@ async def test_steam_login_validate_updates_returning_user(client, db):
     assert steam_login.profile_name == "updated-name"
 
 
-@pytest.mark.asyncio
 async def test_steam_login_validate_unknown_steam_id_not_found(client):
     with respx.mock:
         mock_openid_verify()
@@ -374,7 +360,6 @@ async def test_steam_login_validate_unknown_steam_id_not_found(client):
     assert response.status_code == 404
 
 
-@pytest.mark.asyncio
 async def test_steam_login_validate_propagates_steam_outage(client):
     with respx.mock:
         respx.get(BASEURL).mock(side_effect=httpx.ConnectError("steam is down"))

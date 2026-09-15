@@ -7,12 +7,13 @@ from pathlib import Path
 
 import pytest_asyncio
 import redis.asyncio as redis
+from asgi_lifespan import LifespanManager
 from httpx import ASGITransport, AsyncClient
 from pygam import LogisticGAM
 from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
     AsyncEngine,
     AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
 
@@ -35,7 +36,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_PATH = BASE_DIR / "ml" / "gam.pkl"
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def engine() -> AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
 
@@ -50,8 +51,8 @@ async def engine() -> AsyncGenerator[AsyncEngine, None]:
     await engine.dispose()
 
 
-@pytest_asyncio.fixture
-async def redis_cache() -> AsyncGenerator[redis.Redis, None]:
+@pytest_asyncio.fixture(scope="session")
+async def redis_client() -> AsyncGenerator[redis.Redis, None]:
     rc = redis.Redis.from_url(
         REDIS_URL,
         decode_responses=True,
@@ -65,28 +66,40 @@ async def redis_cache() -> AsyncGenerator[redis.Redis, None]:
     await rc.aclose()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def ml_model() -> AsyncGenerator[LogisticGAM, None]:
     with MODEL_PATH.open("rb") as f:
         # ruff: ignore[suspicious-pickle-usage]
-        yield await asyncio.to_thread(pickle.load, f)
+        return await asyncio.to_thread(pickle.load, f)
 
 
 @pytest_asyncio.fixture
 async def db(engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    session_local: async_sessionmaker[AsyncSession] = async_sessionmaker(
-        bind=engine, class_=AsyncSession, expire_on_commit=False
-    )
+    connection: AsyncConnection = await engine.connect()
+    transaction = await connection.begin()
 
-    async with session_local() as session:
+    session = AsyncSession(
+        bind=connection,
+        expire_on_commit=False,
+        join_transaction_mode="create_savepoint",
+    )
+    try:
         yield session
-        await session.rollback()
+    finally:
+        await session.close()
+        await transaction.rollback()
+        await connection.close()
 
 
 @pytest_asyncio.fixture
-async def cache(redis_cache: redis.Redis) -> redis.Redis:
-    await redis_cache.set("app:status", "healthy")
-    return redis_cache
+async def cache(redis_client: redis.Redis) -> AsyncGenerator[redis.Redis, None]:
+    await redis_client.flushdb()
+    await redis_client.set("app:status", "healthy")
+
+    try:
+        yield redis_client
+    finally:
+        await redis_client.flushdb()
 
 
 @pytest_asyncio.fixture
@@ -111,10 +124,13 @@ async def client(
 
     transport = ASGITransport(app=app, raise_app_exceptions=True)
 
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        yield client
-
-    app.dependency_overrides.clear()
+    try:
+        async with AsyncClient(
+            transport=transport, base_url="http://test"
+        ) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
 
 
 # pyrefly: ignore [no-matching-overload]
@@ -141,3 +157,9 @@ async def auth_client_seed(
     await ac.seed_data(data=mock_data)
     await ac.seed_cache()
     return ac
+
+
+@pytest_asyncio.fixture
+async def lifespan() -> AsyncGenerator[None, None]:
+    async with LifespanManager(app):
+        yield
