@@ -19,3 +19,11 @@ Dockerfile
 .env.*
 
 *.md
+
+coverage
+htmlcov
+.oxlintrc.json
+
+tests
+testSetup.ts
+vitest.config.ts

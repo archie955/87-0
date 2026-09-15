@@ -36,8 +36,8 @@ const App = () => {
                   </RequireAuth>
                 }
               />
+              <Route path="/*" element={<CatchAll />} />
             </Route>
-            <Route path="/*" element={<CatchAll />} />
           </Route>
         </Routes>
       </ErrorBoundary>

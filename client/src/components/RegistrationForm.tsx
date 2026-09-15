@@ -71,7 +71,11 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
       </FieldDescription>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">
-          <form className="p-6 md:p-8" onSubmit={(e) => void handleRegister(e)}>
+          <form
+            className="p-6 md:p-8"
+            onSubmit={(e) => void handleRegister(e)}
+            noValidate
+          >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome!</h1>

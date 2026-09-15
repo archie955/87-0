@@ -77,6 +77,7 @@ const GameStage = ({
               onClick={onRoll}
               size="lg"
               className="mt-7 h-12 rounded-xl px-6 font-bold"
+              name="roll a team"
             >
               <Dices className="mr-2 size-4" />
               Roll a team
