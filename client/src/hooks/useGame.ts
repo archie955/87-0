@@ -28,7 +28,7 @@ const useGame = (): UseGameOutput => {
   });
 
   const submitMutation = useMutation({
-    mutationFn: gameService.submitGame,
+    mutationFn: (lineup: Lineup) => gameService.submitGame(lineup),
   });
 
   const startNewGame = async (): Promise<void> => {

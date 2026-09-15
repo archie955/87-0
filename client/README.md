@@ -30,6 +30,8 @@ npx prettier . --write    # format
 
 ## Building the application locally
 
+`tsconfig.app.json` and `tsconfig.node.json` are invoked by build. `tsconfig.json` is for development, and references the tests.
+
 ```bash
 npm run build
 ```

@@ -7,6 +7,54 @@ import { useLoginStore } from "@/stores/loginStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import userService from "@/services/user";
 
+if (typeof window !== "undefined" && !window.matchMedia) {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}
+
+if (typeof window !== "undefined" && !window.ResizeObserver) {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  window.ResizeObserver = ResizeObserverMock;
+}
+
+if (typeof window !== "undefined" && !window.IntersectionObserver) {
+  class IntersectionObserverMock {
+    root = null;
+    rootMargin = "";
+    thresholds: number[] = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  // @ts-expect-error — only the shape matters for jsdom.
+  window.IntersectionObserver = IntersectionObserverMock;
+}
+
+if (typeof Element !== "undefined" && !Element.prototype.getAnimations) {
+  Element.prototype.getAnimations = function getAnimations() {
+    return [];
+  };
+}
+
 vi.mock("@/services/email", () => ({
   default: {
     createAccount: vi.fn(),
