@@ -1,3 +1,5 @@
+from httpx import Cookies
+
 from tests.game_helpers import (
     play_game,
     play_game_switch_team,
@@ -40,7 +42,7 @@ async def test_play_game_user(auth_client_seed):
     game_submission = await play_game(auth_client_seed)
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 
@@ -58,12 +60,18 @@ async def test_play_game_user(auth_client_seed):
 
 async def test_play_game(auth_client_seed):
     game_submission = await play_game(auth_client_seed)
+    session = auth_client_seed.client.cookies.get("session")
+
+    assert session
 
     auth_client_seed.client.cookies.clear()
 
+    cookies = Cookies({"session": session})
+
     response = await auth_client_seed.noauth_post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
+        cookies=cookies,
     )
 
     assert response.status_code == 200
@@ -82,7 +90,7 @@ async def test_play_game_wrong_team_id(auth_client_seed):
     game_submission = await play_game_switch_team(auth_client_seed)
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 
@@ -95,7 +103,7 @@ async def test_play_game_wrong_number_of_players(auth_client_seed):
     del game_submission["player_5"]
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 
@@ -108,7 +116,7 @@ async def test_play_game_fake_player(auth_client_seed):
     game_submission["player_1"]["id"] = 100
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 
@@ -121,7 +129,7 @@ async def test_frontend_state_edit_no_effect(auth_client_seed):
     game_submission["player_1"]["hltv"] = 999.9
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 
@@ -136,7 +144,7 @@ async def test_play_game_wrong_igl(auth_client_seed):
     game_submission = await play_game_wrong_igl(auth_client_seed)
 
     response = await auth_client_seed.post(
-        f"/games/{game_submission['game_id']}",
+        "/games/submit",
         json=game_submission,
     )
 

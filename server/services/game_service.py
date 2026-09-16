@@ -13,7 +13,9 @@ from services import game_helpers
 MIN_TEAMS = 2
 
 
-async def create_game(cache: redis.Redis) -> active_game_schemas.ActiveGame:
+async def create_game(
+    user_id: str, cache: redis.Redis
+) -> active_game_schemas.ActiveGame:
     teams = await cache.get("team_ids")
 
     if not teams:
@@ -39,6 +41,7 @@ async def create_game(cache: redis.Redis) -> active_game_schemas.ActiveGame:
 
     active_game = active_game_schemas.ActiveGame.model_validate(active_game)
 
+    await cache.set(user_id, id, ex=15 * 60)
     await cache.set(id, active_game.model_dump_json(), ex=15 * 60)
 
     return active_game

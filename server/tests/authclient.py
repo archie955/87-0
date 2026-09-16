@@ -53,17 +53,25 @@ class AuthClient:
         return await self.request("DELETE", url, **kwargs)
 
     async def noauth_get(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
         self.client.cookies.clear()
+        self.client.cookies = cookies
         return await self.client.get(url, **kwargs)
 
     async def noauth_post(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
         self.client.cookies.clear()
+        self.client.cookies = cookies
         return await self.client.post(url, **kwargs)
 
     async def noauth_put(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
         self.client.cookies.clear()
+        self.client.cookies = cookies
         return await self.client.put(url, **kwargs)
 
     async def noauth_delete(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
         self.client.cookies.clear()
+        self.client.cookies = cookies
         return await self.client.delete(url, **kwargs)

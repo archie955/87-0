@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models.models import Player, Team
-from schemas import player_schemas, team_schemas
+from schemas import active_game_schemas, player_schemas, team_schemas
 from tests.authclient import AuthClient
 from tests.mockdata import data
 
@@ -101,11 +101,13 @@ async def get_teams(auth_client: AuthClient) -> dict:
 
 
 async def play_game(auth_client_seed):
-    game = await create_game(auth_client_seed)
+    game = active_game_schemas.ActiveGame.model_validate_json(
+        await create_game(auth_client_seed)
+    )
     teams = await get_teams(auth_client_seed)
 
     roles = set()
-    ids = [game["team_1_id"], game["team_2_id"], game["team_3_id"], game["team_4_id"]]
+    ids = [game.team_1_id, game.team_2_id, game.team_3_id, game.team_4_id]
     players = []
     for id in ids:
         for p in teams[str(id)]["players"]:
@@ -114,11 +116,11 @@ async def play_game(auth_client_seed):
                 players.append(p)
                 break
 
-    last = teams[str(game["team_5_id"])]["players"][-1]
+    last = teams[str(game.team_5_id)]["players"][-1]
     players.append(last)
 
     return {
-        "game_id": game["id"],
+        "game_id": game.id,
         "player_1": players[0],
         "player_2": players[1],
         "player_3": players[2],
@@ -129,11 +131,13 @@ async def play_game(auth_client_seed):
 
 
 async def play_game_switch_team(auth_client_seed):
-    game = await create_game(auth_client_seed)
+    game = active_game_schemas.ActiveGame.model_validate_json(
+        await create_game(auth_client_seed)
+    )
     teams = await get_teams(auth_client_seed)
 
     roles = set()
-    ids = [game["team_1_id"], game["team_2_id"], game["team_3_id"], game["team_4_id"]]
+    ids = [game.team_1_id, game.team_2_id, game.team_3_id, game.team_4_id]
     players = []
     for id in ids:
         for p in teams[str(id)]["players"]:
@@ -142,14 +146,14 @@ async def play_game_switch_team(auth_client_seed):
                 players.append(p)
                 break
 
-    id = {teams[key]["id"] for key in teams} - {game["team_5_id"], game["team_6_id"]}
+    id = {teams[key]["id"] for key in teams} - {game.team_5_id, game.team_6_id}
     id = str(id.pop())
 
     last = teams[id]["players"][-1]
     players.append(last)
 
     return {
-        "game_id": game["id"],
+        "game_id": game.id,
         "player_1": players[0],
         "player_2": players[1],
         "player_3": players[2],
@@ -160,11 +164,13 @@ async def play_game_switch_team(auth_client_seed):
 
 
 async def play_game_wrong_igl(auth_client_seed):
-    game = await create_game(auth_client_seed)
+    game = active_game_schemas.ActiveGame.model_validate_json(
+        await create_game(auth_client_seed)
+    )
     teams = await get_teams(auth_client_seed)
 
     roles = set()
-    ids = [game["team_1_id"], game["team_2_id"], game["team_3_id"], game["team_4_id"]]
+    ids = [game.team_1_id, game.team_2_id, game.team_3_id, game.team_4_id]
     players = []
     for id in ids:
         for p in teams[str(id)]["players"]:
@@ -173,11 +179,11 @@ async def play_game_wrong_igl(auth_client_seed):
                 players.append(p)
                 break
 
-    last = teams[str(game["team_5_id"])]["players"][-1]
+    last = teams[str(game.team_5_id)]["players"][-1]
     players.append(last)
 
     return {
-        "game_id": game["id"],
+        "game_id": game.id,
         "player_1": players[0],
         "player_2": players[1],
         "player_3": players[2],
