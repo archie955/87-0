@@ -48,12 +48,12 @@ describe("gameService.submitGame", () => {
   };
   const result: Result = { score: 4.2, cat: "cat_3", best: true };
 
-  it("POSTs the full lineup to /games/{game_id}", async () => {
+  it("POSTs the full lineup to /games/submit", async () => {
     postSpy.mockResolvedValue(axiosRes(result));
 
     const out = await gameService.submitGame(lineup);
 
-    expect(postSpy).toHaveBeenCalledWith("/games/game-1", lineup);
+    expect(postSpy).toHaveBeenCalledWith("/games/submit", lineup);
     expect(out).toEqual(result);
   });
 });

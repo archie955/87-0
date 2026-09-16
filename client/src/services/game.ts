@@ -10,10 +10,7 @@ const getGame = async (): Promise<Game> => {
 };
 
 const submitGame = async (lineup: Lineup): Promise<Result> => {
-  const response = await api.post<Result>(
-    `${baseUrl}/${lineup.game_id}`,
-    lineup,
-  );
+  const response = await api.post<Result>(`${baseUrl}/submit`, lineup);
   return response.data;
 };
 

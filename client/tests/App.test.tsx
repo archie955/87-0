@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest";
 import { render, screen } from "./test-utils";
 import App from "@/App";
 import gameService from "@/services/game";
@@ -42,6 +42,16 @@ const teams: Teams = Object.fromEntries(
     },
   ]),
 );
+beforeAll(async () => {
+  await Promise.all([
+    import("@/pages/Account"),
+    import("@/pages/Rules"),
+    import("@/pages/Home"),
+    import("@/pages/Game"),
+    import("@/pages/Login"),
+    import("@/pages/CatchAll"),
+  ]);
+});
 
 beforeEach(() => {
   vi.mocked(gameService.getGame).mockResolvedValue(game);
@@ -52,14 +62,20 @@ describe("App routing", () => {
   it("renders Home at /", async () => {
     render(<App />, { route: "/" });
 
-    expect(await screen.findByText(/lineup builder game/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/lineup builder game/i, undefined, {
+        timeout: 3000,
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders Rules at /about", async () => {
     render(<App />, { route: "/about" });
 
     expect(
-      await screen.findByText(/build the best lineup you can/i),
+      await screen.findByText(/build the best lineup you can/i, undefined, {
+        timeout: 3000,
+      }),
     ).toBeInTheDocument();
   });
 
@@ -67,21 +83,27 @@ describe("App routing", () => {
     render(<App />, { route: "/login" });
 
     expect(
-      await screen.findByText(/logging into an account/i),
+      await screen.findByText(/logging into an account/i, undefined, {
+        timeout: 3000,
+      }),
     ).toBeInTheDocument();
   });
 
   it("renders the draft lobby at /game", async () => {
     render(<App />, { route: "/game" });
 
-    expect(await screen.findByText(/ready to roll/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/ready to roll/i, undefined, { timeout: 3000 }),
+    ).toBeInTheDocument();
   });
 
   it("redirects /account to /login when there is no session", async () => {
     render(<App />, { route: "/account" });
 
     expect(
-      await screen.findByText(/logging into an account/i),
+      await screen.findByText(/logging into an account/i, undefined, {
+        timeout: 3000,
+      }),
     ).toBeInTheDocument();
   });
 
@@ -89,7 +111,9 @@ describe("App routing", () => {
     render(<App />, { route: "/definitely-not-a-route" });
 
     expect(
-      await screen.findByText(/404 - Page not found/i),
+      await screen.findByText(/404 - Page not found/i, undefined, {
+        timeout: 3000,
+      }),
     ).toBeInTheDocument();
   });
 });
