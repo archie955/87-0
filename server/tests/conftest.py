@@ -5,6 +5,7 @@ import pickle
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
+import pytest
 import pytest_asyncio
 import redis.asyncio as redis
 from asgi_lifespan import LifespanManager
@@ -19,6 +20,7 @@ from sqlalchemy.ext.asyncio import (
 
 from cache.redis import get_redis
 from database.database import get_db
+from limiter.limiter import limiter
 from main import app
 from ml.ml_model import get_model
 from models.models import Base
@@ -163,3 +165,29 @@ async def auth_client_seed(
 async def lifespan() -> AsyncGenerator[None, None]:
     async with LifespanManager(app):
         yield
+
+
+@pytest.fixture(autouse=True)
+def _disable_limiter_by_default():
+    previous = limiter.enabled
+    limiter.enabled = False
+    limiter.reset()
+    try:
+        yield
+    finally:
+        limiter.reset()
+        limiter.enabled = previous
+
+
+@pytest.fixture
+def rate_limiting_on():
+    previous = limiter.enabled
+
+    limiter.reset()
+    limiter.enabled = True
+
+    try:
+        yield limiter
+    finally:
+        limiter.reset()
+        limiter.enabled = previous

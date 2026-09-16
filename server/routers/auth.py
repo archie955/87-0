@@ -25,6 +25,7 @@ async def refresh(request: Request, db: DBDep, settings: SettingsDep):
 
 
 @router.post("/logout", status_code=status.HTTP_200_OK, response_model=None)
+@limiter.limit("10/min")
 async def logout(request: Request, db: DBDep, settings: SettingsDep):
     await auth_service.logout(request=request, db=db, settings=settings)
 

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
 from database.database import DBDep
+from limiter.limiter import limiter
 from services import auth_service, steam_service
 from utils.config import SettingsDep
 
@@ -13,6 +14,7 @@ FormDep = Annotated[str, Form(...)]
 
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
+@limiter.limit("10/min")
 async def steam_register(
     request: Request, db: DBDep, settings: SettingsDep, username: FormDep
 ):
@@ -30,6 +32,7 @@ async def steam_register(
     status_code=status.HTTP_303_SEE_OTHER,
     response_class=RedirectResponse,
 )
+@limiter.exempt
 async def steam_validate_register(
     request: Request, username: str, db: DBDep, settings: SettingsDep
 ):
@@ -54,6 +57,7 @@ async def steam_validate_register(
 @router.get(
     "/login", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse
 )
+@limiter.limit("10/min")
 def steam_login(request: Request, settings: SettingsDep):
     if settings.prod == "prod":
         url = f"{settings.frontend_auth_url}/api/steam/login/validate"
@@ -68,6 +72,7 @@ def steam_login(request: Request, settings: SettingsDep):
     status_code=status.HTTP_303_SEE_OTHER,
     response_class=RedirectResponse,
 )
+@limiter.exempt
 async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDep):
     profile = await steam_service.validate_profile(
         query_params=request.query_params, key=settings.steam_key

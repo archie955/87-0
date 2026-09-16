@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     prod: str
     frontend_auth_url: str
 
+    def is_dev(self) -> bool:
+        return self.prod.strip().lower() == "dev"
+
     model_config = SettingsConfigDict(
         env_file=".env.dev", case_sensitive=False, extra="ignore"
     )

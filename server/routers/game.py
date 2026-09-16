@@ -26,6 +26,7 @@ async def create_game(request: Request, cache: RedisDep):
     status_code=status.HTTP_200_OK,
     response_model=active_game_schemas.GameEvaluation,
 )
+@limiter.limit("10/min")
 # ruff: ignore[too-many-positional-arguments, too-many-arguments]
 async def submit_lineup(
     request: Request,

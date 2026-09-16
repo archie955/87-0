@@ -272,6 +272,7 @@ source = [
     "ml",
     "logger",
     "exceptions",
+    "limiter",
 ]
 omit = [
     "tests/*",

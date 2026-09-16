@@ -7,6 +7,6 @@ settings = get_settings()
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["5/minute"],
-    enabled=settings.prod == "prod",
+    default_limits=["10/minute"],
+    enabled=settings.is_dev(),
 )

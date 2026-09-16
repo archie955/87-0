@@ -5,6 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 from database.database import DBDep
+from limiter.limiter import limiter
 from schemas import email_schemas
 from services import auth_service, email_service
 from utils.config import SettingsDep
@@ -19,6 +20,7 @@ router = APIRouter(prefix="/email", tags=["Authentication"])
     status_code=status.HTTP_201_CREATED,
     response_class=Response,
 )
+@limiter.limit("10/min")
 async def email_create(
     request: Request,
     email_user: email_schemas.EmailCreate,
@@ -39,6 +41,7 @@ async def email_create(
 
 
 @router.post(path="/login", status_code=status.HTTP_200_OK, response_class=Response)
+@limiter.limit("10/min")
 async def email_login(
     request: Request, email_credentials: AuthDep, db: DBDep, settings: SettingsDep
 ):

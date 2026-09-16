@@ -15,6 +15,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIASGIMiddleware
 from sqlalchemy import text
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from cache.init_cache import initialise_cache
 from cache.redis import RedisDep, create_redis
@@ -77,6 +78,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["172.16.0.0/12"])
 
 app.add_middleware(LoggingMiddleware)
 
