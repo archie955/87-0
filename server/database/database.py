@@ -12,7 +12,7 @@ settings = get_settings()
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.postgres_username}:{settings.postgres_password}@{settings.postgres_hostname}/{settings.postgres_name}"
 
 Base = declarative_base()
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=settings.is_dev())
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
