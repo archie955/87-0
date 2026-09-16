@@ -96,14 +96,12 @@ describe("Account — profile edit", () => {
 
     await user.clear(screen.getByLabelText("New username"));
     await user.type(screen.getByLabelText("New username"), "renamed");
-    await user.type(screen.getByLabelText("Current password"), "pw");
 
     await user.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() =>
       expect(updateUser).toHaveBeenCalledWith({
         updated_username: "renamed",
-        password: "pw",
       }),
     );
 
@@ -125,7 +123,6 @@ describe("Account — profile edit", () => {
 
     render(<Account />);
 
-    await user.type(screen.getByLabelText("Current password"), "pw");
     await user.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() =>

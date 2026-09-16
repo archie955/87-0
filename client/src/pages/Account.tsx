@@ -44,7 +44,6 @@ const Account = () => {
   const [newUsername, setNewUsername] = useState(
     user ? (user.username ?? "") : "",
   );
-  const [currentPassword, setCurrentPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -62,14 +61,12 @@ const Account = () => {
 
     const payload: UpdatedUser = {
       updated_username: newUsername,
-      password: currentPassword,
     };
 
     try {
       await update_user(payload);
       setNotification("Account updated", "success");
       setNewUsername("");
-      setCurrentPassword("");
     } catch {
       setNotification(
         "Couldn't save changes - check your current password, and that you've added a new username",
@@ -167,18 +164,6 @@ const Account = () => {
                   Enter a new password, or your current one to leave it
                   unchanged.
                 </FieldDescription>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="account-current-password">
-                  Current password
-                </FieldLabel>
-                <Input
-                  id="account-current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
               </Field>
               <Field>
                 <Button type="submit" disabled={saving} className="sm:w-fit">

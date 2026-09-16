@@ -42,7 +42,6 @@ describe("userService.updateUser", () => {
   it("PUTs the update payload to /users", async () => {
     const updated: UpdatedUser = {
       updated_username: "new-name",
-      password: "current-password",
     };
     putSpy.mockResolvedValue(axiosRes(user));
 

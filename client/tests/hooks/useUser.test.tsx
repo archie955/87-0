@@ -107,12 +107,10 @@ describe("useUser", () => {
 
     await hook.current.update_user({
       updated_username: "renamed",
-      password: "pwd",
     });
 
     expect(userService.updateUser).toHaveBeenCalledWith({
       updated_username: "renamed",
-      password: "pwd",
     });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["user"] });
   });

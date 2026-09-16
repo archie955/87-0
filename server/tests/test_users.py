@@ -179,19 +179,6 @@ async def test_update_same_username(auth_client):
     assert response.status_code == 409
 
 
-async def test_update_incorrect_password(auth_client):
-    updated_payload = {
-        "updated_username": "newusername",
-        "password": "incorrect",
-    }
-    response = await auth_client.put(
-        "/users",
-        json=updated_payload,
-    )
-
-    assert response.status_code == 401
-
-
 # ---------------------------------------------------------------------------
 # Router-level: DELETE /users
 # ---------------------------------------------------------------------------

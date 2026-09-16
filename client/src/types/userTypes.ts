@@ -53,7 +53,6 @@ export interface RegisterUser {
 
 export interface UpdatedUser {
   updated_username: string;
-  password: string;
 }
 
 export interface Username {

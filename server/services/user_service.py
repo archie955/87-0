@@ -1,6 +1,5 @@
 """Provide service functions for users routers."""
 
-import asyncio
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,12 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from exceptions.app_exceptions import (
     DataAlreadyExistsError,
     DataNotFoundError,
-    InvalidCredentialsError,
 )
 from models.models import User
 from schemas import user_schemas
 from services.helpers import safe_commit, safe_commit_delete
-from utils import utils
 
 logger = logging.getLogger(__name__)
 
@@ -60,17 +57,10 @@ async def update(
 
     """
     email = user.email_login
+    steam = user.steam_login
 
-    if not email:
+    if not email and not steam:
         raise DataNotFoundError(datatype="Email login")
-
-    verified = await asyncio.to_thread(
-        utils.verify,
-        plain_password=updated.password,
-        hashed_password=email.hashed_password,
-    )
-    if not verified:
-        raise InvalidCredentialsError()
 
     if user.username == updated.updated_username:
         raise DataAlreadyExistsError(datatype="Username")

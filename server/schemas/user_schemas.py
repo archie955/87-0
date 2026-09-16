@@ -19,4 +19,3 @@ class UserOut(OrmModel):
 
 class UserUpdate(BaseModel):
     updated_username: str
-    password: str

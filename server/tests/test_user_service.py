@@ -4,7 +4,6 @@ from sqlalchemy import select
 from exceptions.app_exceptions import (
     DataAlreadyExistsError,
     DataNotFoundError,
-    InvalidCredentialsError,
 )
 from models.models import User
 from schemas import user_schemas
@@ -49,25 +48,6 @@ async def test_update_username_success(db):
     result = await user_service.update(db=db, user=user, updated=updated)
 
     assert result.username == "newusername"
-
-
-async def test_update_wrong_password(db):
-    user, _ = await create_email_user(
-        db,
-        username="wrongpassuser",
-        email="wrongpass@example.com",
-        password="password",
-    )
-
-    await db.refresh(user, attribute_names=["email_login"])
-
-    updated = user_schemas.UserUpdate(
-        updated_username="newusername",
-        password="wrong",
-    )
-
-    with pytest.raises(InvalidCredentialsError):
-        await user_service.update(db=db, user=user, updated=updated)
 
 
 async def test_update_same_username(db):
