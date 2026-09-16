@@ -9,6 +9,11 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+
+# ruff: ignore[import-private-name]
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIASGIMiddleware
 from sqlalchemy import text
 
 from cache.init_cache import initialise_cache
@@ -20,6 +25,7 @@ from exceptions.app_exceptions import (
     UninstantiatedCache,
 )
 from exceptions.steam_exceptions import SteamException
+from limiter.limiter import limiter
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
 from routers import auth, email, game, steam, teams, user
@@ -59,6 +65,10 @@ origins = settings.allowed_origins.split(",")
 logger = logging.getLogger(__name__)
 
 app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+# pyrefly: ignore [bad-argument-type]
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIASGIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

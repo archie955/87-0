@@ -13,7 +13,9 @@ FormDep = Annotated[str, Form(...)]
 
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)
-async def steam_register(db: DBDep, settings: SettingsDep, username: FormDep):
+async def steam_register(
+    request: Request, db: DBDep, settings: SettingsDep, username: FormDep
+):
     await steam_service.check_username(db=db, username=username)
     if settings.prod == "prod":
         url = f"{settings.frontend_auth_url}/api/steam/validate/{username}"
@@ -52,7 +54,7 @@ async def steam_validate_register(
 @router.get(
     "/login", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse
 )
-def steam_login(settings: SettingsDep):
+def steam_login(request: Request, settings: SettingsDep):
     if settings.prod == "prod":
         url = f"{settings.frontend_auth_url}/api/steam/login/validate"
     else:
