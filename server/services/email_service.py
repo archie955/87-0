@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 
 from pydantic import EmailStr
 from sqlalchemy import select
@@ -8,6 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from authentication.auth import create_access_token, create_refresh_token
 from exceptions.app_exceptions import (
+    BadRequestError,
     DataAlreadyExistsError,
     InvalidCredentialsError,
 )
@@ -18,11 +20,20 @@ from utils import utils
 from utils.config import Settings
 
 logger = logging.getLogger(__name__)
+MIN_PASSWORD_LENGTH = 6
 
 
 async def create_email(
     db: AsyncSession, email_user: email_schemas.EmailCreate, settings: Settings
 ) -> token_schemas.Tokens:
+    if not re.fullmatch(r"\S+@\S+\.\S+", email_user.email):
+        # ruff: ignore[raise-vanilla-args]
+        raise BadRequestError("Invalid Email provided")
+
+    if not len(email_user.password) >= MIN_PASSWORD_LENGTH:
+        # ruff: ignore[raise-vanilla-args]
+        raise BadRequestError("Password is too short")
+
     existing_username = (
         await db.execute(
             select(models.User).where(models.User.username == email_user.username)

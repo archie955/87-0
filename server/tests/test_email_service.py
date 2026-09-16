@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from exceptions.app_exceptions import (
@@ -83,6 +84,24 @@ async def test_create_email_duplicate_email(db):
             db=db,
             email_user=payload,
             settings=settings,
+        )
+
+
+def test_create_email_small_password():
+    with pytest.raises(ValidationError):
+        email_schemas.EmailCreate(
+            username="newuser",
+            email="new@example.com",
+            password="short",
+        )
+
+
+def test_create_email_invalid_email(db):
+    with pytest.raises(ValidationError):
+        email_schemas.EmailCreate(
+            username="newuser",
+            email="newexamplecom",
+            password="password",
         )
 
 

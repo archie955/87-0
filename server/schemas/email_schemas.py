@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from schemas.base_schema import OrmModel
 
@@ -8,7 +8,7 @@ from schemas.base_schema import OrmModel
 class EmailCreate(BaseModel):
     username: str
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=6)
 
 
 class EmailOut(OrmModel):

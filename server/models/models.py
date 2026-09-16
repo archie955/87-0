@@ -41,14 +41,12 @@ class User(Base, Name, TimeStamps):
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
-    # google_login: Mapped["Google"] = relationship(back_populates="user")
-
 
 class Steam(Base, Name, TimeStamps):
     profile_name: Mapped[str] = mapped_column(String(200), unique=False, nullable=False)
     url: Mapped[str] = mapped_column(String(200), unique=False, nullable=False)
     avatar: Mapped[str] = mapped_column(String(200), unique=False, nullable=True)
-    steam_id: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+    steam_id: Mapped[str] = mapped_column(String(17), unique=True, nullable=False)
     user_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("user.id", ondelete="CASCADE"), unique=True, nullable=False
     )
