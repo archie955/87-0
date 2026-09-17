@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from schemas.user_schemas import UserOut
 
@@ -10,7 +10,7 @@ class AccessTokenData(BaseModel):
 
 
 class RefreshTokenData(AccessTokenData):
-    jti: str
+    jti: str = Field(..., max_length=200)
 
 
 class TokenOut(BaseModel):
@@ -21,7 +21,7 @@ class TokenOut(BaseModel):
 
 class RefreshToken(BaseModel):
     token: str
-    jti: str
+    jti: str = Field(..., max_length=200)
     expires_at: datetime
 
 

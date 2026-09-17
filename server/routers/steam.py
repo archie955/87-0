@@ -10,7 +10,7 @@ from utils.config import SettingsDep
 
 router = APIRouter(prefix="/steam", tags=["Authentication"])
 
-FormDep = Annotated[str, Form(...)]
+FormDep = Annotated[str, Form(..., max_length=100)]
 
 
 @router.post("", status_code=status.HTTP_303_SEE_OTHER, response_class=RedirectResponse)

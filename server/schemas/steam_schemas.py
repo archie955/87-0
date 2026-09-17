@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from schemas.base_schema import OrmModel
 
@@ -10,17 +10,17 @@ class SteamCreate(BaseModel):
 
 
 class SteamProfile(BaseModel):
-    profile_name: str
-    url: str
-    avatar: str
-    steam_id: str
+    profile_name: str = Field(..., max_length=200)
+    url: str = Field(..., max_length=200)
+    avatar: str = Field(..., max_length=200)
+    steam_id: str = Field(..., max_length=17)
 
 
 class SteamOut(OrmModel):
     id: int
     user_id: int
-    username: str
-    profile_name: str
+    username: str = Field(..., max_length=200)
+    profile_name: str = Field(..., max_length=200)
     created_at: datetime
     updated_at: datetime
 
@@ -28,6 +28,6 @@ class SteamOut(OrmModel):
 class SteamUser(OrmModel):
     id: int
     user_id: int
-    profile_name: str
+    profile_name: str = Field(..., max_length=200)
     created_at: datetime
     updated_at: datetime
