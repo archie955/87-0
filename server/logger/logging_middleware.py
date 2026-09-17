@@ -1,3 +1,4 @@
+import uuid
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -15,14 +16,16 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        id = str(uuid.uuid4())
         method = request.method
         url = request.url.path
         client_ip = request.client.host if request.client else "NO HOST"
 
         logger.info(
-            "%s %s from %s",
+            "%s %s [%s] from %s",
             method,
             url,
+            id,
             client_ip,
         )
 
@@ -32,6 +35,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         duration = time.perf_counter() - start
 
-        logger.info("%s %s -> %s (%.3fs)", method, url, response.status_code, duration)
+        logger.info("%s %s [%s] -> %s (%.3fs)", method, url, id, response.status_code, duration)
 
         return response
