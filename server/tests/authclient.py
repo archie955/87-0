@@ -41,15 +41,31 @@ class AuthClient:
         )
 
     async def get(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
+        if cookies:
+            for key in cookies:
+                self.client.cookies.set(key, cookies[key])
         return await self.request("GET", url, **kwargs)
 
     async def post(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
+        if cookies:
+            for key in cookies:
+                self.client.cookies.set(key, cookies[key])
         return await self.request("POST", url, **kwargs)
 
     async def put(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
+        if cookies:
+            for key in cookies:
+                self.client.cookies.set(key, cookies[key])
         return await self.request("PUT", url, **kwargs)
 
     async def delete(self, url: str, **kwargs: Any) -> Response:
+        cookies = kwargs.get("cookies")
+        if cookies:
+            for key in cookies:
+                self.client.cookies.set(key, cookies[key])
         return await self.request("DELETE", url, **kwargs)
 
     async def noauth_get(self, url: str, **kwargs: Any) -> Response:

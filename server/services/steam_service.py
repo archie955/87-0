@@ -31,8 +31,8 @@ async def check_username(db: AsyncSession, username: str) -> None:
         raise SteamDataAlreadyExistsError(datatype="Username")
 
 
-def redirect(return_url: str) -> RedirectResponse:
-    steam = SteamLogin(return_url)
+def redirect(return_url: str, state: str) -> RedirectResponse:
+    steam = SteamLogin(return_url, state)
 
     logger.info("User redirected")
 
@@ -40,10 +40,12 @@ def redirect(return_url: str) -> RedirectResponse:
 
 
 async def validate_profile(
-    query_params: QueryParams, key: str
+    query_params: QueryParams, session_state: str, key: str
 ) -> steam_schemas.SteamProfile:
     validator = SteamValidator()
-    steam_id = await validator.validate_login(query_params)
+    steam_id = await validator.validate_login(
+        data=query_params, session_state=session_state
+    )
 
     if not steam_id:
         raise SteamInvalidCredentialsError()

@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
 from fastapi import status
@@ -44,7 +45,7 @@ FETCHURL = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
 
 
 class SteamLogin:
-    def __init__(self, return_url: str):
+    def __init__(self, return_url: str, state: str):
         self.__params = {
             "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
@@ -52,7 +53,9 @@ class SteamLogin:
             "openid.ns": "http://specs.openid.net/auth/2.0",
             "openid.realm": return_url,
             "openid.return_to": return_url,
+            "state": state,
         }
+        self.state = state
 
     def __create_url(self) -> str:
         return f"{BASEURL}?{urlencode(self.__params)}"
@@ -60,10 +63,13 @@ class SteamLogin:
     # This redirects to steam.
     # Upon login it will send a request to the return_to url provided.
     def redirect(self) -> RedirectResponse:
-        return RedirectResponse(
+        response = RedirectResponse(
             url=self.__create_url(),
             status_code=status.HTTP_303_SEE_OTHER,
         )
+        time = datetime.now(tz=UTC) + timedelta(seconds=60)
+        response.set_cookie(key="state", value=self.state, secure=True, expires=time)
+        return response
 
 
 class SteamValidator:
@@ -82,7 +88,11 @@ class SteamValidator:
         "openid.sig",
     )
 
-    async def validate_login(self, data: dict[str, str]) -> str:  # ruff: ignore[complex-structure]
+    async def validate_login(self, data: dict[str, str], session_state: str) -> str:  # ruff: ignore[complex-structure]
+        state = data.get("state")
+        if not state or state != session_state:
+            raise SteamInvalidCredentialsError()
+
         validation_params: dict[str, str] = {}
         for param in self.__OPENID_PARAMETERS:
             value = data.get(param)

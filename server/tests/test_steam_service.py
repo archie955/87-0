@@ -30,7 +30,7 @@ async def test_check_username_taken(db):
 
 
 def test_redirect_returns_steam_url():
-    response = steam_service.redirect("http://example.com/return")
+    response = steam_service.redirect("http://example.com/return", state="state")
 
     assert response.status_code == 303
     assert response.headers["location"].startswith(

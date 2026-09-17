@@ -1,6 +1,9 @@
+import uuid
+
 import httpx
 import pytest
 import respx
+from respx import SetCookie
 from sqlalchemy import select
 
 from exceptions.steam_exceptions import (
@@ -19,6 +22,7 @@ settings = get_settings()
 KEY = settings.steam_key
 STEAM_ID = "76561197960287930"
 IDENTITY = f"https://steamcommunity.com/openid/id/{STEAM_ID}"
+STATE = str(uuid.uuid4())
 
 
 VALID_OPENID_PARAMS = {
@@ -32,6 +36,7 @@ VALID_OPENID_PARAMS = {
     "openid.assoc_handle": "1234567890",
     "openid.signed": "signed,fields,here",
     "openid.sig": "fakesignature==",
+    "state": STATE,
 }
 
 
@@ -59,9 +64,10 @@ def mock_openid_verify(is_valid: bool = True) -> respx.Route:
     body = "ns:http://specs.openid.net/auth/2.0\nis_valid:" + (
         "true" if is_valid else "false"
     )
+    response = httpx.Response(200, text=body, headers=[SetCookie("state", STATE)])
 
     return respx.get(BASEURL).mock(
-        return_value=httpx.Response(200, text=body),
+        return_value=response,
     )
 
 
@@ -83,9 +89,32 @@ async def test_validate_login_success():
     with respx.mock:
         mock_openid_verify(is_valid=True)
 
-        steam_id = await SteamValidator().validate_login(VALID_OPENID_PARAMS)
+        steam_id = await SteamValidator().validate_login(
+            data=VALID_OPENID_PARAMS, session_state=STATE
+        )
 
     assert steam_id == STEAM_ID
+
+
+async def test_validate_login_rejects_missing_state():
+    with respx.mock:
+        mock_openid_verify(is_valid=True)
+        data = VALID_OPENID_PARAMS.copy()
+        data.pop("state")
+
+        with pytest.raises(SteamInvalidCredentialsError):
+            await SteamValidator().validate_login(data=data, session_state=STATE)
+
+
+async def test_validate_login_rejects_incorrect_state():
+    with respx.mock:
+        mock_openid_verify(is_valid=True)
+        session_state = str(uuid.uuid4())
+
+        with pytest.raises(SteamInvalidCredentialsError):
+            await SteamValidator().validate_login(
+                data=VALID_OPENID_PARAMS, session_state=session_state
+            )
 
 
 @pytest.mark.parametrize("missing_param", list(VALID_OPENID_PARAMS.keys()))
@@ -95,7 +124,7 @@ async def test_validate_login_rejects_missing_param(missing_param):
     }
 
     with pytest.raises(SteamInvalidCredentialsError):
-        await SteamValidator().validate_login(params)
+        await SteamValidator().validate_login(data=params, session_state=STATE)
 
 
 async def test_validate_login_rejects_when_steam_says_invalid():
@@ -103,7 +132,9 @@ async def test_validate_login_rejects_when_steam_says_invalid():
         mock_openid_verify(is_valid=False)
 
         with pytest.raises(SteamInvalidCredentialsError):
-            await SteamValidator().validate_login(VALID_OPENID_PARAMS)
+            await SteamValidator().validate_login(
+                data=VALID_OPENID_PARAMS, session_state=STATE
+            )
 
 
 async def test_validate_login_rejects_identity_claimed_id_mismatch():
@@ -116,7 +147,7 @@ async def test_validate_login_rejects_identity_claimed_id_mismatch():
         mock_openid_verify(is_valid=True)
 
         with pytest.raises(SteamInvalidCredentialsError):
-            await SteamValidator().validate_login(params)
+            await SteamValidator().validate_login(data=params, session_state=STATE)
 
 
 async def test_validate_login_rejects_wrong_identity_prefix():
@@ -132,7 +163,7 @@ async def test_validate_login_rejects_wrong_identity_prefix():
         mock_openid_verify(is_valid=True)
 
         with pytest.raises(SteamPermissionDeniedError):
-            await SteamValidator().validate_login(params)
+            await SteamValidator().validate_login(data=params, session_state=STATE)
 
 
 async def test_validate_login_network_error_becomes_bad_request():
@@ -140,7 +171,9 @@ async def test_validate_login_network_error_becomes_bad_request():
         respx.get(BASEURL).mock(side_effect=httpx.ConnectError("no route to host"))
 
         with pytest.raises(SteamBadRequestError):
-            await SteamValidator().validate_login(VALID_OPENID_PARAMS)
+            await SteamValidator().validate_login(
+                data=VALID_OPENID_PARAMS, session_state=STATE
+            )
 
 
 async def test_validate_login_steam_5xx_becomes_invalid_credentials():
@@ -148,7 +181,9 @@ async def test_validate_login_steam_5xx_becomes_invalid_credentials():
         respx.get(BASEURL).mock(return_value=httpx.Response(500))
 
         with pytest.raises(SteamInvalidCredentialsError):
-            await SteamValidator().validate_login(VALID_OPENID_PARAMS)
+            await SteamValidator().validate_login(
+                data=VALID_OPENID_PARAMS, session_state=STATE
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -280,6 +315,7 @@ async def test_steam_validate_register_creates_user(client, db):
             "/steam/validate/newsteamuser",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert response.status_code == 303
@@ -309,6 +345,7 @@ async def test_steam_validate_register_rejects_already_linked_steam_id(
             "/steam/validate/firstuser",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
         assert first.status_code == 303
@@ -320,6 +357,7 @@ async def test_steam_validate_register_rejects_already_linked_steam_id(
             "/steam/validate/seconduser",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert second.status_code == 409
@@ -335,6 +373,7 @@ async def test_steam_validate_register_rejects_bad_openid_params(client):
         "/steam/validate/newsteamuser",
         params=bad_params,
         follow_redirects=False,
+        cookies={"state": STATE},
     )
 
     assert response.status_code == 401
@@ -354,6 +393,7 @@ async def test_steam_login_validate_updates_returning_user(client, db):
             "/steam/validate/returninguser",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert registered.status_code == 303
@@ -368,6 +408,7 @@ async def test_steam_login_validate_updates_returning_user(client, db):
             "/steam/login/validate",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert response.status_code == 303
@@ -390,6 +431,7 @@ async def test_steam_login_validate_unknown_steam_id_not_found(client):
             "/steam/login/validate",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert response.status_code == 404
@@ -403,6 +445,7 @@ async def test_steam_login_validate_propagates_steam_outage(client):
             "/steam/login/validate",
             params=VALID_OPENID_PARAMS,
             follow_redirects=False,
+            cookies={"state": STATE},
         )
 
     assert response.status_code == 400
