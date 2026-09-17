@@ -1,3 +1,4 @@
+import logging
 import json
 import uuid
 from random import randint
@@ -11,6 +12,8 @@ from schemas import active_game_schemas
 from services import game_helpers
 
 MIN_TEAMS = 2
+
+logger = logging.getLogger(__name__)
 
 
 async def create_game(
@@ -44,6 +47,8 @@ async def create_game(
     await cache.set(user_id, id, ex=15 * 60)
     await cache.set(id, active_game.model_dump_json(), ex=15 * 60)
 
+    logger.info("Game successfully created")
+
     return active_game
 
 
@@ -65,5 +70,7 @@ async def game_evaluation(
             score=game_evaluation.score,
         )
         game_evaluation.best = best
+
+    logger.info("Game successfully evaluated")
 
     return game_evaluation

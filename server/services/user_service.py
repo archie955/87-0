@@ -70,4 +70,6 @@ async def update(
     await safe_commit(db=db, datatype="Username")
     await db.refresh(user)
 
+    logger.info("Updated user", extra={"user_id": user.id})
+
     return user_schemas.UserOut.model_validate(user)
