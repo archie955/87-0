@@ -56,6 +56,10 @@ jobs:
             working-directory: server
             run: uv sync --no-default-groups --group dev
 
+          - name: Audit dependencies
+            working-directory: server
+            run: uv audit --preview-features audit
+
           - name: Check backend formatting
             working-directory: server
             run: uv run ruff format --check .
@@ -95,6 +99,10 @@ jobs:
           - name: Install frontend dependencies
             working-directory: client
             run: npm ci
+
+          - name: Audit dependencies
+            working-directory: client
+            run: npm audit
 
           - name: Run frontend typecheck
             working-directory: client

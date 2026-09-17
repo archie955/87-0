@@ -8,6 +8,6 @@ services:
     ports:
       - "5433:5432"
   redis_test:
-    image: redis:latest
+    image: redis:8.8
     ports:
       - "6380:6379"

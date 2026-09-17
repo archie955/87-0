@@ -57,6 +57,10 @@ jobs:
         working-directory: server
         run: uv sync --no-default-groups --group lint
 
+      - name: Audit dependencies
+        working-directory: server
+        run: uv audit --preview-features audit
+
       - name: Check formatting
         working-directory: server
         run: uv run ruff format --check

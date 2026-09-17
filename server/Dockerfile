@@ -13,7 +13,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
-RUN pip install uv
+RUN pip install uv==0.11.17
 
 COPY pyproject.toml uv.lock ./
 
