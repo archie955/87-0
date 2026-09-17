@@ -1,6 +1,6 @@
-import uuid
 import logging
 import time
+import uuid
 from collections.abc import Awaitable, Callable
 from typing import override
 
@@ -35,6 +35,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         duration = time.perf_counter() - start
 
-        logger.info("%s %s [%s] -> %s (%.3fs)", method, url, id, response.status_code, duration)
+        logger.info(
+            "%s %s [%s] -> %s (%.3fs)", method, url, id, response.status_code, duration
+        )
 
         return response
