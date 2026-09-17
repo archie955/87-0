@@ -23,7 +23,8 @@ from database.database import DBDep
 from database.init_db import initialise_db
 from exceptions.app_exceptions import (
     AppException,
-    UninstantiatedCache,
+    UnhealthyCacheError,
+    UnhealthyDBError,
 )
 from exceptions.steam_exceptions import SteamException
 from limiter.limiter import limiter
@@ -143,16 +144,14 @@ def global_expression_handler(request: Request, exc: Exception):
 async def health(request: Request, db: DBDep, cache: RedisDep) -> dict[str, str]:
     try:
         await db.execute(text("SELECT 1"))
-    except Exception:
+    except Exception as err:
         logger.exception("DB is not healthy")
-        return {"status": "unhealthy"}
-    else:
-        status = {"status": "healthy"}
+        raise UnhealthyDBError() from err
     try:
         redis_state = await cache.get("app:status")
-    except Exception:
+    except Exception as err:
         logger.exception("Redis Cache is not healthy")
-        return {"status": "unhealthy"}
+        raise UnhealthyCacheError() from err
     if redis_state != "healthy":
-        raise UninstantiatedCache()
-    return status
+        raise UnhealthyCacheError()
+    return {"status": "healthy"}

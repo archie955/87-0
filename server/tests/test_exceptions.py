@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from exceptions.app_exceptions import (
     BadRequestError,
     DataAlreadyAddedError,
@@ -6,9 +8,11 @@ from exceptions.app_exceptions import (
     ExpiredDataError,
     InvalidCredentialsError,
     InvalidGameLineup,
+    LockoutError,
     PermissionDeniedError,
     RequiredAuthentication,
-    UninstantiatedCache,
+    UnhealthyCacheError,
+    UnhealthyDBError,
 )
 from exceptions.steam_exceptions import (
     SteamBadRequestError,
@@ -36,7 +40,9 @@ def test_app_exceptions():
     assert ExpiredDataError("Token").status_code == 422
     assert InvalidGameLineup(1, "reason").status_code == 422
     assert RequiredAuthentication().status_code == 409
-    assert UninstantiatedCache().status_code == 404
+    assert UnhealthyCacheError().status_code == 503
+    assert UnhealthyDBError().status_code == 503
+    assert LockoutError(time=datetime.now(tz=UTC)).status_code == 403
 
 
 def test_steam_exceptions():

@@ -77,10 +77,26 @@ class RequiredAuthentication(AppException):
         )
 
 
-class UninstantiatedCache(AppException):
+class UnhealthyDBError(AppException):
     def __init__(self, headers: dict[str, str] | None = None):
         super().__init__(
-            status_code=404,
-            message="Redis Cache has not initialised correctly",
+            status_code=503, message="Database is not healthy", headers=headers
+        )
+
+
+class UnhealthyCacheError(AppException):
+    def __init__(self, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=503,
+            message="Redis Cache is not healthy",
+            headers=headers,
+        )
+
+
+class LockoutError(AppException):
+    def __init__(self, time: int, headers: dict[str, str] | None = None):
+        super().__init__(
+            status_code=403,
+            message=f"Too many failed attempts, please try again in {time} minutes",
             headers=headers,
         )

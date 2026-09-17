@@ -1,9 +1,11 @@
 import asyncio
 import logging
+import math
 import re
+from datetime import UTC, datetime, timedelta
 
 from pydantic import EmailStr
-from sqlalchemy import select
+from sqlalchemy import null, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -12,6 +14,7 @@ from exceptions.app_exceptions import (
     BadRequestError,
     DataAlreadyExistsError,
     InvalidCredentialsError,
+    LockoutError,
 )
 from models import models
 from schemas import email_schemas, token_schemas
@@ -21,6 +24,15 @@ from utils.config import Settings
 
 logger = logging.getLogger(__name__)
 MIN_PASSWORD_LENGTH = 6
+MAX_ATTEMPTS = 3
+
+
+async def lockout(email_user: models.Email, db: AsyncSession):
+    email_user.attempts += 1
+    if email_user.attempts >= MAX_ATTEMPTS:
+        email_user.lockout = datetime.now(tz=UTC) + timedelta(hours=1)
+
+    await safe_commit(db=db, datatype="Email Lockout")
 
 
 async def create_email(
@@ -104,6 +116,12 @@ async def login(
     if not email_user:
         raise InvalidCredentialsError()
 
+    if email_user.lockout and email_user.lockout > datetime.now(tz=UTC):
+        time = math.ceil(
+            (email_user.lockout - datetime.now(tz=UTC)).total_seconds() / 60.0
+        )
+        raise LockoutError(time=time)
+
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=password,
@@ -112,6 +130,7 @@ async def login(
     )
 
     if not verified:
+        await lockout(email_user, db)
         raise InvalidCredentialsError()
 
     user_data = {"sub": str(email_user.user_id)}
@@ -136,6 +155,9 @@ async def login(
     )
 
     db.add(refresh)
+    email_user.attempts = 0
+    email_user.lockout = null()
+
     await safe_commit_add(db=db, datatype="Refresh Token")
 
     logger.info("User logged in", extra={"user_id": email_user.user_id})

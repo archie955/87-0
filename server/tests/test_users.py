@@ -143,6 +143,26 @@ async def test_incorrect_email(client):
     assert "refresh_token" not in response.cookies
 
 
+async def test_login_lockout(client):
+    user = await register_user(client)
+
+    for _ in range(3):
+        response = await client.post(
+            "/email/login",
+            data={"username": user.email, "password": "incorrectpassword"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
+
+    response = await client.post(
+        "/email/login",
+        data={"username": user.email, "password": "incorrectpassword"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+    assert response.status_code == 403
+
+
 # ---------------------------------------------------------------------------
 # Router-level: PUT /users
 # ---------------------------------------------------------------------------
