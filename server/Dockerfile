@@ -1,5 +1,8 @@
 # Base image
-FROM python:3.12-slim
+FROM python:3.12.14-slim
+
+RUN useradd -m -u 1000 dev_user
+USER dev_user
 
 # prevent python from writing pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
