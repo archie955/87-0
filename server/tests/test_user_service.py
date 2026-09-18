@@ -21,7 +21,7 @@ async def test_delete_user(db):
         email="delete@example.com",
     )
 
-    await user_service.delete(db=db, user=user)
+    await user_service.delete(db=db, user=user, request_id="1")
 
     found = (
         await db.execute(select(User).where(User.id == user.id))
@@ -45,7 +45,9 @@ async def test_update_username_success(db):
         password="password",
     )
 
-    result = await user_service.update(db=db, user=user, updated=updated)
+    result = await user_service.update(
+        db=db, user=user, updated=updated, request_id="1"
+    )
 
     assert result.username == "newusername"
 
@@ -66,7 +68,7 @@ async def test_update_same_username(db):
     )
 
     with pytest.raises(DataAlreadyExistsError):
-        await user_service.update(db=db, user=user, updated=updated)
+        await user_service.update(db=db, user=user, updated=updated, request_id="1")
 
 
 async def test_update_no_email_login(db):
@@ -82,4 +84,4 @@ async def test_update_no_email_login(db):
     )
 
     with pytest.raises(DataNotFoundError):
-        await user_service.update(db=db, user=user, updated=updated)
+        await user_service.update(db=db, user=user, updated=updated, request_id="1")

@@ -22,7 +22,7 @@ async def delete_user(
     db: DBDep,
     user: UserDep,
 ):
-    await user_service.delete(db=db, user=user)
+    await user_service.delete(db=db, user=user, request_id=request.state.id)
 
 
 @router.put("", status_code=status.HTTP_200_OK, response_model=user_schemas.UserOut)
@@ -30,4 +30,6 @@ async def delete_user(
 async def update_user(
     request: Request, db: DBDep, user: UserDep, updated: user_schemas.UserUpdate
 ):
-    return await user_service.update(db=db, user=user, updated=updated)
+    return await user_service.update(
+        db=db, user=user, updated=updated, request_id=request.state.id
+    )

@@ -24,9 +24,7 @@ async def test_create_email_success(db):
     )
 
     tokens = await email_service.create_email(
-        db=db,
-        email_user=payload,
-        settings=settings,
+        db=db, email_user=payload, settings=settings, request_id="1"
     )
 
     assert tokens.access_token
@@ -60,9 +58,7 @@ async def test_create_email_duplicate_username(db):
 
     with pytest.raises(DataAlreadyExistsError):
         await email_service.create_email(
-            db=db,
-            email_user=payload,
-            settings=settings,
+            db=db, email_user=payload, settings=settings, request_id="1"
         )
 
 
@@ -81,9 +77,7 @@ async def test_create_email_duplicate_email(db):
 
     with pytest.raises(DataAlreadyExistsError):
         await email_service.create_email(
-            db=db,
-            email_user=payload,
-            settings=settings,
+            db=db, email_user=payload, settings=settings, request_id="1"
         )
 
 
@@ -118,6 +112,7 @@ async def test_login_success(db):
         settings=settings,
         email="login@example.com",
         password="password",
+        request_id="1",
     )
 
     assert tokens.access_token
@@ -138,6 +133,7 @@ async def test_login_wrong_password(db):
             settings=settings,
             email="wrongpass@example.com",
             password="wrong",
+            request_id="1",
         )
 
 
@@ -148,6 +144,7 @@ async def test_login_unknown_email(db):
             settings=settings,
             email="unknown@example.com",
             password="password",
+            request_id="1",
         )
 
 
@@ -164,6 +161,7 @@ async def test_login_rotates_refresh_token(db):
         settings=settings,
         email="rotate@example.com",
         password="password",
+        request_id="1",
     )
 
     second = await email_service.login(
@@ -171,6 +169,7 @@ async def test_login_rotates_refresh_token(db):
         settings=settings,
         email="rotate@example.com",
         password="password",
+        request_id="1",
     )
 
     assert first.refresh_token != second.refresh_token

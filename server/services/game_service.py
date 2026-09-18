@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 async def create_game(
-    user_id: str, cache: redis.Redis
+    user_id: str, cache: redis.Redis, request_id: str
 ) -> active_game_schemas.ActiveGame:
     teams = await cache.get("team_ids")
 
@@ -47,17 +47,21 @@ async def create_game(
     await cache.set(user_id, id, ex=15 * 60)
     await cache.set(id, active_game.model_dump_json(), ex=15 * 60)
 
-    logger.info("Game successfully created")
+    logger.info(
+        "Game successfully created", extra={"game_id": id, "request_id": request_id}
+    )
 
     return active_game
 
 
+# ruff: ignore[too-many-positional-arguments, too-many-arguments]
 async def game_evaluation(
     game: active_game_schemas.GameResult,
     active_game: active_game_schemas.ActiveGame,
     user: User | None,
     db: AsyncSession,
     cache: redis.Redis,
+    request_id: str,
 ) -> active_game_schemas.GameEvaluation:
     game_evaluation = await game_helpers.evaluation_base(
         game=game, active_game=active_game, cache=cache, db=db
@@ -71,6 +75,9 @@ async def game_evaluation(
         )
         game_evaluation.best = best
 
-    logger.info("Game successfully evaluated")
+    logger.info(
+        "Game successfully evaluated",
+        extra={"game_id": game.game_id, "request_id": request_id},
+    )
 
     return game_evaluation

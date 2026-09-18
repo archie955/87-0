@@ -27,7 +27,9 @@ async def steam_register(
     else:
         url = f"{settings.frontend_auth_url}/steam/validate/{username}"
 
-    return steam_service.redirect(return_url=url, state=state)
+    return steam_service.redirect(
+        return_url=url, state=state, request_id=request.state.id
+    )
 
 
 @router.get(
@@ -43,11 +45,18 @@ async def steam_validate_register(
     if not state:
         raise SteamInvalidCredentialsError()
     profile = await steam_service.validate_profile(
-        query_params=request.query_params, session_state=state, key=settings.steam_key
+        query_params=request.query_params,
+        session_state=state,
+        key=settings.steam_key,
+        request_id=request.state.id,
     )
 
     tokens = await steam_service.create_steam_login(
-        db=db, settings=settings, profile=profile, username=username
+        db=db,
+        settings=settings,
+        profile=profile,
+        username=username,
+        request_id=request.state.id,
     )
 
     response = RedirectResponse(
@@ -71,7 +80,9 @@ async def steam_login(request: Request, settings: SettingsDep):
     else:
         url = f"{settings.frontend_auth_url}/steam/login/validate"
 
-    return steam_service.redirect(return_url=url, state=state)
+    return steam_service.redirect(
+        return_url=url, state=state, request_id=request.state.id
+    )
 
 
 @router.get(
@@ -85,7 +96,10 @@ async def steam_validate_login(request: Request, db: DBDep, settings: SettingsDe
     if not state:
         raise SteamInvalidCredentialsError()
     profile = await steam_service.validate_profile(
-        query_params=request.query_params, session_state=state, key=settings.steam_key
+        query_params=request.query_params,
+        session_state=state,
+        key=settings.steam_key,
+        request_id=request.state.id,
     )
 
     tokens = await steam_service.update_steam_login(

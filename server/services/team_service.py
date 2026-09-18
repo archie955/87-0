@@ -19,7 +19,7 @@ from schemas import team_schemas
 logger = logging.getLogger(__name__)
 
 
-async def get(cache: Redis) -> team_schemas.Teams:
+async def get(cache: Redis, request_id: str) -> team_schemas.Teams:
     """Fetches teams from async redis cache. Converts them into an instance of the
     team_schemas.Teams pydantic model. Validates the existence of the teams,
     and returns them.
@@ -64,6 +64,6 @@ async def get(cache: Redis) -> team_schemas.Teams:
     if not teams:
         raise DataNotFoundError("Teams")
 
-    logger.info("Successfully returned teams")
+    logger.info("Successfully returned teams", extra={"request_id": request_id})
 
     return teams

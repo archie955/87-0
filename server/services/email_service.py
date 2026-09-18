@@ -36,7 +36,10 @@ async def lockout(email_user: models.Email, db: AsyncSession):
 
 
 async def create_email(
-    db: AsyncSession, email_user: email_schemas.EmailCreate, settings: Settings
+    db: AsyncSession,
+    email_user: email_schemas.EmailCreate,
+    settings: Settings,
+    request_id: str,
 ) -> token_schemas.Tokens:
     if not re.fullmatch(r"\S+@\S+\.\S+", email_user.email):
         # ruff: ignore[raise-vanilla-args]
@@ -94,7 +97,7 @@ async def create_email(
     db.add(refresh)
     await safe_commit(db=db, datatype="Refresh Token")
 
-    logger.info("User created", extra={"user_id": user.id})
+    logger.info("User created", extra={"user_id": user.id, "request_id": request_id})
 
     return token_schemas.Tokens(
         access_token=create_access_token(data=user_data, settings=settings),
@@ -103,7 +106,11 @@ async def create_email(
 
 
 async def login(
-    db: AsyncSession, settings: Settings, email: EmailStr, password: str
+    db: AsyncSession,
+    settings: Settings,
+    email: EmailStr,
+    password: str,
+    request_id: str,
 ) -> token_schemas.Tokens:
     email_user = (
         await db.execute(
@@ -163,7 +170,10 @@ async def login(
 
     await safe_commit_add(db=db, datatype="Refresh Token")
 
-    logger.info("User logged in", extra={"user_id": email_user.user_id})
+    logger.info(
+        "User logged in",
+        extra={"user_id": email_user.user_id, "request_id": request_id},
+    )
 
     return token_schemas.Tokens(
         access_token=create_access_token(data=user_data, settings=settings),

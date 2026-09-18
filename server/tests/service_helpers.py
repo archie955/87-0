@@ -48,9 +48,13 @@ async def create_refresh_token_for_user(
 def request_with_cookies(**cookies: str) -> Request:
     cookie_header = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
-    return Request(
+    request = Request(
         {
             "type": "http",
             "headers": [(b"cookie", cookie_header.encode())],
         }
     )
+
+    request.state.id = "1"
+
+    return request

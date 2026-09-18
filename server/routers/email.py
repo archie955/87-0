@@ -28,7 +28,7 @@ async def email_create(
     settings: SettingsDep,
 ):
     tokens = await email_service.create_email(
-        db=db, email_user=email_user, settings=settings
+        db=db, email_user=email_user, settings=settings, request_id=request.state.id
     )
 
     response = RedirectResponse(
@@ -50,6 +50,7 @@ async def email_login(
         settings=settings,
         email=email_credentials.username,
         password=email_credentials.password,
+        request_id=request.state.id,
     )
 
     response = RedirectResponse(

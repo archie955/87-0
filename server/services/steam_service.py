@@ -31,16 +31,16 @@ async def check_username(db: AsyncSession, username: str) -> None:
         raise SteamDataAlreadyExistsError(datatype="Username")
 
 
-def redirect(return_url: str, state: str) -> RedirectResponse:
+def redirect(return_url: str, state: str, request_id: str) -> RedirectResponse:
     steam = SteamLogin(return_url, state)
 
-    logger.info("User redirected")
+    logger.info("User redirected", extra={"request_id": request_id})
 
     return steam.redirect()
 
 
 async def validate_profile(
-    query_params: QueryParams, session_state: str, key: str
+    query_params: QueryParams, session_state: str, key: str, request_id: str
 ) -> steam_schemas.SteamProfile:
     validator = SteamValidator()
     steam_id = await validator.validate_login(
@@ -50,6 +50,8 @@ async def validate_profile(
     if not steam_id:
         raise SteamInvalidCredentialsError()
 
+    logger.info("Steam validated", extra={"request_id": request_id})
+
     return await validator.fetch_details(steam_id, key=key)
 
 
@@ -58,6 +60,7 @@ async def create_steam_login(
     profile: steam_schemas.SteamProfile,
     settings: Settings,
     username: str,
+    request_id: str,
 ) -> token_schemas.Tokens:
     steam_login = (
         await db.execute(
@@ -107,7 +110,9 @@ async def create_steam_login(
     db.add(refresh)
     await safe_commit(db=db, datatype="Refresh Token")
 
-    logger.info("User logged in", extra={"user_id": str(user.id)})
+    logger.info(
+        "User logged in", extra={"user_id": str(user.id), "request_id": request_id}
+    )
 
     return token_schemas.Tokens(
         access_token=create_access_token(data=user_data, settings=settings),

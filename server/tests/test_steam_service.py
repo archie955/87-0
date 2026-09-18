@@ -30,7 +30,9 @@ async def test_check_username_taken(db):
 
 
 def test_redirect_returns_steam_url():
-    response = steam_service.redirect("http://example.com/return", state="state")
+    response = steam_service.redirect(
+        "http://example.com/return", state="state", request_id="1"
+    )
 
     assert response.status_code == 303
     assert response.headers["location"].startswith(
@@ -47,10 +49,7 @@ async def test_create_steam_login_success(db):
     )
 
     tokens = await steam_service.create_steam_login(
-        db=db,
-        profile=profile,
-        settings=settings,
-        username="steamuser",
+        db=db, profile=profile, settings=settings, username="steamuser", request_id="1"
     )
 
     assert tokens.access_token
@@ -77,18 +76,12 @@ async def test_create_steam_login_duplicate_steam_id(db):
     )
 
     await steam_service.create_steam_login(
-        db=db,
-        profile=profile,
-        settings=settings,
-        username="first",
+        db=db, profile=profile, settings=settings, username="first", request_id="1"
     )
 
     with pytest.raises(SteamDataAlreadyExistsError):
         await steam_service.create_steam_login(
-            db=db,
-            profile=profile,
-            settings=settings,
-            username="second",
+            db=db, profile=profile, settings=settings, username="second", request_id="1"
         )
 
 
@@ -101,10 +94,7 @@ async def test_update_steam_login_success(db):
     )
 
     await steam_service.create_steam_login(
-        db=db,
-        profile=profile,
-        settings=settings,
-        username="updateuser",
+        db=db, profile=profile, settings=settings, username="updateuser", request_id="1"
     )
 
     new_profile = steam_schemas.SteamProfile(

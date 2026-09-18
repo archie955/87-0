@@ -91,7 +91,10 @@ async def refresh(
     if not old_token or old_token.jti != token.jti:
         logger.info(
             "Refresh attempt with invalid token",
-            extra={"jti_hash": hashlib.sha256(token.jti.encode()).hexdigest()[:16]},
+            extra={
+                "jti_hash": hashlib.sha256(token.jti.encode()).hexdigest()[:16],
+                "request_id": request.state.id,
+            },
         )
         raise InvalidCredentialsError()
 
@@ -118,7 +121,9 @@ async def refresh(
     db.add(refresh)
     await safe_commit_add(db=db, datatype="Refresh Token")
 
-    logger.info("New tokens created", extra={"user_id": user.id})
+    logger.info(
+        "New tokens created", extra={"user_id": user.id, "request_id": request.state.id}
+    )
 
     return token_schemas.Tokens(
         access_token=new_access_token, refresh_token=new_refresh.token
@@ -146,4 +151,6 @@ async def logout(request: Request, db: AsyncSession, settings: Settings) -> None
         await db.delete(old_token)
         await db.commit()
 
-    logger.info("User logged out", extra={"user_id": token.id})
+    logger.info(
+        "User logged out", extra={"user_id": token.id, "request_id": request.state.id}
+    )

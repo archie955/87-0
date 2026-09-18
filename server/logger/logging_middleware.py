@@ -16,16 +16,17 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        id = str(uuid.uuid4())
+        request_id = str(uuid.uuid4())
         method = request.method
         url = request.url.path
         client_ip = request.client.host if request.client else "NO HOST"
+        request.state.id = request_id
 
         logger.info(
             "%s %s [%s] from %s",
             method,
             url,
-            id,
+            request_id,
             client_ip,
         )
 
@@ -36,7 +37,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         duration = time.perf_counter() - start
 
         logger.info(
-            "%s %s [%s] -> %s (%.3fs)", method, url, id, response.status_code, duration
+            "%s %s [%s] -> %s (%.3fs)",
+            method,
+            url,
+            request_id,
+            response.status_code,
+            duration,
         )
 
         return response

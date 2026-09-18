@@ -25,7 +25,9 @@ async def create_game(request: Request, cache: RedisDep, settings: SettingsDep):
     user_id = request.cookies.get("session")
     if not user_id:
         user_id = str(uuid.uuid4())
-    game = await game_service.create_game(user_id=user_id, cache=cache)
+    game = await game_service.create_game(
+        user_id=user_id, cache=cache, request_id=request.state.id
+    )
     response = JSONResponse(content=game.model_dump_json(), status_code=201)
     response.set_cookie(
         "session",
@@ -53,5 +55,10 @@ async def submit_lineup(
     cache: RedisDep,
 ):
     return await game_service.game_evaluation(
-        game=game, active_game=active_game, user=user, db=db, cache=cache
+        game=game,
+        active_game=active_game,
+        user=user,
+        db=db,
+        cache=cache,
+        request_id=request.state.id,
     )
