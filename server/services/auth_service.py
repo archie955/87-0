@@ -30,16 +30,16 @@ def set_cookie_headers(
         key="access_token",
         value=tokens.access_token,
         httponly=True,
-        secure=settings.prod == "prod",
-        samesite="strict" if settings.prod == "prod" else "lax",
+        secure=settings.is_prod(),
+        samesite="strict" if settings.is_prod() else "lax",
     )
 
     response.set_cookie(
         key="refresh_token",
         value=tokens.refresh_token,
         httponly=True,
-        secure=settings.prod == "prod",
-        samesite="strict" if settings.prod == "prod" else "lax",
+        secure=settings.is_prod(),
+        samesite="strict" if settings.is_prod() else "lax",
     )
 
     return response
@@ -49,14 +49,14 @@ def clear_cookie_headers(response: Response, settings: Settings) -> Response:
     response.delete_cookie(
         key="access_token",
         httponly=True,
-        secure=settings.prod == "prod",
-        samesite="strict" if settings.prod == "prod" else "lax",
+        secure=settings.is_prod(),
+        samesite="strict" if settings.is_prod() else "lax",
     )
     response.delete_cookie(
         key="refresh_token",
         httponly=True,
-        secure=settings.prod == "prod",
-        samesite="strict" if settings.prod == "prod" else "lax",
+        secure=settings.is_prod(),
+        samesite="strict" if settings.is_prod() else "lax",
     )
 
     return response
