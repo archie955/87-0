@@ -79,6 +79,9 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
                   placeholder="*****"
                   required
                 />
+                <p className="text-muted-foreground text-balance">
+                  Forgot your password? Login with steam instead (recommended)
+                </p>
               </Field>
               <Field>
                 <Button type="submit" name="email_login">

@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 
 describe("LoginForm", () => {
-  it("renders the email/password fields and the Steam entry point", () => {
+  it("renders the email/password fields and the Steam entry point, with forgotten password message", async () => {
     render(<LoginForm />);
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -49,6 +49,14 @@ describe("LoginForm", () => {
 
     expect(steamForm).toHaveAttribute("action", "/api/steam/login");
     expect(steamForm).toHaveAttribute("method", "GET");
+
+    expect(
+      await screen.findByText(
+        "Forgot your password? Login with steam instead (recommended)",
+        undefined,
+        { timeout: 3000 },
+      ),
+    ).toBeInTheDocument();
   });
 
   it("logs in, sets a success notification, and navigates home", async () => {
