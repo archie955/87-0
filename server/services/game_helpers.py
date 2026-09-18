@@ -3,7 +3,7 @@
 import json
 
 from redis.asyncio import Redis
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from exceptions.app_exceptions import (
@@ -177,9 +177,13 @@ async def evaluation_base(
 async def update_user_game(db: AsyncSession, user: models.User, score: float):
     best = False
     if user.best_score is None or user.best_score < score:
-        user.best_score = score
         best = True
+        await db.execute(
+            update(models.User)
+            .where(models.User.id == user.id)
+            .values(best_score=func.greatest(models.User.best_score, score))
+        )
 
-    await safe_commit(db=db, datatype="Best Score")
+        await safe_commit(db=db, datatype="Best Score")
 
     return best

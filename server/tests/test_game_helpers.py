@@ -206,9 +206,11 @@ async def test_update_user_game_best_score(db):
     best = await game_helpers.update_user_game(db=db, user=user, score=2.0)
 
     assert best is True
+    await db.refresh(user)
     assert user.best_score == 2.0
 
     best = await game_helpers.update_user_game(db=db, user=user, score=1.5)
 
     assert best is False
+    await db.refresh(user)
     assert user.best_score == 2.0
