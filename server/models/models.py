@@ -128,3 +128,11 @@ class RefreshToken(Base, Name, TimeStamps):
     )
 
     user: Mapped["User"] = relationship(back_populates="refresh")
+
+
+class DataVersion(Base, TimeStamps):
+    __tablename__ = "data_version"
+
+    version: Mapped[int] = mapped_column(
+        Integer, primary_key=True, nullable=False, default=1
+    )

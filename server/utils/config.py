@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     redis_db: int
     prod: Literal["prod", "dev"]
     frontend_auth_url: str
+    data_version: int
 
     def is_dev(self) -> bool:
         return self.prod == "dev"

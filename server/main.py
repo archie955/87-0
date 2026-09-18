@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
 
         await app.state.redis.ping()
 
-        await initialise_db()
+        await initialise_db(settings)
         await initialise_cache(cache=app.state.redis)
 
         await app.state.redis.set("app:status", "healthy")
