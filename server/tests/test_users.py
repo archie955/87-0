@@ -146,7 +146,7 @@ async def test_incorrect_email(client):
 async def test_login_lockout(client):
     user = await register_user(client)
 
-    for _ in range(3):
+    for _ in range(5):
         response = await client.post(
             "/email/login",
             data={"username": user.email, "password": "incorrectpassword"},
