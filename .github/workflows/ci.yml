@@ -8,6 +8,7 @@ on:
         - "docker-compose.prod.yml"
         - ".github/workflows/ci.yml"
         - "Caddyfile"
+        - ".github/dependabot.yml"
       branches: [ main ]
     pull_request:
       branches: [ main ]
