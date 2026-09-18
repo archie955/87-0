@@ -125,16 +125,6 @@ def upgrade() -> None:
             nullable=False
         ),
         sa.Column(
-            "attempts",
-            sa.Integer,
-            nullable=True
-        ),
-        sa.Column(
-            "lockout",
-            sa.DateTime(timezone=True),
-            nullable=True
-        ),
-        sa.Column(
             "user_id",
             sa.Integer,
             sa.ForeignKey("user.id", ondelete="CASCADE"),
