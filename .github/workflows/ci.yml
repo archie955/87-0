@@ -87,7 +87,7 @@ jobs:
               REDIS_DB: ${{ secrets.REDIS_DB }}
               PROD: ${{ secrets.DEV }}
               FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_DEV_URL }}
-              DATABASE_VERSION: ${{ vars.DATABASE_VERSION }}
+              DATA_VERSION: ${{ vars.DATABASE_VERSION }}
             run: uv run pytest --cov-report=xml
 
           - name: Use Node.js
@@ -159,7 +159,7 @@ jobs:
                 REDIS_DB: ${{ secrets.REDIS_DB }}
                 PROD: ${{ secrets.PROD }}
                 FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_AUTH_URL }}
-                DATABASE_VERSION: ${{ vars.DATABASE_VERSION }}
+                DATA_VERSION: ${{ vars.DATABASE_VERSION }}
               id: backend
               with:
                 context: ./server
@@ -226,7 +226,7 @@ jobs:
                     cosign verify "${BACKEND_IMAGE}:latest" \
                       --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
                       --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
-                            
+
                     cosign verify "${FRONTEND_IMAGE}:latest" \
                       --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
                       --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'

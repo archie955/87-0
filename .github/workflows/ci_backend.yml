@@ -96,5 +96,5 @@ jobs:
           REDIS_DB: ${{ secrets.REDIS_DB }}
           PROD: ${{ secrets.DEV }}
           FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_DEV_URL }}
-          DATABASE_VERSION: ${{ vars.DATABASE_VERSION }}
+          DATA_VERSION: ${{ vars.DATABASE_VERSION }}
         run: uv run pytest --cov-report=xml
