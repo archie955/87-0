@@ -3,12 +3,18 @@ updates:
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      npm-all:
+        patterns: ["*"]
 
   - package-ecosystem: "uv"
     directory: "/server"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      uv-all:
+        patterns: ["*"]
 
   - package-ecosystem: "docker"
     directory: "/client"
