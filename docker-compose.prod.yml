@@ -1,14 +1,21 @@
 services:
   db:
     image: postgres:16
-    container_name: trade_db
+    container_name: 87-0-db
     restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
     logging:
       driver: json-file
       options:
-        max-size: "50m"
-        max-file: "5"
+        max-size: "20m"
+        max-file: "3"
         compress: "true"
 
     environment:
@@ -24,41 +31,52 @@ services:
 
   redis:
     image: redis:8.8
-    container_name: redis
+    container_name: 87-0-redis
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
     logging:
       driver: json-file
       options:
-        max-size: "50m"
-        max-file: "5"
+        max-size: "20m"
+        max-file: "3"
         compress: "true"
 
-    environment:
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-      REDIS_DB: ${REDIS_DB}
     networks:
       - 87-0-net
 
   backend:
     image: archie955/87-0-backend:latest
     container_name: 87-0-backend
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
     logging:
       driver: json-file
       options:
-        max-size: "300m"
+        max-size: "100m"
         max-file: "5"
         compress: "true"
-
-    restart: unless-stopped
 
     env_file:
       - .env
 
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
     environment:
       POSTGRES_HOSTNAME: db
@@ -73,24 +91,26 @@ services:
   frontend:
     image: archie955/87-0-frontend:latest
     container_name: 87-0-frontend
+    restart: unless-stopped
 
     logging:
       driver: json-file
       options:
-        max-size: "150m"
-        max-file: "5"
+        max-size: "50m"
+        max-file: "3"
         compress: "true"
 
-    restart: unless-stopped
-
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
     networks:
       - 87-0-net
 
   caddy:
-    image: caddy:2
+    image: caddy:2.10-alpine
+    container_name: 87-0-caddy
+    restart: unless-stopped
 
     logging:
       driver: json-file
@@ -98,11 +118,6 @@ services:
         max-size: "50m"
         max-file: "5"
         compress: "true"
-
-
-    container_name: 87-0-caddy
-
-    restart: unless-stopped
 
     ports:
       - "80:80"
@@ -114,8 +129,10 @@ services:
       - caddy_config:/config
 
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_healthy
 
     networks:
       - 87-0-net

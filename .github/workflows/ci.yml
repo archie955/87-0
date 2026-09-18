@@ -233,7 +233,7 @@ jobs:
                       --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
                       --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
                     
-                    cd ../opt/87-0
+                    cd ../../opt/87-0
                     docker compose pull
                     docker compose up -d
 
