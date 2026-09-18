@@ -119,11 +119,17 @@ def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
-    logger.error("REQUEST VALIDATION ERROR: %s", exc.endpoint_path)
+    for e in exc.errors():
+        logger.error("%s: %s from %s", e["type"], e["msg"], e["loc"])
 
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors()},
+        content={
+            "detail": [
+                {"loc": e["loc"], "msg": e["msg"], "type": e["type"]}
+                for e in exc.errors()
+            ]
+        },
     )
 
 
