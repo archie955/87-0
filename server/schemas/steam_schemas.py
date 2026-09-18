@@ -6,7 +6,7 @@ from schemas.base_schema import OrmModel
 
 
 class SteamCreate(BaseModel):
-    username: str
+    username: str = Field(..., max_length=100)
 
 
 class SteamProfile(BaseModel):
@@ -19,7 +19,7 @@ class SteamProfile(BaseModel):
 class SteamOut(OrmModel):
     id: int
     user_id: int
-    username: str = Field(..., max_length=200)
+    username: str = Field(..., max_length=100)
     profile_name: str = Field(..., max_length=200)
     created_at: datetime
     updated_at: datetime

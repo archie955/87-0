@@ -18,4 +18,4 @@ class UserOut(OrmModel):
 
 
 class UserUpdate(BaseModel):
-    updated_username: str = Field(..., max_length=200)
+    updated_username: str = Field(..., max_length=100)
