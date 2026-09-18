@@ -180,17 +180,25 @@ jobs:
 
             - name: Sign and verify backend image
               run: |
-                cosign sign --yes ${{ vars.DOCKERHUB_USERNAME }}/87-0-backend@${{ steps.backend.outputs.digest }}
-                cosign verify ${images} \
-                --certificate-identity=https://github.com/archie955/87-0/.github/workflows/ci.yml \
-                --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+                IMAGE="${{ vars.DOCKERHUB_USERNAME }}/87-0-backend"
+                DIGEST="${{ steps.backend.outputs.digest }}"
+
+                cosign sign --yes "${IMAGE}@${DIGEST}"
+
+                cosign verify "${IMAGE}@${DIGEST}" \
+                  --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
+                  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
 
             - name: Sign and verify frontend image
               run: |
-                cosign sign --yes ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend@${{ steps.frontend.outputs.digest }}
-                cosign verify ${images} \
-                --certificate-identity=https://github.com/archie955/87-0/.github/workflows/ci.yml \
-                --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+                IMAGE="${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend"
+                DIGEST="${{ steps.frontend.outputs.digest }}"
+
+                cosign sign --yes "${IMAGE}@${DIGEST}"
+
+                cosign verify "${IMAGE}@${DIGEST}" \
+                  --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
+                  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
     
     deploy:
         needs: build
@@ -204,6 +212,25 @@ jobs:
                 username: ${{ secrets.DROPLET_USER }}
                 key: ${{ secrets.DROPLET_SSH_KEY }}
                 script: |
+                    set -e
+
+                    if ! command -v cosign &> /dev/null; then
+                      curl -sSfL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 \
+                        -o /usr/local/bin/cosign
+                      chmod +x /usr/local/bin/cosign
+                    fi
+
+                    BACKEND_IMAGE="${{ vars.DOCKERHUB_USERNAME }}/87-0-backend"
+                    FRONTEND_IMAGE="${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend"
+
+                    cosign verify "${BACKEND_IMAGE}:latest" \
+                      --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
+                      --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
+                            
+                    cosign verify "${FRONTEND_IMAGE}:latest" \
+                      --certificate-identity-regexp 'https://github.com/archie955/87-0/.github/workflows/ci.yml@refs/heads/main' \
+                      --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
+                    
                     cd ../opt/87-0
                     docker compose pull
                     docker compose up -d

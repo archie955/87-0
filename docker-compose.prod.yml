@@ -4,6 +4,13 @@ services:
     container_name: trade_db
     restart: unless-stopped
 
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+
     environment:
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -19,6 +26,13 @@ services:
     image: redis:8.8
     container_name: redis
 
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+
     environment:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
@@ -29,6 +43,13 @@ services:
   backend:
     image: archie955/87-0-backend:latest
     container_name: 87-0-backend
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "300m"
+        max-file: "5"
+        compress: "true"
 
     restart: unless-stopped
 
@@ -53,6 +74,13 @@ services:
     image: archie955/87-0-frontend:latest
     container_name: 87-0-frontend
 
+    logging:
+      driver: json-file
+      options:
+        max-size: "150m"
+        max-file: "5"
+        compress: "true"
+
     restart: unless-stopped
 
     depends_on:
@@ -63,6 +91,14 @@ services:
 
   caddy:
     image: caddy:2
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+
 
     container_name: 87-0-caddy
 
