@@ -30,7 +30,7 @@ services:
       - 87-0-net
 
   redis:
-    image: redis:8.8
+    image: redis:8.10
     container_name: 87-0-redis
     restart: unless-stopped
 
