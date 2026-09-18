@@ -107,7 +107,7 @@ jobs:
 
           - name: Run frontend typecheck
             working-directory: client
-            run: npm run tsc -- --force
+            run: npm run tsc
 
           - name: Run frontend linting
             working-directory: client
