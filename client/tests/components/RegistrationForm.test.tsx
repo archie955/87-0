@@ -147,7 +147,10 @@ describe("RegistrationForm", () => {
 
       expect(
         await screen.findByText(
-          "Logging into an account allows us to track your best game.",
+          "Logging into an account allows us to track your best game. It is advised " +
+            "to use Steam to login rather than email.",
+          undefined,
+          { timeout: 3000 },
         ),
       ).toBeInTheDocument();
       expect(useLoginStore.getState().login).toBe(true);
@@ -156,7 +159,10 @@ describe("RegistrationForm", () => {
       expect(useLoginStore.getState().login).toBe(false);
       expect(
         await screen.findByText(
-          "Creating an account allows us to track your best game.",
+          "Creating an account allows us to track your best game. It is advised " +
+            "to use Steam to create your account.",
+          undefined,
+          { timeout: 3000 },
         ),
       ).toBeInTheDocument();
 
@@ -164,7 +170,10 @@ describe("RegistrationForm", () => {
       expect(useLoginStore.getState().login).toBe(true);
       expect(
         await screen.findByText(
-          "Logging into an account allows us to track your best game.",
+          "Logging into an account allows us to track your best game. It is advised " +
+            "to use Steam to login rather than email.",
+          undefined,
+          { timeout: 3000 },
         ),
       ).toBeInTheDocument();
     });

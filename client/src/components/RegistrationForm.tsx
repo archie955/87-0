@@ -67,7 +67,8 @@ const RegistrationForm = ({ className, ...props }: ComponentProps<"div">) => {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldDescription className="px-6 text-center">
-        Creating an account allows us to track your best game.
+        Creating an account allows us to track your best game. It is advised to
+        use Steam to create your account.
       </FieldDescription>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">

@@ -49,7 +49,8 @@ const LoginForm = ({ className, ...props }: ComponentProps<"div">) => {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldDescription className="px-6 text-center">
-        Logging into an account allows us to track your best game.
+        Logging into an account allows us to track your best game. It is advised
+        to use Steam to login rather than email.
       </FieldDescription>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-1">
