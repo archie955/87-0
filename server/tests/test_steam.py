@@ -286,7 +286,7 @@ async def test_steam_register_rejects_taken_username(client):
         follow_redirects=False,
     )
 
-    assert response.status_code == 409
+    assert response.status_code == 303
 
 
 async def test_steam_login_redirects_to_steam(client):
@@ -360,7 +360,7 @@ async def test_steam_validate_register_rejects_already_linked_steam_id(
             cookies={"state": STATE},
         )
 
-    assert second.status_code == 409
+    assert second.status_code == 303
 
 
 async def test_steam_validate_register_rejects_bad_openid_params(client):
@@ -376,7 +376,7 @@ async def test_steam_validate_register_rejects_bad_openid_params(client):
         cookies={"state": STATE},
     )
 
-    assert response.status_code == 401
+    assert response.status_code == 303
 
 
 # ---------------------------------------------------------------------------
@@ -434,7 +434,7 @@ async def test_steam_login_validate_unknown_steam_id_not_found(client):
             cookies={"state": STATE},
         )
 
-    assert response.status_code == 404
+    assert response.status_code == 303
 
 
 async def test_steam_login_validate_propagates_steam_outage(client):
@@ -448,4 +448,4 @@ async def test_steam_login_validate_propagates_steam_outage(client):
             cookies={"state": STATE},
         )
 
-    assert response.status_code == 400
+    assert response.status_code == 303

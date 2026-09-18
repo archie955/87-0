@@ -46,13 +46,14 @@ FETCHURL = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
 
 class SteamLogin:
     def __init__(self, return_url: str, state: str):
+        return_url_with_state = f"{return_url}?state={state}"
         self.__params = {
             "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.mode": "checkid_setup",
             "openid.ns": "http://specs.openid.net/auth/2.0",
             "openid.realm": return_url,
-            "openid.return_to": return_url,
+            "openid.return_to": return_url_with_state,
             "state": state,
         }
         self.state = state
@@ -67,7 +68,7 @@ class SteamLogin:
             url=self.__create_url(),
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        time = datetime.now(tz=UTC) + timedelta(seconds=60)
+        time = datetime.now(tz=UTC) + timedelta(minutes=10)
         response.set_cookie(key="state", value=self.state, secure=True, expires=time)
         return response
 

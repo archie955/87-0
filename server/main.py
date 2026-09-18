@@ -111,7 +111,10 @@ def steam_exception_handler(
     exc: SteamException,
 ) -> RedirectResponse:
     logger.warning(f"SteamException raised: {exc.__class__.__name__}: {exc.message}")
-    return RedirectResponse(url=settings.frontend_auth_url, status_code=exc.status_code)
+    return RedirectResponse(
+        url=f"{settings.frontend_auth_url}/login?error={exc.__class__.__name__}",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 @app.exception_handler(RequestValidationError)

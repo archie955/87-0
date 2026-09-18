@@ -35,8 +35,11 @@ def test_app_exception_handler():
 def test_steam_exception_handler():
     response = steam_exception_handler(make_request(), SteamBadRequestError("bad"))
 
-    assert response.status_code == 400
-    assert response.headers["location"] == settings.frontend_auth_url
+    assert response.status_code == 303
+    assert (
+        response.headers["location"]
+        == f"{settings.frontend_auth_url}/login?error=SteamBadRequestError"
+    )
 
 
 def test_validation_exception_handler():
