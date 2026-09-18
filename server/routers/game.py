@@ -28,7 +28,7 @@ async def create_game(request: Request, cache: RedisDep, settings: SettingsDep):
     game = await game_service.create_game(
         user_id=user_id, cache=cache, request_id=request.state.id
     )
-    response = JSONResponse(content=game.model_dump_json(), status_code=201)
+    response = JSONResponse(content=game.model_dump(), status_code=201)
     response.set_cookie(
         "session",
         value=user_id,

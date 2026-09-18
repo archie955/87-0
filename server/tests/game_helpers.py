@@ -101,7 +101,7 @@ async def get_teams(auth_client: AuthClient) -> dict:
 
 
 async def play_game(auth_client_seed):
-    game = active_game_schemas.ActiveGame.model_validate_json(
+    game = active_game_schemas.ActiveGame.model_validate(
         await create_game(auth_client_seed)
     )
     teams = await get_teams(auth_client_seed)
@@ -131,7 +131,7 @@ async def play_game(auth_client_seed):
 
 
 async def play_game_switch_team(auth_client_seed):
-    game = active_game_schemas.ActiveGame.model_validate_json(
+    game = active_game_schemas.ActiveGame.model_validate(
         await create_game(auth_client_seed)
     )
     teams = await get_teams(auth_client_seed)
@@ -164,7 +164,7 @@ async def play_game_switch_team(auth_client_seed):
 
 
 async def play_game_wrong_igl(auth_client_seed):
-    game = active_game_schemas.ActiveGame.model_validate_json(
+    game = active_game_schemas.ActiveGame.model_validate(
         await create_game(auth_client_seed)
     )
     teams = await get_teams(auth_client_seed)

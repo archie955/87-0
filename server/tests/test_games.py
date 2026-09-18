@@ -18,6 +18,8 @@ async def test_create_game(auth_client_seed):
 
     data = response.json()
 
+    assert isinstance(data, dict)
+
     assert "id" in data
     assert "team_1_id" in data
     assert "team_2_id" in data
