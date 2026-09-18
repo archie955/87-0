@@ -59,7 +59,9 @@ class Email(Base, Name, TimeStamps):
     hashed_password: Mapped[str] = mapped_column(
         String(200), nullable=False, unique=False
     )
-    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    attempts: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     lockout: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

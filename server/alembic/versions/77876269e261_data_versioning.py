@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('version')
     )
-    op.add_column('email', sa.Column('attempts', sa.Integer(), nullable=False))
+    op.add_column('email', sa.Column('attempts', sa.Integer(), nullable=False, server_default="0"))
     op.add_column('email', sa.Column('lockout', sa.DateTime(timezone=True), nullable=True))
     op.alter_column('steam', 'steam_id',
                existing_type=sa.VARCHAR(length=200),
