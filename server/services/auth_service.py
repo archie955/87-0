@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from datetime import UTC, datetime
 
@@ -88,6 +89,10 @@ async def refresh(
     old_token = user.refresh
 
     if not old_token or old_token.jti != token.jti:
+        logger.info(
+            "Refresh attempt with invalid token",
+            extra={"jti_hash": hashlib.sha256(token.jti.encode()).hexdigest()[:16]},
+        )
         raise InvalidCredentialsError()
 
     if old_token.expires_at < datetime.now(tz=UTC):
