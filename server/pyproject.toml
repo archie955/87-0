@@ -1,6 +1,6 @@
 [project]
 name = "87-0_backend"
-version = "0.0.1"
+version = "0.1.0"
 description = "Counter Strike Esports Game"
 readme = "README.md"
 requires-python = ">=3.12"
