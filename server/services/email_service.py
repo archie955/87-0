@@ -5,7 +5,7 @@ import re
 from datetime import UTC, datetime, timedelta
 
 from pydantic import EmailStr
-from sqlalchemy import null, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -24,7 +24,7 @@ from utils.config import Settings
 
 logger = logging.getLogger(__name__)
 MIN_PASSWORD_LENGTH = 6
-MAX_ATTEMPTS = 3
+MAX_ATTEMPTS = 5
 
 
 async def lockout(email_user: models.Email, db: AsyncSession):
@@ -122,6 +122,10 @@ async def login(
         )
         raise LockoutError(time=time)
 
+    if email_user.lockout:
+        email_user.attempts = 0
+        email_user.lockout = None
+
     verified = await asyncio.to_thread(
         utils.verify,
         plain_password=password,
@@ -156,7 +160,6 @@ async def login(
 
     db.add(refresh)
     email_user.attempts = 0
-    email_user.lockout = null()
 
     await safe_commit_add(db=db, datatype="Refresh Token")
 
