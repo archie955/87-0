@@ -177,29 +177,15 @@ jobs:
                     ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend:${{ github.sha }}
 
             - name: Sign and verify backend image
-              env:
-                DIGEST: ${{ steps.backend.outputs.digest }}
-                TAGS: ${{ steps.backend.conclusion.tags }}
               run: |
-                images=""
-                for tag in ${TAGS}; do
-                  images+="${tag}@${DIGEST}"
-                done
-                cosign sign --yes ${images}
+                cosign sign --yes ${{ vars.DOCKERHUB_USERNAME }}/87-0-backend@${{ steps.backend.outputs.digest }}
                 cosign verify ${images} \
                 --certificate-identity=https://github.com/archie955/87-0/.github/workflows/ci.yml \
                 --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 
             - name: Sign and verify frontend image
-              env:
-                DIGEST: ${{ steps.frontend.outputs.digest }}
-                TAGS: ${{ steps.frontend.conclusion.tags }}
               run: |
-                images=""
-                for tag in ${TAGS}; do
-                  images+="${tag}@${DIGEST}"
-                done
-                cosign sign --yes ${images}
+                cosign sign --yes ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend@${{ steps.frontend.outputs.digest }}
                 cosign verify ${images} \
                 --certificate-identity=https://github.com/archie955/87-0/.github/workflows/ci.yml \
                 --certificate-oidc-issuer=https://token.actions.githubusercontent.com
