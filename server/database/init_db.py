@@ -24,7 +24,7 @@ async def initialise_db(settings: Settings) -> None:
             await db.refresh(version)
         
 
-        if has_teams and version < settings.data_version:
+        if has_teams and version.version < settings.data_version:
 
             await db.execute(delete(models.Player))
             await db.execute(delete(models.Team))
