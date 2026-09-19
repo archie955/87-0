@@ -69,7 +69,7 @@ const GameStage = ({
                 Ready to roll?
               </h2>
               <p className="text-muted-foreground mt-2 text-sm leading-6">
-                Open your next team
+                Roll your next team
               </p>
             </div>
 
@@ -127,7 +127,7 @@ const GameStage = ({
               <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-primary/80 text-[10px] font-bold tracking-[0.2em] uppercase">
-                    Team acquired
+                    Team unboxed
                   </p>
                   <div className="mt-1 flex flex-wrap items-end gap-x-3 gap-y-1">
                     <h3 className="text-2xl font-black tracking-tight">

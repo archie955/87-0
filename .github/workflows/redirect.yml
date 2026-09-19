@@ -72,20 +72,3 @@ jobs:
                 tags: |
                     ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend:latest
                     ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend:${{ github.sha }}
-    
-    deploy:
-        needs: build
-        if: github.event_name == 'push' && github.ref == 'refs/heads/email'
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Deploy to droplet
-              uses: appleboy/ssh-action@v1.2.5
-              with:
-                host: ${{ secrets.DROPLET_IP }}
-                username: ${{ secrets.DROPLET_USER }}
-                key: ${{ secrets.DROPLET_SSH_KEY }}
-                script: |
-                    cd ../../opt/87-0
-                    docker compose pull
-                    docker compose up -d

@@ -48,8 +48,7 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
           Who leads the team?
         </h2>
         <p className="text-muted-foreground mt-2 text-sm leading-6">
-          Pick one eligible player to become the IGL. Your final score is based
-          on the lineup you have built.
+          Pick one eligible player to become the IGL.
         </p>
       </div>
 
@@ -99,6 +98,7 @@ const IglSelector = ({ candidates, selected, onSelect }: IglSelectorProps) => {
                       IGL Bonus
                     </span>
                     <span className="font-mono text-sm text-[12px] font-bold uppercase tabular-nums">
+                      {player.igl_score > player.hltv ? "+" : ""}
                       {(player.igl_score - player.hltv).toFixed(2)}
                     </span>
                   </div>

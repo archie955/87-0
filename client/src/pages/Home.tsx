@@ -47,7 +47,7 @@ const Home = () => {
             at the bottom left. Account creation is <b>NOT</b> necessary to play
             the game, but does save your scores so you can track your personal
             best across sessions. Functionality may be added later that requires
-            an account, such as leaderboards in certain timeframes.
+            an account.
           </p>
         </div>
       </div>
