@@ -37,19 +37,17 @@ const Home = () => {
         </div>
         <div className="mx-auto max-w-5xl gap-10 text-left md:flex">
           <p className="mb:12 text-xl leading-relaxed dark:text-neutral-400">
-            You can create an account and sign in with either email or Steam by
-            following{" "}
+            You can create an account and sign in with Steam by following{" "}
             <Link
               to="/login"
               className="text-blue-600 underline underline-offset-2 hover:no-underline"
             >
               Sign in
             </Link>{" "}
-            at the bottom left. It is recommended to use Steam login over email.
-            Account creation is <b>NOT</b> necessary to play the game, but does
-            save your scores so you can track your personal best across
-            sessions. Functionality may be added later that requires an account,
-            such as leaderboards in certain timeframes.
+            at the bottom left. Account creation is <b>NOT</b> necessary to play
+            the game, but does save your scores so you can track your personal
+            best across sessions. Functionality may be added later that requires
+            an account, such as leaderboards in certain timeframes.
           </p>
         </div>
       </div>

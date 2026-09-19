@@ -1,5 +1,5 @@
-import RegistrationForm from "@/components/RegistrationForm";
-import LoginForm from "@/components/LoginForm";
+import AltRegistrationForm from "@/components/AltRegistrationForm";
+import AltLoginForm from "@/components/AltLoginForm";
 import { useLogin } from "@/stores/loginStore";
 import { CardContent } from "@/components/ui/card";
 import { useNotificationActions } from "@/stores/notificationStore";
@@ -21,10 +21,11 @@ const Login = () => {
       setNotification("Steam login failed.", "error");
     }
   }, [error, setNotification]);
+
   return (
-    <div className="card text-align m-auto">
+    <div className="card text-align m-auto flex flex-col items-center">
       <CardContent className="max-w-fit">
-        {login ? <LoginForm /> : <RegistrationForm />}
+        {login ? <AltLoginForm /> : <AltRegistrationForm />}
       </CardContent>
     </div>
   );
