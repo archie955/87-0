@@ -30,7 +30,7 @@ from exceptions.steam_exceptions import SteamException
 from limiter.limiter import limiter
 from logger.configuration import configure_logging
 from logger.logging_middleware import LoggingMiddleware
-from routers import auth, email, game, steam, teams, user
+from routers import auth, game, steam, teams, user
 from utils.config import get_settings
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -88,7 +88,7 @@ app.include_router(user.router)
 app.include_router(teams.router)
 app.include_router(game.router)
 app.include_router(steam.router)
-app.include_router(email.router)
+# app.include_router(email.router)
 app.include_router(auth.router)
 
 

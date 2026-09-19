@@ -1,0 +1,91 @@
+name: CI-deploy
+
+on:
+    push:
+      paths:
+        - "server/**"
+        - "client/**"
+        - "docker-compose.prod.yml"
+        - ".github/workflows/ci.yml"
+        - "Caddyfile"
+        - ".github/dependabot.yml"
+      branches: [ email ]
+    pull_request:
+      branches: [ email ]
+
+concurrency:
+    group: production-deploy
+    cancel-in-progress: true
+
+jobs:
+    build:
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v6
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v4
+              with:
+                username: ${{ vars.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v4
+
+            - name: Build backend image
+              uses: docker/build-push-action@v7
+              env:
+                SECRET_KEY: ${{ secrets.SECRET_KEY }}
+                POSTGRES_HOSTNAME: ${{ secrets.POSTGRES_HOSTNAME }}
+                POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
+                POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+                POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+                POSTGRES_NAME: ${{ secrets.POSTGRES_NAME }}
+                ALGORITHM: ${{ secrets.ALGORITHM }}
+                ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+                REFRESH_TOKEN_EXPIRE_DAYS: ${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }}
+                ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
+                STEAM_KEY: ${{ secrets.STEAM_KEY }}
+                REDIS_HOST: ${{ secrets.REDIS_HOST }}
+                REDIS_PORT: ${{ secrets.REDIS_PORT }}
+                REDIS_DB: ${{ secrets.REDIS_DB }}
+                PROD: ${{ secrets.PROD }}
+                FRONTEND_AUTH_URL: ${{ secrets.FRONTEND_AUTH_URL }}
+                DATA_VERSION: ${{ vars.DATABASE_VERSION }}
+              id: backend
+              with:
+                context: ./server
+                push: true
+                tags: |
+                    ${{ vars.DOCKERHUB_USERNAME }}/87-0-backend:latest
+                    ${{ vars.DOCKERHUB_USERNAME }}/87-0-backend:${{ github.sha }}
+
+            - name: Build frontend image
+              uses: docker/build-push-action@v7
+              id: frontend
+              with:
+                context: ./client
+                push: true
+                tags: |
+                    ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend:latest
+                    ${{ vars.DOCKERHUB_USERNAME }}/87-0-frontend:${{ github.sha }}
+    
+    deploy:
+        needs: build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Deploy to droplet
+              uses: appleboy/ssh-action@v1.2.5
+              with:
+                host: ${{ secrets.DROPLET_IP }}
+                username: ${{ secrets.DROPLET_USER }}
+                key: ${{ secrets.DROPLET_SSH_KEY }}
+                script: |
+                    cd ../../opt/87-0
+                    docker compose pull
+                    docker compose up -d

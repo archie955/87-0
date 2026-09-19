@@ -7,9 +7,11 @@ on:
       - ".github/workflows/ci_frontend.yml"
     branches-ignore:
       - main
+      - email
   pull_request:
     branches-ignore:
       - main
+      - email
 
 concurrency:
   group: development-frontend
